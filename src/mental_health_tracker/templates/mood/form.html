@@ -1,0 +1,79 @@
+{% extends "base.html" %}
+
+{% block title %}Add Mood Entry{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="mb-4">
+                <h1 class="gradient-text">How are you feeling today?</h1>
+                <p class="text-muted">Track your emotional well-being to identify patterns and gain insights.</p>
+            </div>
+            
+            <div class="card feature-card">
+                <div class="card-body p-4">
+                    <form method="POST" action="{{ url_for('mood_new') }}">
+                        {{ form.hidden_tag() }}
+                        
+                        <div class="mb-4">
+                            <label class="form-label">Your Mood Today</label>
+                            {{ form.mood_score }}
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="activities" class="form-label">What activities have you done today?</label>
+                            {{ form.activities }}
+                            <div class="form-text">Separate multiple activities with commas.</div>
+                        </div>
+                        
+                        <div class="mb-4">
+                            <label for="notes" class="form-label">Notes (Optional)</label>
+                            {{ form.notes }}
+                            <div class="form-text mt-2">
+                                <i class="bi bi-journal-text me-1"></i> Need more space to reflect? <a href="{{ url_for('journal_new') }}" target="_blank">Create a detailed journal entry</a> to explore your thoughts and feelings more deeply.
+                            </div>
+                        </div>
+                        
+                        <div class="d-flex justify-content-between mt-4">
+                            <a href="{{ url_for('mood_tracker') }}" class="btn btn-outline-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back
+                            </a>
+                            <button type="submit" class="btn cta-button px-4">
+                                <i class="bi bi-check-circle me-2"></i>Save Entry
+                            </button>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Decorative circles like on landing page -->
+    <div class="position-fixed bottom-0 end-0 z-n1">
+        <div class="circle circle-1"></div>
+        <div class="circle circle-2"></div>
+        <div class="circle circle-3"></div>
+        <div class="circle circle-4"></div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    .gradient-text {
+        background: linear-gradient(135deg, #2f80ed, #56ccf2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: bold;
+    }
+    
+    .form-control:focus {
+        border-color: #2f80ed;
+        box-shadow: 0 0 0 0.25rem rgba(47, 128, 237, 0.25);
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}{% endblock %}

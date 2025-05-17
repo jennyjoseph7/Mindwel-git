@@ -1,0 +1,2539 @@
+{% extends "base.html" %}
+
+{% block title %}Dashboard - MindWell{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Dashboard styles */
+    
+    /* Your existing styles here */
+
+    /* Enhanced base styles */
+    .dashboard-page {
+        background-color: #f9fbf7;
+        color: #333;
+        font-family: 'Nunito', 'Segoe UI', Roboto, -apple-system, BlinkMacSystemFont, sans-serif;
+        padding-bottom: 2rem;
+    }
+    
+    /* Enhanced header */
+    .dashboard-header {
+        background: linear-gradient(135deg, #8bc34a 0%, #689f38 100%);
+        padding: 2.5rem 0 5rem;
+        position: relative;
+        overflow: hidden;
+        margin-bottom: -3rem;
+        box-shadow: 0 4px 20px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dashboard-title {
+        font-size: 2.5rem;
+        color: white;
+        font-weight: 700;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+    }
+    
+    .dashboard-subtitle {
+        font-size: 1.25rem;
+        color: rgba(255, 255, 255, 0.9);
+        margin-bottom: 1.5rem;
+        font-weight: 300;
+    }
+    
+    /* Main container adjustments */
+    .dashboard-content {
+        position: relative;
+        z-index: 10;
+    }
+    
+    .dashboard-content .container {
+        max-width: 1340px;
+        padding: 0 1.5rem;
+    }
+    
+    /* Section spacing adjustments */
+    .welcome-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    .quick-actions-section {
+        margin-bottom: 1.5rem;
+    }
+    
+    /* Row spacing adjustments */
+    .row.g-4 {
+        --bs-gutter-x: 1rem;
+        --bs-gutter-y: 1rem;
+        margin-right: calc(var(--bs-gutter-x) * -0.5);
+        margin-left: calc(var(--bs-gutter-x) * -0.5);
+    }
+    
+    .row.g-4 > * {
+        padding-right: calc(var(--bs-gutter-x) * 0.5);
+        padding-left: calc(var(--bs-gutter-x) * 0.5);
+        margin-top: var(--bs-gutter-y);
+    }
+    
+    /* Card refinements */
+    .glass-card, 
+    .mood-journey-card,
+    .action-card {
+        height: 100%;
+        margin-bottom: 0;
+    }
+    
+    /* Responsive improvements */
+    @media (max-width: 991.98px) {
+        .dashboard-header {
+            padding: 2rem 0 4.5rem;
+            margin-bottom: -2.5rem;
+        }
+        
+        .dashboard-content .container {
+            padding: 0 1rem;
+        }
+        
+        .row.g-4 {
+            --bs-gutter-x: 0.75rem;
+            --bs-gutter-y: 0.75rem;
+        }
+    }
+    
+    @media (max-width: 767.98px) {
+        .dashboard-header {
+            padding: 1.5rem 0 4rem;
+            margin-bottom: -2rem;
+        }
+        
+        .row.g-4 {
+            --bs-gutter-x: 0.5rem;
+            --bs-gutter-y: 0.5rem;
+        }
+    }
+
+    /* Card grid adjustments */
+    .card-grid {
+        display: grid;
+        gap: 1rem;
+        grid-template-columns: repeat(auto-fit, minmax(280px, 1fr));
+    }
+
+    /* Card height consistency */
+    .glass-card {
+        display: flex;
+        flex-direction: column;
+    }
+
+    .glass-card .card-body {
+        flex: 1;
+    }
+
+    /* Section title spacing */
+    .section-title {
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+    }
+
+    /* Chart container adjustments */
+    .chart-container {
+        margin: 0.5rem 0;
+    }
+
+    /* Data summary spacing */
+    .mood-data-summary {
+        margin-top: 1rem;
+        padding-top: 1rem;
+    }
+
+    /* Journal entries spacing */
+    .journal-entry {
+        margin-bottom: 0.75rem;
+    }
+
+    /* Timeline spacing */
+    .timeline-item {
+        padding-bottom: 1rem;
+    }
+
+    /* Tips container spacing */
+    .tips-list {
+        margin-top: 1rem;
+    }
+
+    .tip-item {
+        margin-bottom: 0.75rem;
+    }
+
+    /* Welcome section adjustments */
+    .welcome-section .glass-card {
+        padding: 1.5rem;
+    }
+
+    /* Quick actions adjustments */
+    .quick-actions-section .action-card {
+        padding: 1.25rem;
+    }
+
+    /* Mood journey card adjustments */
+    .mood-journey-card {
+        padding: 1.5rem;
+    }
+
+    /* Journal card adjustments */
+    .journal-card {
+        padding: 1.5rem;
+    }
+
+    /* Stats grid adjustments */
+    .journal-stats {
+        gap: 0.75rem;
+        margin-bottom: 1.25rem;
+    }
+
+    /* Insights spacing */
+    .journal-insights {
+        margin-top: 1.25rem;
+    }
+
+    .journal-insight-item {
+        margin-bottom: 0.75rem;
+    }
+
+    /* Keywords spacing */
+    .journal-keywords {
+        gap: 0.5rem;
+        margin-top: 1.25rem;
+    }
+
+    /* Empty state spacing */
+    .empty-state {
+        padding: 1.25rem;
+    }
+
+    /* Button spacing */
+    .btn-refresh {
+        margin-top: 0.75rem;
+    }
+
+    /* Alert spacing */
+    .alert-info {
+        margin-bottom: 1rem;
+    }
+
+    /* Data info overlay spacing */
+    .data-info-overlay {
+        padding: 0.5rem 0.75rem;
+    }
+
+    /* Loading spinner positioning */
+    .loading-spinner {
+        margin: 1rem 0;
+    }
+    
+    /* Your existing styles here */
+
+    /* Enhanced nature elements */
+    .nature-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+    }
+    
+    .leaf {
+        position: absolute;
+        width: 50px;
+        height: 50px;
+        background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath fill='%23ffffff' d='M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z'/%3E%3C/svg%3E");
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.3;
+        animation: floating 15s infinite linear;
+    }
+    
+    .leaf-1 {
+        top: 20%;
+        left: 10%;
+        animation-duration: 25s;
+        transform: rotate(45deg) scale(1.2);
+    }
+    
+    .leaf-2 {
+        top: 40%;
+        right: 15%;
+        animation-duration: 22s;
+        animation-delay: 2s;
+        transform: rotate(-30deg) scale(0.8);
+    }
+    
+    .leaf-3 {
+        bottom: 15%;
+        left: 30%;
+        animation-duration: 18s;
+        animation-delay: 1s;
+        transform: rotate(10deg);
+    }
+    
+    .leaf-4 {
+        top: 25%;
+        right: 30%;
+        animation-duration: 20s;
+        animation-delay: 3s;
+        transform: rotate(-15deg) scale(1.1);
+    }
+    
+    .floating-particle {
+        position: absolute;
+        width: 10px;
+        height: 10px;
+        background-color: rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        animation: floating 20s infinite linear;
+    }
+    
+    .particle-1 {
+        top: 30%;
+        left: 20%;
+        width: 6px;
+        height: 6px;
+    }
+    
+    .particle-2 {
+        top: 60%;
+        right: 25%;
+        width: 8px;
+        height: 8px;
+        animation-delay: 5s;
+    }
+    
+    .particle-3 {
+        bottom: 20%;
+        right: 10%;
+        width: 4px;
+        height: 4px;
+        animation-delay: 3s;
+    }
+    
+    @keyframes floating {
+        0% { transform: translate(0, 0) rotate(0deg); }
+        25% { transform: translate(10px, 15px) rotate(5deg); }
+        50% { transform: translate(20px, 0) rotate(10deg); }
+        75% { transform: translate(10px, -15px) rotate(5deg); }
+        100% { transform: translate(0, 0) rotate(0deg); }
+    }
+
+    /* Enhanced cards */
+    .glass-card {
+        background-color: rgba(255, 255, 255, 0.8);
+        backdrop-filter: blur(10px);
+        border-radius: 16px;
+        border: 1px solid rgba(255, 255, 255, 0.5);
+        padding: 1.75rem;
+        margin-bottom: 1.5rem;
+        position: relative;
+        overflow: hidden;
+        transition: all 0.3s ease;
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.05);
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.1);
+    }
+    
+    .glass-card .card-glow {
+        position: absolute;
+        top: -50%;
+        left: -50%;
+        width: 200%;
+        height: 200%;
+        background: radial-gradient(circle at center, rgba(139, 195, 74, 0.1), transparent 70%);
+        opacity: 0;
+        transition: opacity 0.5s ease;
+        pointer-events: none;
+    }
+    
+    .glass-card:hover .card-glow {
+        opacity: 1;
+    }
+
+    /* Mood Journey card styles */
+    .mood-journey-chart {
+        width: 100% !important;
+        height: 100% !important;
+        max-height: 300px;
+        display: block;
+    }
+    
+    .mood-journey-icon {
+        width: 40px;
+        height: 40px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        background-color: rgba(139, 195, 74, 0.15);
+        border-radius: 50%;
+        font-size: 18px;
+        color: #8bc34a;
+        box-shadow: 0 0 15px rgba(139, 195, 74, 0.3);
+        transition: transform 0.3s ease;
+    }
+    
+    .mood-journey-icon:hover {
+        transform: scale(1.1);
+        background-color: rgba(139, 195, 74, 0.2);
+    }
+    
+    .rounded-4 {
+        border-radius: 16px !important;
+    }
+    
+    .no-data-container {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 2.5rem;
+        background-color: rgba(240, 240, 240, 0.1);
+        border-radius: 8px;
+        text-align: center;
+        border: 1px dashed rgba(0, 0, 0, 0.1);
+    }
+    
+    /* Nature themed button */
+    .btn-nature {
+        background-color: rgba(139, 195, 74, 0.9);
+        color: white;
+        border: none;
+        padding: 0.6rem 1.5rem;
+        border-radius: 50px;
+        font-weight: 500;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3);
+        position: relative;
+        overflow: hidden;
+        z-index: 1;
+    }
+    
+    .btn-nature:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.2), transparent);
+        transition: all 0.6s ease;
+        z-index: -1;
+    }
+    
+    .btn-nature:hover {
+        background-color: rgba(139, 195, 74, 1);
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(139, 195, 74, 0.4);
+        color: white;
+    }
+    
+    .btn-nature:hover:before {
+        left: 100%;
+    }
+    
+    /* Clean white card for mood journey matching reference image */
+    .mood-journey-card {
+        position: relative;
+        background: linear-gradient(to bottom, #ffffff, #f9fbf7);
+        border-radius: 16px;
+        border: 1px solid #e5e5e5;
+        padding: 1.75rem;
+        overflow: hidden;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07);
+        transition: all 0.3s ease;
+        display: flex;
+        flex-direction: column;
+    }
+    
+    .mood-journey-card:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 5px;
+        background: linear-gradient(to right, #8bc34a, #4caf50);
+    }
+    
+    .mood-journey-card .section-heading {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+        justify-content: space-between;
+    }
+    
+    .mood-journey-card .heading-left {
+        display: flex;
+        align-items: center;
+    }
+    
+    .mood-journey-card .heading-icon {
+        width: 48px;
+        height: 48px;
+        background: linear-gradient(135deg, #f0f9eb, #e8f5db);
+        border-radius: 12px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 20px;
+        color: #8bc34a;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 15px rgba(139, 195, 74, 0.15);
+    }
+    
+    .mood-journey-card:hover .heading-icon {
+        background-color: #e8f5db;
+        transform: scale(1.05);
+    }
+    
+    .mood-journey-card .heading-text h3 {
+        margin: 0;
+        font-size: 1.35rem;
+        font-weight: 600;
+        color: #333333;
+    }
+    
+    .mood-journey-card .heading-text p {
+        margin: 0;
+        font-size: 0.95rem;
+        color: #717171;
+    }
+    
+    /* Enhanced action cards */
+    .action-card {
+        background-color: white;
+        border-radius: 16px;
+        padding: 1.5rem;
+        text-align: center;
+        position: relative;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+        text-decoration: none;
+        color: #333;
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.05);
+    }
+    
+    .action-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.1);
+        color: #333;
+        border-color: rgba(139, 195, 74, 0.3);
+    }
+    
+    .action-icon {
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background-color: rgba(139, 195, 74, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 24px;
+        color: #8bc34a;
+        margin-bottom: 1rem;
+        position: relative;
+        z-index: 2;
+        transition: all 0.3s ease;
+    }
+    
+    .action-card:hover .action-icon {
+        background-color: #8bc34a;
+        color: white;
+        transform: scale(1.1);
+        box-shadow: 0 5px 15px rgba(139, 195, 74, 0.3);
+    }
+    
+    .action-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .action-content h4 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        color: #333;
+    }
+    
+    .action-content p {
+        font-size: 0.9rem;
+        color: #666;
+        margin: 0;
+    }
+    
+    .nature-overlay {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        overflow: hidden;
+        z-index: 1;
+        opacity: 0.03;
+        transition: opacity 0.3s ease;
+    }
+    
+    .action-card:hover .nature-overlay {
+        opacity: 0.05;
+    }
+    
+    .nature-bg {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-size: cover;
+        background-position: center;
+        transform: scale(1.1);
+        transition: transform 0.5s ease;
+    }
+    
+    .action-card:hover .nature-bg {
+        transform: scale(1.2);
+    }
+    
+    /* Enhanced alert info */
+    .alert-info {
+        background-color: #1a3a58 !important;
+        color: #ffffff !important;
+        border: none !important;
+        border-radius: 8px !important;
+        padding: 15px !important;
+        margin-bottom: 20px !important;
+        display: flex !important;
+        align-items: center !important;
+        position: relative;
+        overflow: hidden;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);
+    }
+    
+    .alert-info:before {
+        content: '\f05a';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 16px;
+        margin-right: 10px;
+        background-color: rgba(255,255,255,0.15);
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .alert-info strong {
+        font-weight: 600;
+        margin-right: 5px;
+    }
+    
+    /* Journal entries styling */
+    .journal-entry {
+        background-color: white;
+        border-radius: 12px;
+        padding: 1.25rem;
+        margin-bottom: 1rem;
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .journal-entry:hover {
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.05);
+        border-color: rgba(139, 195, 74, 0.3);
+    }
+    
+    .entry-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 0.75rem;
+    }
+    
+    .entry-header h4 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        margin: 0;
+        color: #333;
+    }
+    
+    .entry-date {
+        font-size: 0.85rem;
+        color: #888;
+    }
+    
+    .entry-content p {
+        color: #444;
+        margin: 0;
+        line-height: 1.6;
+    }
+    
+    .entry-footer {
+        margin-top: 1rem;
+        text-align: right;
+    }
+    
+    .btn-read-more {
+        color: #8bc34a;
+        text-decoration: none;
+        font-weight: 500;
+        font-size: 0.9rem;
+        display: inline-flex;
+        align-items: center;
+        transition: all 0.3s ease;
+    }
+    
+    .btn-read-more i {
+        margin-left: 5px;
+        transition: transform 0.3s ease;
+    }
+    
+    .btn-read-more:hover {
+        color: #689f38;
+    }
+    
+    .btn-read-more:hover i {
+        transform: translateX(3px);
+    }
+    
+    /* Enhanced insights */
+    .insight-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.25rem;
+        padding: 1rem;
+        background-color: rgba(249, 251, 247, 0.6);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .insight-item:hover {
+        background-color: rgba(249, 251, 247, 0.9);
+        transform: translateX(5px);
+    }
+    
+    .insight-icon {
+        width: 42px;
+        height: 42px;
+        border-radius: 50%;
+        background-color: rgba(46, 204, 113, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 18px;
+        color: #2ecc71;
+        flex-shrink: 0;
+    }
+    
+    .insight-icon.positive {
+        background-color: rgba(46, 204, 113, 0.15);
+        color: #2ecc71;
+    }
+    
+    .insight-icon.negative {
+        background-color: rgba(231, 76, 60, 0.15);
+        color: #e74c3c;
+    }
+    
+    .insight-text h5 {
+        margin: 0 0 0.25rem;
+        font-size: 1.05rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .insight-text p {
+        margin: 0;
+        font-size: 0.9rem;
+        color: #666;
+    }
+    
+    /* Glass card for mood journey */
+    .mood-journey-card .card-glow {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle at 50% 0%, rgba(139, 195, 74, 0.15), transparent 60%);
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    /* Tip items styling */
+    .tip-item {
+        display: flex;
+        align-items: flex-start;
+        margin-bottom: 1.25rem;
+        padding: 0.75rem;
+        background-color: rgba(249, 251, 247, 0.6);
+        border-radius: 10px;
+        transition: all 0.3s ease;
+    }
+    
+    .tip-item:hover {
+        background-color: rgba(249, 251, 247, 0.9);
+        transform: translateX(5px);
+    }
+    
+    .tip-icon {
+        width: 36px;
+        height: 36px;
+        border-radius: 50%;
+        background-color: rgba(139, 195, 74, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 0.75rem;
+        font-size: 16px;
+        color: #8bc34a;
+        flex-shrink: 0;
+    }
+    
+    .tip-content h5 {
+        margin: 0 0 0.25rem;
+        font-size: 1rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .tip-content p {
+        margin: 0;
+        font-size: 0.85rem;
+        color: #666;
+        line-height: 1.5;
+    }
+    
+    /* Timeline styling */
+    .timeline-item {
+        position: relative;
+        padding-left: 2.5rem;
+        padding-bottom: 1.5rem;
+        position: relative;
+    }
+    
+    .timeline-item:not(:last-child):before {
+        content: '';
+        position: absolute;
+        left: 14px;
+        top: 30px;
+        bottom: 0;
+        width: 2px;
+        background-color: rgba(139, 195, 74, 0.2);
+    }
+    
+    .timeline-icon {
+        position: absolute;
+        left: 0;
+        top: 0;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        background-color: rgba(139, 195, 74, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 14px;
+        color: #8bc34a;
+        z-index: 2;
+    }
+    
+    .timeline-content {
+        background-color: white;
+        border-radius: 10px;
+        padding: 0.75rem 1rem;
+        box-shadow: 0 2px 8px rgba(0, 0, 0, 0.05);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .timeline-content:hover {
+        transform: translateX(5px);
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.08);
+    }
+    
+    .timeline-content h5 {
+        margin: 0 0 0.25rem;
+        font-size: 0.95rem;
+        font-weight: 600;
+        color: #333;
+    }
+    
+    .timeline-content p {
+        margin: 0 0 0.25rem;
+        font-size: 0.85rem;
+        color: #666;
+    }
+    
+    .timeline-time {
+        display: block;
+        font-size: 0.75rem;
+        color: #999;
+    }
+    
+    /* Refresh tips button */
+    .btn-refresh {
+        border: none;
+        background-color: transparent;
+        color: #8bc34a;
+        font-size: 0.9rem;
+        display: flex;
+        align-items: center;
+        margin-top: 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        padding: 0.5rem;
+        border-radius: 6px;
+    }
+    
+    .btn-refresh:hover {
+        background-color: rgba(139, 195, 74, 0.1);
+        color: #689f38;
+    }
+    
+    .btn-refresh i {
+        margin-right: 0.5rem;
+        font-size: 0.85rem;
+    }
+    
+    /* Improved welcome section */
+    .welcome-heading {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .welcome-text {
+        font-size: 1.1rem;
+        color: #555;
+        margin-bottom: 0.75rem;
+    }
+    
+    .highlight-text {
+        color: #689f38;
+        font-weight: 600;
+    }
+    
+    .nature-quote {
+        font-style: italic;
+        color: #666;
+        font-size: 0.95rem;
+        padding-left: 0.75rem;
+        border-left: 3px solid rgba(139, 195, 74, 0.5);
+        margin-top: 0.75rem;
+    }
+    
+    .section-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        color: #333;
+        margin-bottom: 1.25rem;
+        position: relative;
+        padding-bottom: 0.75rem;
+    }
+    
+    .section-title:after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        width: 50px;
+        height: 4px;
+        background-color: #8bc34a;
+        border-radius: 2px;
+    }
+
+    /* Mood data refresh button */
+    .btn-refresh-mood {
+        position: relative;
+        background-color: #6d6d6d;
+        color: white;
+        border: none;
+        padding: 0.5rem 1rem;
+        border-radius: 8px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition: all 0.3s ease;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        cursor: pointer;
+        z-index: 10;
+        overflow: hidden;
+    }
+    
+    .btn-refresh-mood:before {
+        content: '';
+        position: absolute;
+        top: 0;
+        left: -100%;
+        width: 100%;
+        height: 100%;
+        background: linear-gradient(90deg, transparent, rgba(255,255,255,0.2), transparent);
+        transition: all 0.6s ease;
+    }
+    
+    .btn-refresh-mood:hover {
+        background-color: #555555;
+        transform: translateY(-2px);
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-refresh-mood:hover:before {
+        left: 100%;
+    }
+    
+    .btn-refresh-mood i {
+        margin-right: 0.5rem;
+    }
+
+    /* Data info overlay */
+    .data-info-overlay {
+        position: absolute;
+        top: 0.75rem;
+        right: 0.75rem;
+        background: rgba(255, 255, 255, 0.95);
+        padding: 0.75rem 1rem;
+        border-radius: 8px;
+        font-size: 0.8rem;
+        color: #555;
+        box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1);
+        display: flex;
+        flex-direction: column;
+        z-index: 5;
+        backdrop-filter: blur(5px);
+        border: 1px solid rgba(0, 0, 0, 0.05);
+    }
+    
+    .sample-data-tag {
+        font-weight: 600;
+        color: #ff9800;
+        margin-bottom: 0.25rem;
+        display: flex;
+        align-items: center;
+    }
+    
+    .sample-data-tag:before {
+        content: '\f071';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 12px;
+        margin-right: 5px;
+    }
+    
+    .last-updated {
+        font-size: 0.75rem;
+        color: #888;
+        display: flex;
+        align-items: center;
+    }
+    
+    .last-updated:before {
+        content: '\f017';
+        font-family: 'Font Awesome 5 Free';
+        font-weight: 900;
+        font-size: 12px;
+        margin-right: 5px;
+        opacity: 0.7;
+    }
+    
+    /* Loading spinner */
+    .loading-spinner {
+        display: none;
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        z-index: 20;
+    }
+    
+    .loading-spinner:after {
+        content: '';
+        display: block;
+        width: 30px;
+        height: 30px;
+        border-radius: 50%;
+        border: 3px solid rgba(139, 195, 74, 0.2);
+        border-top-color: #8bc34a;
+        animation: spin 1s linear infinite;
+    }
+    
+    @keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+    
+    .is-loading .loading-spinner {
+        display: block;
+    }
+    
+    .is-loading .mood-journey-chart {
+        opacity: 0.6;
+    }
+
+    /* Chart container */
+    .chart-container {
+        position: relative;
+        height: 300px !important;
+        max-height: 300px !important;
+        min-height: 300px !important;
+        width: 100%;
+        background-color: white;
+        border-radius: 8px;
+        overflow: hidden !important;
+        box-sizing: border-box;
+        flex-shrink: 0;
+        flex-grow: 0;
+    }
+    
+    .mood-journey-chart {
+        width: 100% !important;
+        height: 300px !important;
+        max-height: 300px !important;
+        min-height: 300px !important;
+        display: block !important;
+    }
+    
+    /* Data summary section styling */
+    .mood-data-summary {
+        margin-top: 1.5rem;
+        padding-top: 1.5rem;
+        border-top: 1px solid rgba(0,0,0,0.05);
+        display: flex;
+        flex-wrap: wrap;
+        justify-content: space-between;
+        max-height: 200px;
+        overflow-y: auto;
+    }
+    
+    .data-stat {
+        flex: 1;
+        min-width: 150px;
+        margin: 0 0.5rem 1rem;
+        display: flex;
+        align-items: center;
+        padding: 1rem;
+        background: linear-gradient(to bottom, #ffffff, #f9fbf7);
+        border-radius: 12px;
+        transition: all 0.3s ease;
+        border: 1px solid rgba(0,0,0,0.03);
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);
+    }
+    
+    .data-stat:hover {
+        background: #ffffff;
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.06);
+        border-color: rgba(139, 195, 74, 0.2);
+    }
+    
+    .stat-icon {
+        width: 42px;
+        height: 42px;
+        background: linear-gradient(135deg, rgba(139, 195, 74, 0.1), rgba(139, 195, 74, 0.2));
+        color: #8bc34a;
+        border-radius: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        flex-shrink: 0;
+        font-size: 18px;
+        transition: all 0.3s ease;
+    }
+    
+    .data-stat:hover .stat-icon {
+        background: linear-gradient(135deg, rgba(139, 195, 74, 0.2), rgba(139, 195, 74, 0.3));
+        transform: scale(1.05);
+    }
+    
+    .stat-label {
+        font-size: 0.85rem;
+        color: #666;
+        margin-bottom: 0.25rem;
+        font-weight: 500;
+    }
+    
+    .stat-value {
+        font-size: 1.2rem;
+        font-weight: 700;
+        color: #333;
+        transition: all 0.3s ease;
+    }
+    
+    .data-stat:hover .stat-value {
+        color: #8bc34a;
+    }
+
+    @media (max-width: 768px) {
+        .chart-container {
+            height: 250px;
+            min-height: 250px;
+            max-height: 250px;
+        }
+        
+        .mood-journey-chart {
+            height: 250px !important;
+            min-height: 250px !important;
+            max-height: 250px !important;
+        }
+    }
+
+    /* Journal Card Styles */
+    .journal-card {
+        background: #263342;
+        border-radius: 16px;
+        box-shadow: 0 8px 30px rgba(0, 0, 0, 0.12);
+        transition: all 0.3s ease;
+        height: 100%;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.05);
+        color: #fff;
+    }
+
+    .journal-card:hover {
+        transform: translateY(-4px);
+        box-shadow: 0 12px 35px rgba(0, 0, 0, 0.18);
+    }
+
+    .journal-card-header {
+        background: #1c2733;
+        padding: 1.5rem;
+        color: white;
+        border-bottom: 1px solid rgba(255, 255, 255, 0.05);
+    }
+
+    .journal-card-title {
+        font-size: 1.5rem;
+        font-weight: 600;
+        margin-bottom: 0.5rem;
+        letter-spacing: -0.01em;
+        color: #fff;
+    }
+
+    .journal-card-subtitle {
+        font-size: 0.95rem;
+        opacity: 0.7;
+        font-weight: 300;
+        color: #fff;
+    }
+
+    .journal-card-body {
+        padding: 1.75rem;
+        background: #263342;
+    }
+
+    .journal-stats {
+        display: grid;
+        grid-template-columns: repeat(2, 1fr);
+        gap: 1.25rem;
+        margin-bottom: 1.75rem;
+    }
+
+    .journal-stat-item {
+        text-align: center;
+        padding: 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 12px;
+        border: 1px solid rgba(255, 255, 255, 0.08);
+        transition: all 0.2s ease;
+    }
+
+    .journal-stat-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateY(-2px);
+    }
+
+    .journal-stat-value {
+        font-size: 1.75rem;
+        font-weight: 700;
+        color: #4caf50;
+        margin-bottom: 0.35rem;
+        line-height: 1;
+    }
+
+    .journal-stat-label {
+        font-size: 0.9rem;
+        color: rgba(255, 255, 255, 0.7);
+        font-weight: 500;
+    }
+
+    .journal-insights {
+        margin-top: 1.5rem;
+    }
+
+    .journal-insights h4 {
+        font-size: 1.15rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 1rem;
+        padding-bottom: 0.5rem;
+        border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    }
+
+    .journal-insight-item {
+        display: flex;
+        align-items: center;
+        margin-bottom: 1rem;
+        padding: 0.75rem 1rem;
+        background: rgba(255, 255, 255, 0.05);
+        border-radius: 10px;
+        border-left: 4px solid #4caf50;
+        transition: all 0.2s ease;
+    }
+
+    .journal-insight-item:hover {
+        background: rgba(255, 255, 255, 0.08);
+        transform: translateX(2px);
+    }
+
+    .journal-insight-icon {
+        margin-right: 0.75rem;
+        color: #4caf50;
+        font-size: 1.25rem;
+    }
+
+    .journal-keywords {
+        display: flex;
+        flex-wrap: wrap;
+        gap: 0.5rem;
+        margin-top: 1.5rem;
+    }
+
+    .journal-keyword {
+        background: rgba(76, 175, 80, 0.1);
+        color: #4caf50;
+        padding: 0.3rem 0.8rem;
+        border-radius: 20px;
+        font-size: 0.85rem;
+        font-weight: 500;
+        border: 1px solid rgba(76, 175, 80, 0.2);
+        transition: all 0.2s ease;
+    }
+
+    .journal-keyword:hover {
+        background: rgba(76, 175, 80, 0.2);
+        transform: translateY(-2px);
+    }
+
+    .journal-empty-state {
+        text-align: center;
+        padding: 1.5rem;
+        color: rgba(255, 255, 255, 0.6);
+        font-style: italic;
+    }
+
+    .journal-empty-state i {
+        font-size: 2.5rem;
+        color: rgba(255, 255, 255, 0.2);
+        margin-bottom: 1rem;
+    }
+
+    .journal-empty-state p {
+        margin-bottom: 1rem;
+    }
+
+    .journal-empty-state .btn-create-entry {
+        display: inline-block;
+        background: #4caf50;
+        color: white;
+        border: none;
+        padding: 0.4rem 1rem;
+        border-radius: 20px;
+        font-size: 0.9rem;
+        text-decoration: none;
+        transition: all 0.2s ease;
+    }
+
+    .journal-empty-state .btn-create-entry:hover {
+        background: #43a047;
+        transform: translateY(-2px);
+    }
+
+    @media (max-width: 767.98px) {
+        .journal-stats {
+            grid-template-columns: 1fr;
+            gap: 1rem;
+        }
+        
+        .journal-card-title {
+            font-size: 1.3rem;
+        }
+    }
+
+    /* Add/replace this CSS for the main dashboard card grid */
+    .dashboard-main-cards {
+        max-width: 1100px;
+        margin: 0 auto 2.5rem auto;
+        padding: 2rem 1rem;
+        background: #f3f7f2;
+        border-radius: 24px;
+        box-shadow: 0 4px 24px rgba(0,0,0,0.04);
+    }
+    .card-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(260px, 1fr));
+        gap: 1.5rem;
+        align-items: stretch;
+    }
+    .card-grid > * {
+        min-width: 260px;
+        max-width: 340px;
+        width: 100%;
+        margin: 0 auto;
+        display: flex;
+        flex-direction: column;
+        height: 100%;
+    }
+    .glass-card, .mood-journey-card, .action-card {
+        height: 100%;
+        min-height: 320px;
+        max-height: 420px;
+        box-sizing: border-box;
+        box-shadow: 0 4px 20px rgba(0,0,0,0.06);
+        border-radius: 18px;
+        background: #fff;
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        padding: 1.5rem 1.25rem;
+        margin: 0;
+    }
+    @media (max-width: 991.98px) {
+        .dashboard-main-cards {
+            padding: 1.25rem 0.5rem;
+        }
+        .card-grid {
+            gap: 1rem;
+            grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+        }
+        .card-grid > * {
+            min-width: 200px;
+            max-width: 100%;
+        }
+        .glass-card, .mood-journey-card, .action-card {
+            min-height: 260px;
+            max-height: 380px;
+            padding: 1.1rem 0.75rem;
+        }
+    }
+    @media (max-width: 767.98px) {
+        .dashboard-main-cards {
+            padding: 0.5rem 0.25rem;
+        }
+        .card-grid {
+            gap: 0.75rem;
+            grid-template-columns: 1fr;
+        }
+        .card-grid > * {
+            min-width: 0;
+            max-width: 100%;
+        }
+        .glass-card, .mood-journey-card, .action-card {
+            min-height: 180px;
+            max-height: none;
+            padding: 0.75rem 0.5rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Dashboard Header with Nature Theme -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 offset-lg-2 text-center">
+                    <h1 class="dashboard-title">Your Wellness Dashboard</h1>
+                    <p class="dashboard-subtitle">Track your journey to mental wellness</p>
+                    <div class="nature-badge">
+                        <i class="fas fa-leaf pulse-icon"></i>
+                        <span>Nature-Inspired Healing</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Nature-themed decorative elements -->
+        <div class="nature-elements">
+            <div class="leaf leaf-1"></div>
+            <div class="leaf leaf-2"></div>
+            <div class="leaf leaf-3"></div>
+            <div class="leaf leaf-4"></div>
+            <div class="floating-particle particle-1"></div>
+            <div class="floating-particle particle-2"></div>
+            <div class="floating-particle particle-3"></div>
+        </div>
+    </div>
+    
+    <!-- Main Dashboard Content -->
+    <div class="dashboard-content">
+        <div class="container">
+            <!-- Welcome Message and Date -->
+            <div class="welcome-section">
+                <div class="glass-card">
+                    <div class="card-glow"></div>
+                    <div class="row align-items-center">
+                        <div class="col-md-7">
+                            <h2 class="welcome-heading">Welcome back, {{ current_user.name }}</h2>
+                            <p class="welcome-text">Today is <span class="highlight-text">{{ current_date }}</span></p>
+                            <p class="nature-quote">"In nature, nothing is perfect and everything is perfect." — Alice Walker</p>
+                        </div>
+                        <div class="col-md-5 text-md-end text-center mt-3 mt-md-0">
+                            <div class="daily-progress">
+                                <div class="progress-circle">
+                                    <svg width="120" height="120" viewBox="0 0 120 120">
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#e6e6e6" stroke-width="12" />
+                                        <circle cx="60" cy="60" r="54" fill="none" stroke="#8bc34a" stroke-width="12" stroke-dasharray="339.292" stroke-dashoffset="80" />
+                                    </svg>
+                                    <div class="progress-text">
+                                        <span class="progress-percentage">75%</span>
+                                        <span class="progress-label">Daily Goal</span>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Quick Actions Section -->
+            <div class="quick-actions-section">
+                <h3 class="section-title" style="font-size: 1.75rem; font-weight: 700; color: #333; margin-bottom: 1.5rem; position: relative; padding-left: 15px; border-left: 4px solid #8bc34a;">
+                    <i class="fas fa-bolt" style="color: #8bc34a; margin-right: 10px;"></i>Quick Actions
+                </h3>
+                <div class="row g-4">
+                    <div class="col-md-3 col-sm-6">
+                        <a href="{{ url_for('mood_new') }}" class="action-card nature-card" style="background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); padding: 1.5rem; text-align: center; position: relative; transition: all 0.3s ease; text-decoration: none; display: flex; flex-direction: column; align-items: center; overflow: hidden; height: 100%; border: 1px solid rgba(139, 195, 74, 0.1);">
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(to right, #4caf50, #8bc34a);"></div>
+                            <div class="action-icon" style="width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, #f0f9eb, #e8f5db); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; transition: all 0.35s ease; box-shadow: 0 8px 25px rgba(139, 195, 74, 0.2);">
+                                <i class="fas fa-smile" style="font-size: 28px; color: #4caf50; transition: all 0.3s ease;"></i>
+                            </div>
+                            <div class="action-content" style="z-index: 5; position: relative;">
+                                <h4 style="font-size: 1.25rem; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Log Mood</h4>
+                                <p style="font-size: 0.95rem; color: #666; margin-bottom: 0;">Track how you feel right now</p>
+                            </div>
+                            <div class="nature-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden; opacity: 0.05; transition: opacity 0.3s ease;">
+                                <div class="nature-bg mood-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transform: scale(1.1); transition: transform 0.5s ease;"></div>
+                            </div>
+                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 0; background: linear-gradient(to top, rgba(76, 175, 80, 0.1), transparent); transition: height 0.3s ease; z-index: 2;"></div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <a href="{{ url_for('journal_new') }}" class="action-card nature-card" style="background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); padding: 1.5rem; text-align: center; position: relative; transition: all 0.3s ease; text-decoration: none; display: flex; flex-direction: column; align-items: center; overflow: hidden; height: 100%; border: 1px solid rgba(139, 195, 74, 0.1);">
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(to right, #ff9800, #ffc107);"></div>
+                            <div class="action-icon" style="width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, #fff8e1, #fffde7); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; transition: all 0.35s ease; box-shadow: 0 8px 25px rgba(255, 152, 0, 0.2);">
+                                <i class="fas fa-book" style="font-size: 28px; color: #ff9800; transition: all 0.3s ease;"></i>
+                            </div>
+                            <div class="action-content" style="z-index: 5; position: relative;">
+                                <h4 style="font-size: 1.25rem; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Journal Entry</h4>
+                                <p style="font-size: 0.95rem; color: #666; margin-bottom: 0;">Write your thoughts</p>
+                            </div>
+                            <div class="nature-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden; opacity: 0.05; transition: opacity 0.3s ease;">
+                                <div class="nature-bg journal-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transform: scale(1.1); transition: transform 0.5s ease;"></div>
+                            </div>
+                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 0; background: linear-gradient(to top, rgba(255, 152, 0, 0.1), transparent); transition: height 0.3s ease; z-index: 2;"></div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <a href="{{ url_for('music_dashboard') }}" class="action-card nature-card" style="background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); padding: 1.5rem; text-align: center; position: relative; transition: all 0.3s ease; text-decoration: none; display: flex; flex-direction: column; align-items: center; overflow: hidden; height: 100%; border: 1px solid rgba(139, 195, 74, 0.1);">
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(to right, #2196f3, #03a9f4);"></div>
+                            <div class="action-icon" style="width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, #e3f2fd, #e1f5fe); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; transition: all 0.35s ease; box-shadow: 0 8px 25px rgba(33, 150, 243, 0.2);">
+                                <i class="fas fa-music" style="font-size: 28px; color: #2196f3; transition: all 0.3s ease;"></i>
+                            </div>
+                            <div class="action-content" style="z-index: 5; position: relative;">
+                                <h4 style="font-size: 1.25rem; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Music Therapy</h4>
+                                <p style="font-size: 0.95rem; color: #666; margin-bottom: 0;">Relax with soothing sounds</p>
+                            </div>
+                            <div class="nature-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden; opacity: 0.05; transition: opacity 0.3s ease;">
+                                <div class="nature-bg music-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transform: scale(1.1); transition: transform 0.5s ease;"></div>
+                            </div>
+                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 0; background: linear-gradient(to top, rgba(33, 150, 243, 0.1), transparent); transition: height 0.3s ease; z-index: 2;"></div>
+                        </a>
+                    </div>
+                    
+                    <div class="col-md-3 col-sm-6">
+                        <a href="{{ url_for('breathing_exercise') }}" class="action-card nature-card" style="background: white; border-radius: 16px; box-shadow: 0 10px 30px rgba(0, 0, 0, 0.08); padding: 1.5rem; text-align: center; position: relative; transition: all 0.3s ease; text-decoration: none; display: flex; flex-direction: column; align-items: center; overflow: hidden; height: 100%; border: 1px solid rgba(139, 195, 74, 0.1);">
+                            <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(to right, #9c27b0, #673ab7);"></div>
+                            <div class="action-icon" style="width: 70px; height: 70px; border-radius: 20px; background: linear-gradient(135deg, #f3e5f5, #ede7f6); display: flex; align-items: center; justify-content: center; margin-bottom: 1.25rem; transition: all 0.35s ease; box-shadow: 0 8px 25px rgba(156, 39, 176, 0.2);">
+                                <i class="fas fa-wind" style="font-size: 28px; color: #9c27b0; transition: all 0.3s ease;"></i>
+                            </div>
+                            <div class="action-content" style="z-index: 5; position: relative;">
+                                <h4 style="font-size: 1.25rem; font-weight: 600; color: #333; margin-bottom: 0.5rem;">Breathe</h4>
+                                <p style="font-size: 0.95rem; color: #666; margin-bottom: 0;">Guided breathing exercise</p>
+                            </div>
+                            <div class="nature-overlay" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1; overflow: hidden; opacity: 0.05; transition: opacity 0.3s ease;">
+                                <div class="nature-bg breathe-bg" style="position: absolute; top: 0; left: 0; width: 100%; height: 100%; background-size: cover; background-position: center; transform: scale(1.1); transition: transform 0.5s ease;"></div>
+                            </div>
+                            <div style="position: absolute; bottom: 0; left: 0; width: 100%; height: 0; background: linear-gradient(to top, rgba(156, 39, 176, 0.1), transparent); transition: height 0.3s ease; z-index: 2;"></div>
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Add hover effects with JavaScript -->
+            <script>
+            document.addEventListener('DOMContentLoaded', function() {
+                const actionCards = document.querySelectorAll('.action-card');
+                
+                actionCards.forEach(card => {
+                    card.addEventListener('mouseenter', function() {
+                        // Elevate card
+                        this.style.transform = 'translateY(-10px)';
+                        this.style.boxShadow = '0 15px 35px rgba(0, 0, 0, 0.1)';
+                        
+                        // Grow icon
+                        const icon = this.querySelector('.action-icon');
+                        icon.style.transform = 'scale(1.1)';
+                        
+                        // Show overlay
+                        const overlay = this.querySelector('.nature-overlay');
+                        overlay.style.opacity = '0.08';
+                        
+                        // Show gradient at bottom
+                        const gradient = this.querySelector('div[style*="bottom: 0"]');
+                        gradient.style.height = '100%';
+                        
+                        // Pop icon
+                        const iconElement = this.querySelector('.action-icon i');
+                        iconElement.style.transform = 'scale(1.2)';
+                    });
+                    
+                    card.addEventListener('mouseleave', function() {
+                        // Reset card
+                        this.style.transform = 'translateY(0)';
+                        this.style.boxShadow = '0 10px 30px rgba(0, 0, 0, 0.08)';
+                        
+                        // Reset icon
+                        const icon = this.querySelector('.action-icon');
+                        icon.style.transform = 'scale(1)';
+                        
+                        // Reset overlay
+                        const overlay = this.querySelector('.nature-overlay');
+                        overlay.style.opacity = '0.05';
+                        
+                        // Hide gradient
+                        const gradient = this.querySelector('div[style*="bottom: 0"]');
+                        gradient.style.height = '0';
+                        
+                        // Reset icon
+                        const iconElement = this.querySelector('.action-icon i');
+                        iconElement.style.transform = 'scale(1)';
+                    });
+                });
+            });
+            </script>
+            
+            <!-- New Mood Journey Card with updated structure -->
+            <div class="row g-4 mt-4">
+                <div class="col-12">
+                    <div class="mood-journey-card" style="background: linear-gradient(to bottom, #ffffff, #f9fbf7); box-shadow: 0 8px 30px rgba(0, 0, 0, 0.07); border-radius: 16px; position: relative; overflow: hidden;">
+                        <!-- Accent bar at top -->
+                        <div style="position: absolute; top: 0; left: 0; width: 100%; height: 5px; background: linear-gradient(to right, #8bc34a, #4caf50);"></div>
+                        
+                        <div class="section-heading" style="display: flex; align-items: center; justify-content: space-between; margin-bottom: 1.5rem;">
+                            <div style="display: flex; align-items: center;">
+                                <div class="heading-icon" style="width: 48px; height: 48px; background: linear-gradient(135deg, #f0f9eb, #e8f5db); border-radius: 12px; display: flex; align-items: center; justify-content: center; margin-right: 1rem; font-size: 20px; color: #8bc34a; box-shadow: 0 4px 15px rgba(139, 195, 74, 0.15);">
+                                <i class="fas fa-chart-line"></i>
+                            </div>
+                            <div class="heading-text">
+                                    <h3 style="margin: 0; font-size: 1.35rem; font-weight: 600; color: #333333;">Mood Journey</h3>
+                                    <p style="margin: 0; font-size: 0.95rem; color: #717171;">Your emotional path over time</p>
+                            </div>
+                        </div>
+                        
+                            <!-- Refresh button with new styling -->
+                            <button id="refresh-mood-data" class="btn-refresh-mood" style="background-color: #6d6d6d; color: white; border: none; padding: 0.5rem 1rem; border-radius: 8px; font-size: 0.85rem; font-weight: 500; display: flex; align-items: center; justify-content: center; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); cursor: pointer; position: relative; overflow: hidden;">
+                                <i class="fas fa-sync-alt" style="margin-right: 0.5rem;"></i> Refresh
+                            </button>
+                                </div>
+                        
+                        <!-- Alert with info about chart status - dark blue style -->
+                        <div class="alert alert-info" style="background-color: #1a3a58 !important; color: #ffffff !important; border: none !important; border-radius: 8px !important; padding: 15px !important; margin-bottom: 15px; display: flex !important; align-items: center !important; box-shadow: 0 4px 15px rgba(0, 0, 0, 0.1);">
+                            <div style="background-color: rgba(255,255,255,0.15); width: 30px; height: 30px; border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 10px;">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div>
+                                <strong style="font-weight: 600;">Note:</strong> The mood chart will display sample data until you add real mood entries. Any existing entries will be shown with green colors on a white background.
+                        </div>
+                    </div>
+                        
+                        <!-- Chart container with loading state -->
+                        <div class="chart-container my-4" style="height: 300px; max-height: 300px; min-height: 300px; width: 100%; background-color: white; border-radius: 8px; overflow: hidden !important; box-sizing: border-box; position: relative;">
+                            <!-- Loading spinner -->
+                            <div class="loading-spinner"></div>
+                            
+                            <!-- Information overlay -->
+                            <div class="data-info-overlay" style="position: absolute; top: 0.75rem; right: 0.75rem; background: rgba(255, 255, 255, 0.95); padding: 0.75rem 1rem; border-radius: 8px; font-size: 0.8rem; color: #555; box-shadow: 0 3px 10px rgba(0, 0, 0, 0.1); display: flex; flex-direction: column; z-index: 5; backdrop-filter: blur(5px); border: 1px solid rgba(0, 0, 0, 0.05);">
+                                <div id="sample-data-indicator" class="sample-data-tag" style="font-weight: 600; color: #ff9800; margin-bottom: 0.25rem; display: flex; align-items: center;">
+                                    <i class="fas fa-exclamation-triangle" style="font-size: 12px; margin-right: 5px;"></i> Sample Data
+                                </div>
+                                <div id="last-updated" class="last-updated" style="font-size: 0.75rem; color: #888; display: flex; align-items: center;">
+                                    <i class="fas fa-clock" style="font-size: 12px; margin-right: 5px; opacity: 0.7;"></i> Last updated: Just now
+                                </div>
+                            </div>
+                            
+                            <!-- The chart canvas -->
+                            <canvas id="moodJourneyChart" class="mood-journey-chart" style="height: 300px !important; max-height: 300px !important; min-height: 300px !important; width: 100% !important; display: block !important; background-color: white;"></canvas>
+                        </div>
+                        
+                        <!-- Data summary section -->
+                        <div class="mood-data-summary" style="margin-top: 1.5rem; padding-top: 1.5rem; border-top: 1px solid rgba(0,0,0,0.05); display: flex; flex-wrap: wrap; justify-content: space-between; max-height: 200px;">
+                            <div class="col-md-4">
+                                <div class="data-stat" style="flex: 1; display: flex; align-items: center; padding: 1rem; background: linear-gradient(to bottom, #ffffff, #f9fbf7); border-radius: 12px; margin-bottom: 0.5rem; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);">
+                                    <div class="stat-icon" style="width: 42px; height: 42px; background: linear-gradient(135deg, rgba(139, 195, 74, 0.1), rgba(139, 195, 74, 0.2)); color: #8bc34a; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem; flex-shrink: 0; font-size: 18px;">
+                                        <i class="fas fa-calendar-day"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label" style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; font-weight: 500;">Today's Mood</div>
+                                        <div id="today-mood" class="stat-value" style="font-size: 1.2rem; font-weight: 700; color: #333;">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="data-stat" style="flex: 1; display: flex; align-items: center; padding: 1rem; background: linear-gradient(to bottom, #ffffff, #f9fbf7); border-radius: 12px; margin-bottom: 0.5rem; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);">
+                                    <div class="stat-icon" style="width: 42px; height: 42px; background: linear-gradient(135deg, rgba(139, 195, 74, 0.1), rgba(139, 195, 74, 0.2)); color: #8bc34a; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem; flex-shrink: 0; font-size: 18px;">
+                                        <i class="fas fa-chart-pie"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label" style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; font-weight: 500;">Average Mood</div>
+                                        <div id="average-mood" class="stat-value" style="font-size: 1.2rem; font-weight: 700; color: #333;">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="data-stat" style="flex: 1; display: flex; align-items: center; padding: 1rem; background: linear-gradient(to bottom, #ffffff, #f9fbf7); border-radius: 12px; margin-bottom: 0.5rem; transition: all 0.3s ease; border: 1px solid rgba(0,0,0,0.03); box-shadow: 0 4px 15px rgba(0, 0, 0, 0.03);">
+                                    <div class="stat-icon" style="width: 42px; height: 42px; background: linear-gradient(135deg, rgba(139, 195, 74, 0.1), rgba(139, 195, 74, 0.2)); color: #8bc34a; border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem; flex-shrink: 0; font-size: 18px;">
+                                        <i class="fas fa-arrows-alt-v"></i>
+                                    </div>
+                                    <div class="stat-content">
+                                        <div class="stat-label" style="font-size: 0.85rem; color: #666; margin-bottom: 0.25rem; font-weight: 500;">Mood Range</div>
+                                        <div id="mood-range" class="stat-value" style="font-size: 1.2rem; font-weight: 700; color: #333;">-</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Mood Tracking Summary -->
+            <div class="dashboard-main-cards">
+              <div class="card-grid">
+                <div class="glass-card mood-summary-card">
+                  <div class="card-glow"></div>
+                  <div class="section-heading">
+                    <div class="heading-icon">
+                      <i class="fas fa-chart-line"></i>
+                    </div>
+                    <div class="heading-text">
+                      <h3 style="color: #333333;">Mood Insights</h3>
+                      <p style="color: #666666;">Patterns and trends in your emotional health</p>
+                    </div>
+                  </div>
+                  
+                  <div class="mood-insights">
+                    {% if recent_moods %}
+                        {% set trend = 0 %}
+                        {% if recent_moods|length > 1 %}
+                            {% set trend = recent_moods[0].mood_score - recent_moods[-1].mood_score %}
+                        {% endif %}
+                        <div class="insight-item">
+                            <div class="insight-icon {% if trend >= 0 %}positive{% else %}negative{% endif %}">
+                                <i class="fas fa-{% if trend >= 0 %}arrow-up{% else %}arrow-down{% endif %}"></i>
+                            </div>
+                            <div class="insight-text">
+                                <h5>{% if trend >= 0 %}Improving{% else %}Declining{% endif %} Trend</h5>
+                                <p>Your mood has been {{ 'improving' if trend >= 0 else 'declining' }} over the past week</p>
+                            </div>
+                        </div>
+                        {% if mood_avg %}
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-chart-bar"></i>
+                            </div>
+                            <div class="insight-text">
+                                <h5>Average Mood: {{ mood_avg }}/5</h5>
+                                <p>Based on your recent mood entries</p>
+                            </div>
+                        </div>
+                        {% endif %}
+                    {% else %}
+                        <div class="insight-item">
+                            <div class="insight-icon">
+                                <i class="fas fa-info-circle"></i>
+                            </div>
+                            <div class="insight-text">
+                                <h5>No Mood Data Yet</h5>
+                                <p>Start tracking your mood to see insights here</p>
+                            </div>
+                        </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="glass-card wellness-tips-card">
+                  <div class="card-glow"></div>
+                  <div class="section-heading" style="display: flex; align-items: center; margin-bottom: 1.75rem;">
+                    <div class="heading-icon" style="width: 48px; height: 48px; background: rgba(139, 195, 74, 0.15); border-radius: 50%; display: flex; align-items: center; justify-content: center; margin-right: 1rem; font-size: 20px; color: #8bc34a;">
+                      <i class="fas fa-lightbulb"></i>
+                    </div>
+                    <div class="heading-text">
+                      <h3 style="margin: 0; font-size: 1.35rem; font-weight: 600; color: #333333;">Nature-Inspired Tips</h3>
+                      <p style="margin: 0; font-size: 0.95rem; color: #717171;">Calming practices for today</p>
+                    </div>
+                  </div>
+                  <div id="tips-container" class="tips-list" style="margin-top: 1.5rem;"></div>
+                  <div style="text-align: center; margin-top: 2rem;">
+                    <button id="refresh-tips" style="background-color: #8bc34a; color: white; border: none; padding: 0.75rem 1.5rem; border-radius: 30px; font-size: 0.95rem; font-weight: 500; display: inline-flex; align-items: center; box-shadow: 0 4px 12px rgba(139, 195, 74, 0.3); cursor: pointer; transition: all 0.3s ease;">
+                      <i class="fas fa-sync-alt" style="margin-right: 0.6rem;"></i> Refresh Tips
+                    </button>
+                  </div>
+                </div>
+                <div class="glass-card recent-activities-card">
+                  <div class="card-glow"></div>
+                  <div class="section-heading">
+                    <div class="heading-icon">
+                      <i class="fas fa-history"></i>
+                    </div>
+                    <div class="heading-text">
+                      <h3>Recent Activities</h3>
+                      <p>Your wellness journey</p>
+                    </div>
+                  </div>
+                  <div class="activities-timeline">
+                    {% if recent_activities %}
+                        {% for activity in recent_activities %}
+                        <div class="timeline-item">
+                          <div class="timeline-icon">
+                            {% if 'music' in activity.activity_type.lower() %}
+                                <i class="fas fa-music"></i>
+                            {% elif 'mood' in activity.activity_type.lower() %}
+                                <i class="fas fa-smile"></i>
+                            {% elif 'journal' in activity.activity_type.lower() %}
+                                <i class="fas fa-book"></i>
+                            {% elif 'focus' in activity.activity_type.lower() %}
+                                <i class="fas fa-clock"></i>
+                            {% else %}
+                                <i class="fas fa-star"></i>
+                            {% endif %}
+                          </div>
+                          <div class="timeline-content">
+                            <h5>{{ activity.activity_type }}</h5>
+                            <p>{{ activity.description }}</p>
+                            <span class="timeline-time">{{ activity.created_at|timeago }}</span>
+                          </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                          <div class="empty-icon">
+                            <i class="fas fa-history"></i>
+                          </div>
+                          <h4>No Recent Activities</h4>
+                          <p>Your activities will appear here as you use the app</p>
+                        </div>
+                    {% endif %}
+                  </div>
+                </div>
+                <div class="glass-card journal-preview-card">
+                  <div class="card-glow"></div>
+                  <div class="section-heading">
+                    <div class="heading-icon">
+                      <i class="fas fa-feather-alt"></i>
+                    </div>
+                    <div class="heading-text">
+                      <h3>Journal Reflections</h3>
+                      <p>Your recent thoughts and observations</p>
+                    </div>
+                    <div class="heading-action">
+                      <a href="{{ url_for('journal_list') }}" class="btn-view-all">View All</a>
+                    </div>
+                  </div>
+                  <div class="journal-entries">
+                    {% if journal_entries %}
+                        {% for entry in journal_entries[:2] %}
+                        <div class="journal-entry">
+                          <div class="entry-header">
+                            <h4>{{ entry.title }}</h4>
+                            <span class="entry-date">{{ entry.date_created.strftime('%b %d, %Y') }}</span>
+                          </div>
+                          <div class="entry-content">
+                            <p>{{ entry.content|truncate(150) }}</p>
+                          </div>
+                          <div class="entry-footer">
+                            <a href="{{ url_for('journal_view', entry_id=entry.id) }}" class="btn-read-more">
+                              Continue Reading <i class="fas fa-arrow-right"></i>
+                            </a>
+                          </div>
+                        </div>
+                        {% endfor %}
+                    {% else %}
+                        <div class="empty-state">
+                          <div class="empty-icon">
+                            <i class="fas fa-book-open"></i>
+                          </div>
+                          <h4>No Journal Entries Yet</h4>
+                          <p>Start documenting your thoughts and feelings</p>
+                          <a href="{{ url_for('journal_new') }}" class="btn-add-entry">
+                            <i class="fas fa-plus"></i> Add First Entry
+                          </a>
+                        </div>
+                    {% endif %}
+                  </div>
+                </div>
+              </div>
+            </div>
+            
+            <div class="col-lg-6">
+               
+                        <div class="journal-keywords mt-4" id="journalKeywords">
+                            <!-- Keywords will be populated dynamically -->
+                        </div>
+                    </div>
+                </div>
+            </div>
+                            </div>
+    </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Debug output to console
+    console.log("Dashboard script started");
+    
+    // Initialize global variables for chart and data
+    let moodJourneyChart;
+    const chartContainer = document.querySelector('.chart-container');
+    const lastUpdatedElement = document.getElementById('last-updated');
+    const sampleDataIndicator = document.getElementById('sample-data-indicator');
+    const todayMoodElement = document.getElementById('today-mood');
+    const averageMoodElement = document.getElementById('average-mood');
+    const moodRangeElement = document.getElementById('mood-range');
+    const tipsContainer = document.getElementById('tips-container');
+    
+    // --- BEGIN FIXED MOOD DATA BLOCK ---
+    // Only use window.chartDates and window.chartScores as set by the injected <script> block.
+    const sampleDates = ['Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat', 'Sun'];
+    const sampleScores = [3, 4, 3, 5, 4, 3, 4];
+    const moodLabels = ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+    function processInitialData() {
+        // Use sample data if real data is missing or empty
+        const dates = window.chartDates && window.chartDates.length > 0 ? window.chartDates : sampleDates;
+        const moodScores = window.chartScores && window.chartScores.length > 0 ? window.chartScores : sampleScores;
+        // Update UI to show if using sample data
+        updateSampleDataDisplay(!(window.chartDates && window.chartDates.length > 0));
+        console.log("Initial chart data:", dates, moodScores);
+        // Assign to global for chart
+        window.chartDates = dates;
+        window.chartScores = moodScores;
+    }
+    // --- END FIXED MOOD DATA BLOCK ---
+    
+    // Function to initialize the chart
+    function initializeChart() {
+        const moodJourneyCtx = document.getElementById('moodJourneyChart').getContext('2d');
+        if (!moodJourneyCtx) {
+            console.error("Could not find moodJourneyChart canvas element");
+            return;
+        }
+        
+        // Process initial data from template
+        processInitialData();
+        
+        // Create the chart
+        try {
+            moodJourneyChart = new Chart(moodJourneyCtx, {
+        type: 'line',
+        data: {
+                    labels: window.chartDates,
+            datasets: [{
+                label: 'Mood',
+                        data: window.chartScores,
+                borderColor: '#8bc34a',
+                backgroundColor: 'rgba(139, 195, 74, 0.2)',
+                borderWidth: 3,
+                tension: 0.4,
+                fill: true,
+                pointBackgroundColor: '#8bc34a',
+                pointBorderColor: '#fff',
+                pointBorderWidth: 2,
+                pointRadius: 6,
+                pointHoverRadius: 8
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+                    layout: {
+                        padding: {
+                            top: 20,
+                            right: 20,
+                            bottom: 10,
+                            left: 10
+                        }
+                    },
+                    aspectRatio: 2,
+            scales: {
+                y: {
+                    beginAtZero: false,
+                    min: 1,
+                    max: 5,
+                    ticks: {
+                        stepSize: 1,
+                        callback: function(value) {
+                                    return moodLabels[value-1] || '';
+                        },
+                                color: '#333333',
+                        font: {
+                            size: 12
+                        }
+                    },
+                    grid: {
+                                color: 'rgba(0, 0, 0, 0.1)'
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                                color: '#333333',
+                        font: {
+                            size: 12
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    display: false
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(139, 195, 74, 0.8)',
+                    titleFont: {
+                        size: 14
+                    },
+                    bodyFont: {
+                        size: 13
+                    },
+                    callbacks: {
+                        label: function(context) {
+                            const score = context.raw;
+                                    return `Mood: ${moodLabels[score-1] || 'Unknown'} (${score}/5)`;
+                        },
+                        title: function(context) {
+                            return context[0].label;
+                        }
+                    },
+                    displayColors: false,
+                    padding: 10,
+                    cornerRadius: 6
+                }
+                    },
+                    animation: {
+                        duration: 0 // Disable animations to prevent resize issues
+                    },
+                    onResize: function(chart, size) {
+                        // Force height to remain fixed on resize
+                        if (size.height !== 300) {
+                            chart.height = 300;
+                }
+            }
+        }
+    });
+            console.log("Mood journey chart created successfully");
+            
+            // Update data summary
+            updateDataSummary();
+            
+            // Set up periodic data refresh
+            setupDataRefresh();
+            
+        } catch (e) {
+            console.error("Error creating mood journey chart:", e);
+        }
+    }
+    
+    // Setup periodic data refresh
+    function setupDataRefresh() {
+        // Set refresh interval (e.g., every 5 minutes)
+        const refreshInterval = 5 * 60 * 1000; // 5 minutes in milliseconds
+        
+        // Set up interval to fetch new data
+        setInterval(fetchLatestMoodData, refreshInterval);
+        
+        // Add event listener for manual refresh
+        const refreshButton = document.getElementById('refresh-mood-data');
+        if (refreshButton) {
+            refreshButton.addEventListener('click', function() {
+                refreshButton.disabled = true;
+                refreshButton.innerHTML = '<i class="fas fa-sync-alt fa-spin"></i> Refreshing...';
+                fetchLatestMoodData().finally(() => {
+                    setTimeout(() => {
+                        refreshButton.disabled = false;
+                        refreshButton.innerHTML = '<i class="fas fa-sync-alt"></i> Refresh';
+                    }, 1000); // Re-enable after 1 second
+                });
+            });
+        }
+    }
+    
+    // Fetch latest mood data from server
+    function fetchLatestMoodData() {
+        console.log("Fetching latest mood data...");
+        setLoading(true);
+        
+        return fetch('/api/moods/latest')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
+            .then(data => {
+                console.log("Received new mood data:", data);
+                updateChartWithNewData(data);
+                updateLastUpdated();
+            })
+            .catch(error => {
+                console.error('Error fetching mood data:', error);
+                // Show error notification
+                showErrorNotification("Could not fetch the latest mood data");
+            })
+            .finally(() => {
+                setLoading(false);
+            });
+    }
+    
+    // Show error notification
+    function showErrorNotification(message) {
+        // You can implement a toast notification here
+        console.error(message);
+    }
+    
+    // Update last updated timestamp
+    function updateLastUpdated() {
+        const now = new Date();
+        const formattedTime = now.toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' });
+        if (lastUpdatedElement) {
+            lastUpdatedElement.textContent = `Last updated: ${formattedTime}`;
+        }
+    }
+    
+    // Set loading state
+    function setLoading(isLoading) {
+        if (chartContainer) {
+            if (isLoading) {
+                chartContainer.classList.add('is-loading');
+            } else {
+                chartContainer.classList.remove('is-loading');
+            }
+        }
+    }
+    
+    // Update chart with new mood data
+    function updateChartWithNewData(newData) {
+        // Process new data
+        const processedData = processMoodData(newData);
+        
+        // Update chart data
+        if (moodJourneyChart) {
+            moodJourneyChart.data.labels = processedData.dates;
+            moodJourneyChart.data.datasets[0].data = processedData.scores;
+            moodJourneyChart.update();
+            
+            // Update global variables
+            window.chartDates = processedData.dates;
+            window.chartScores = processedData.scores;
+            
+            console.log("Chart updated with new data:", window.chartDates, window.chartScores);
+            
+            // Update sample data notification
+            updateSampleDataDisplay(!processedData.isRealData);
+            
+            // Update data summary
+            updateDataSummary();
+        }
+    }
+    
+    // Update sample data display
+    function updateSampleDataDisplay(isSampleData) {
+        if (sampleDataIndicator) {
+            sampleDataIndicator.style.display = isSampleData ? 'block' : 'none';
+        }
+    }
+    
+    // Update data summary
+    function updateDataSummary() {
+        if (window.chartScores.length === 0) return;
+        
+        // Calculate today's mood (latest entry)
+        const todayMood = window.chartScores[window.chartScores.length - 1];
+        if (todayMoodElement) {
+            todayMoodElement.textContent = `${moodLabels[todayMood - 1]} (${todayMood}/5)`;
+        }
+        
+        // Calculate average mood
+        const sum = window.chartScores.reduce((a, b) => a + b, 0);
+        const avg = (sum / window.chartScores.length).toFixed(1);
+        if (averageMoodElement) {
+            averageMoodElement.textContent = `${avg}/5`;
+        }
+        
+        // Calculate mood range
+        const min = Math.min(...window.chartScores);
+        const max = Math.max(...window.chartScores);
+        if (moodRangeElement) {
+            moodRangeElement.textContent = `${moodLabels[min - 1]} - ${moodLabels[max - 1]}`;
+        }
+    }
+    
+    // Process mood data from API
+    function processMoodData(data) {
+        // Initialize arrays for processed data
+        const dates = [];
+        const scores = [];
+        
+        // Check if we have valid data
+        if (data && Array.isArray(data) && data.length > 0) {
+            // Sort data by timestamp (ascending)
+            data.sort((a, b) => new Date(a.timestamp) - new Date(b.timestamp));
+            
+            // Process each mood entry
+            data.forEach(entry => {
+                if (isValidMoodEntry(entry)) {
+                    const date = new Date(entry.timestamp);
+                    dates.push(date.toLocaleDateString('en-US', { weekday: 'short' }));
+                    scores.push(entry.mood);
+                }
+            });
+            
+            // Limit to last 30 days if needed
+            if (dates.length > 30) {
+                dates.splice(0, dates.length - 30);
+                scores.splice(0, scores.length - 30);
+            }
+            
+            return {
+                dates: dates,
+                scores: scores,
+                isRealData: true
+            };
+        }
+        
+        // Return existing data if new data is invalid
+        return {
+            dates: window.chartDates,
+            scores: window.chartScores,
+            isRealData: window.chartDates !== sampleDates
+        };
+    }
+    
+    // Validate mood entry
+    function isValidMoodEntry(entry) {
+        return entry && 
+               entry.timestamp && 
+               typeof entry.mood === 'number' && 
+               entry.mood >= 1 && 
+               entry.mood <= 5;
+    }
+    
+    // Add resize observer to maintain chart height
+    const chartCanvas = document.getElementById('moodJourneyChart');
+    const resizeObserver = new ResizeObserver(entries => {
+        for (let entry of entries) {
+            if (entry.target === chartCanvas) {
+                // Force height back to 300px if it changes
+                if (entry.contentRect.height !== 300) {
+                    chartCanvas.style.height = '300px !important';
+                    if (moodJourneyChart) {
+                        moodJourneyChart.resize();
+                    }
+                }
+            }
+        }
+    });
+
+    // Start observing the canvas
+    if (chartCanvas) {
+        resizeObserver.observe(chartCanvas);
+    }
+    
+    // Initialize the visualization
+    initializeChart();
+    
+    // Setup nature tips refresh functionality
+  
+        // Function to get current tips titles
+        function getCurrentTips() {
+            const tipElements = tipsContainer.querySelectorAll('.tip-item h5');
+            return Array.from(tipElements).map(el => el.textContent.trim());
+        }
+        
+        // Function to get random tips not currently displayed
+        function getRandomTips(count) {
+            const currentTips = getCurrentTips();
+            const availableTips = allTips.filter(tip => !currentTips.includes(tip.title));
+            
+            // If we've used all or most tips, just return random from all
+            if (availableTips.length < count) {
+                return shuffle(allTips).slice(0, count);
+            }
+            
+            return shuffle(availableTips).slice(0, count);
+        }
+        
+        // Shuffle array function
+        function shuffle(array) {
+            const newArray = [...array];
+            for (let i = newArray.length - 1; i > 0; i--) {
+                const j = Math.floor(Math.random() * (i + 1));
+                [newArray[i], newArray[j]] = [newArray[j], newArray[i]];
+            }
+            return newArray;
+        }
+        
+        // Function to create HTML for a tip
+        function createTipHTML(tip) {
+            return `
+            <div class="tip-item" style="background: linear-gradient(to right, ${tip.bgColor}, ${tip.bgColor.replace('0.05', '0.01')}); padding: 1rem; border-radius: 10px; margin-bottom: 1rem; display: flex; align-items: flex-start; transition: all 0.3s ease; border-left: 3px solid ${tip.color}; opacity: 0; transform: translateY(10px);">
+                <div class="tip-icon" style="width: 40px; height: 40px; background: linear-gradient(135deg, ${tip.bgColor.replace('0.05', '0.3')}, ${tip.bgColor.replace('0.05', '0.1')}); border-radius: 10px; display: flex; align-items: center; justify-content: center; margin-right: 1rem; font-size: 18px; color: ${tip.color}; box-shadow: 0 4px 10px ${tip.bgColor.replace('0.05', '0.2')};">
+                    <i class="fas fa-${tip.icon}"></i>
+                </div>
+                <div class="tip-content">
+                    <h5 style="margin: 0 0 0.35rem 0; font-size: 1.1rem; font-weight: 600; color: #333;">${tip.title}</h5>
+                    <p style="margin: 0; font-size: 0.9rem; color: #666; line-height: 1.4;">${tip.text}</p>
+                </div>
+            </div>`;
+        }
+        
+        // Add animation to refresh button when clicked
+        function animateRefresh() {
+            const btn = document.getElementById('refresh-tips');
+            if (!btn) return;
+            
+            btn.disabled = true;
+            btn.classList.add('rotating');
+            btn.style.transform = 'rotate(180deg)';
+            
+            setTimeout(() => {
+                btn.style.transform = 'rotate(360deg)';
+                setTimeout(() => {
+                    btn.style.transform = '';
+                    btn.classList.remove('rotating');
+                    btn.disabled = false;
+                }, 300);
+            }, 300);
+        }
+        
+        // Function to refresh tips - defined separately so it can be reused
+        function refreshTips() {
+            console.log("Refreshing tips");
+            // Animate button
+            animateRefresh();
+            
+            // Get new random tips
+            const newTips = getRandomTips(3);
+            
+            // Create the refresh tips button HTML
+            const refreshButtonHTML = `
+            <div class="refresh-tips" style="text-align: center; margin-top: 1.5rem;">
+                <button class="btn-refresh" id="refresh-tips" style="background: linear-gradient(to right, #4caf50, #8bc34a); color: white; border: none; padding: 0.6rem 1.5rem; border-radius: 30px; font-size: 0.9rem; font-weight: 500; display: flex; align-items: center; margin: 0 auto; box-shadow: 0 4px 15px rgba(139, 195, 74, 0.3); cursor: pointer; transition: all 0.3s ease; transform-origin: center;">
+                    <i class="fas fa-sync-alt" style="margin-right: 0.5rem;"></i> Refresh Tips
+                </button>
+            </div>`;
+            
+            // Fade out existing tips
+            const existingTips = tipsContainer.querySelectorAll('.tip-item');
+            existingTips.forEach((tip, i) => {
+                setTimeout(() => {
+                    tip.style.opacity = '0';
+                    tip.style.transform = 'translateY(-10px)';
+                }, i * 100);
+            });
+            
+            // Replace tips after fade out
+            setTimeout(() => {
+                // Clear the container
+                tipsContainer.innerHTML = '';
+                
+                // Add new tips
+                newTips.forEach(tip => {
+                    tipsContainer.insertAdjacentHTML('beforeend', createTipHTML(tip));
+                });
+                
+                // Add refresh button back
+                tipsContainer.insertAdjacentHTML('beforeend', refreshButtonHTML);
+                
+                // Set up click handler on new button - IMPORTANT FIX
+                const newRefreshBtn = document.getElementById('refresh-tips');
+                if (newRefreshBtn) {
+                    newRefreshBtn.addEventListener('click', refreshTips);
+                }
+                
+                // Fade in new tips
+                const newTipElements = tipsContainer.querySelectorAll('.tip-item');
+                newTipElements.forEach((tip, i) => {
+                    setTimeout(() => {
+                        tip.style.opacity = '1';
+                        tip.style.transform = 'translateY(0)';
+                    }, i * 100);
+                });
+            }, 400);
+        }
+        
+        // Handle refresh button click - initial setup
+        
+
+
+
+
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Existing JavaScript code...
+
+    // Journal Card Functionality
+    function updateJournalCard() {
+        // Show loading state
+        document.getElementById('totalEntries').innerHTML = '<small><i class="fas fa-spinner fa-spin"></i></small>';
+        document.getElementById('averageMood').innerHTML = '<small><i class="fas fa-spinner fa-spin"></i></small>';
+        
+        const insightsContainer = document.getElementById('journalInsights');
+        const keywordsContainer = document.getElementById('journalKeywords');
+        
+        fetch('/api/journal/summary')
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Failed to fetch journal data');
+                }
+                return response.json();
+            })
+            .then(data => {
+                // Update statistics with animation
+                animateValue('totalEntries', 0, data.total_entries || 0, 1000);
+                
+                // Update average mood
+                if (data.average_mood) {
+                    document.getElementById('averageMood').textContent = data.average_mood.toFixed(1);
+                } else {
+                    document.getElementById('averageMood').textContent = '-';
+                }
+
+                // Update insights
+                insightsContainer.innerHTML = '';
+
+                if (data.recent_insights && data.recent_insights.length > 0) {
+                    data.recent_insights.forEach(insight => {
+                        const insightElement = document.createElement('div');
+                        insightElement.className = 'journal-insight-item';
+                        insightElement.innerHTML = `
+                            <i class="fas fa-lightbulb journal-insight-icon"></i>
+                            <div>${insight}</div>
+                        `;
+                        insightsContainer.appendChild(insightElement);
+                    });
+                } else {
+                    insightsContainer.innerHTML = `
+                        <div style="text-align: center; padding: 2.5rem 1rem 1.5rem;">
+                            <div style="margin-bottom: 1.5rem; display: flex; justify-content: center;">
+                                <i class="far fa-bookmark" style="font-size: 3.5rem; color: rgba(255, 255, 255, 0.15);"></i>
+                            </div>
+                            <p style="color: rgba(255, 255, 255, 0.7); margin-bottom: 1.8rem; font-size: 1rem; font-weight: 400;">No insights available yet. Keep journaling!</p>
+                            <div>
+                                <a href="{{ url_for('journal_new') }}" style="display: inline-flex; align-items: center; text-decoration: none; background-color: #3498db; border-radius: 4px; padding: 0.5rem 1rem; transition: all 0.2s ease;">
+                                    <span style="display: inline-flex; justify-content: center; align-items: center; width: 26px; height: 26px; background-color: rgba(255, 255, 255, 0.2); color: white; border-radius: 4px; margin-right: 10px;">
+                                        <i class="fas fa-pen" style="font-size: 0.8rem;"></i>
+                                    </span>
+                                    <span style="color: white; font-weight: 500; font-size: 0.95rem;">Create an Entry</span>
+                                </a>
+                            </div>
+                        </div>
+                    `;
+                }
+
+                // Update keywords
+                keywordsContainer.innerHTML = '';
+
+                if (data.keywords && data.keywords.length > 0) {
+                    data.keywords.forEach(keyword => {
+                        const keywordElement = document.createElement('span');
+                        keywordElement.className = 'journal-keyword';
+                        keywordElement.textContent = keyword;
+                        keywordsContainer.appendChild(keywordElement);
+                    });
+                }
+            })
+            .catch(error => {
+                console.error('Error fetching journal data:', error);
+                document.getElementById('totalEntries').textContent = '0';
+                document.getElementById('averageMood').textContent = '-';
+                
+                insightsContainer.innerHTML = `
+                    <div class="journal-empty-state">
+                        <p class="text-danger"><i class="fas fa-exclamation-circle me-2"></i>Couldn't load journal data</p>
+                        <button class="btn btn-sm btn-outline-secondary mt-2" onclick="updateJournalCard()">
+                            <i class="fas fa-sync-alt me-1"></i> Try Again
+                        </button>
+                    </div>
+                `;
+            });
+    }
+
+    // Animate number counting
+    function animateValue(id, start, end, duration) {
+        const obj = document.getElementById(id);
+        let startTimestamp = null;
+        const step = (timestamp) => {
+            if (!startTimestamp) startTimestamp = timestamp;
+            const progress = Math.min((timestamp - startTimestamp) / duration, 1);
+            obj.innerHTML = Math.floor(progress * (end - start) + start);
+            if (progress < 1) {
+                window.requestAnimationFrame(step);
+            }
+        };
+        window.requestAnimationFrame(step);
+    }
+
+    // Initial load
+    document.addEventListener('DOMContentLoaded', function() {
+        updateJournalCard();
+        
+        // Set up real-time updates (every 5 minutes)
+        setInterval(updateJournalCard, 300000);
+    });
+
+    // Listen for journal updates
+    document.addEventListener('journalUpdated', function() {
+        updateJournalCard();
+    });
+</script>
+{% endblock %}

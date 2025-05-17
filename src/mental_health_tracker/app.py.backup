@@ -1,0 +1,419 @@
+import os
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField
+from wtforms.validators import DataRequired, Email, EqualTo, Length
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime
+from flask_wtf.csrf import CSRFProtect
+
+# Create Flask app
+app = Flask(__name__)
+app.secret_key = 'your-secret-key-here'  # Replace with a real secret key in production
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///mental_health.db'
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+
+# Import db from models
+from models import db
+
+# Initialize extensions with app
+db.init_app(app)
+csrf = CSRFProtect(app)
+
+# Initialize login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'auth'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Import models after db initialization to avoid circular imports
+from models import User, JournalEntry, MoodEntry
+
+# Create database tables
+with app.app_context():
+    db.create_all()
+
+# Simple user database (replace with a real database in production)
+users = {}
+
+# Routes
+@app.route('/')
+def index():
+    return render_template('index.html')
+
+@app.route('/auth')
+def auth():
+    return render_template('auth.html')
+
+@app.route('/login', methods=['POST'])
+def login():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    
+    user = User.query.filter_by(username=username).first()
+    
+    if user and check_password_hash(user.password, password):
+        session['user_id'] = user.id
+        session['username'] = user.username
+        flash('Login successful!', 'success')
+        return redirect(url_for('index'))
+    else:
+        flash('Invalid username or password', 'error')
+        return redirect(url_for('auth'))
+
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.form.get('username')
+    password = request.form.get('password')
+    email = request.form.get('email')  # Capture email
+    
+    # Check if username already exists
+    existing_user = User.query.filter_by(username=username).first()
+    
+    if existing_user:
+        flash('Username already exists', 'error')
+        return redirect(url_for('auth'))
+    
+    # Create new user
+    hashed_password = generate_password_hash(password)
+    new_user = User(username=username, password=hashed_password, email=email)
+    
+    db.session.add(new_user)
+    db.session.commit()
+    
+    flash('Registration successful! Please log in.', 'success')
+    return redirect(url_for('auth'))
+
+@app.route('/logout')
+def logout():
+    session.pop('user_id', None)
+    session.pop('username', None)
+    flash('You have been logged out', 'success')
+    return redirect(url_for('index'))
+
+@app.route('/reset-password')
+def reset_password():
+    return render_template('reset_password.html')
+
+@app.route('/music-therapy')
+def music_therapy():
+    return render_template('music_therapy.html')
+
+@app.route('/api/music-recommendations', methods=['POST'])
+def music_recommendations():
+    """API endpoint to get music recommendations based on mood"""
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+        
+    data = request.json
+    mood = data.get('mood')
+    
+    if not mood:
+        return jsonify({"error": "Mood parameter is required"}), 400
+    
+    # Music recommendation based on mood
+    music_library = {
+        'happy': [
+            {'id': 'happy1', 'title': 'Good Vibes', 'artist': 'Positive Energy', 'duration': '3:45', 'file': 'static/audio/happy1.mp3'},
+            {'id': 'happy2', 'title': 'Sunshine Day', 'artist': 'Mood Lifters', 'duration': '4:20', 'file': 'static/audio/happy2.mp3'},
+            {'id': 'happy3', 'title': 'Joyful Morning', 'artist': 'Spirit Raisers', 'duration': '3:15', 'file': 'static/audio/happy3.mp3'},
+        ],
+        'sad': [
+            {'id': 'sad1', 'title': 'Gentle Comfort', 'artist': 'Emotion Healers', 'duration': '5:10', 'file': 'static/audio/sad1.mp3'},
+            {'id': 'sad2', 'title': 'Rainy Day', 'artist': 'Soul Soothers', 'duration': '4:55', 'file': 'static/audio/sad2.mp3'},
+            {'id': 'sad3', 'title': 'Reflection Time', 'artist': 'Inner Peace', 'duration': '5:30', 'file': 'static/audio/sad3.mp3'},
+        ],
+        'anxious': [
+            {'id': 'anxious1', 'title': 'Calm Waters', 'artist': 'Anxiety Relief', 'duration': '6:15', 'file': 'static/audio/anxious1.mp3'},
+            {'id': 'anxious2', 'title': 'Deep Breathing', 'artist': 'Mind Relaxers', 'duration': '5:45', 'file': 'static/audio/anxious2.mp3'},
+            {'id': 'anxious3', 'title': 'Stress Melter', 'artist': 'Tranquility', 'duration': '4:50', 'file': 'static/audio/anxious3.mp3'},
+        ],
+        'tired': [
+            {'id': 'tired1', 'title': 'Gentle Energy', 'artist': 'Revitalizers', 'duration': '4:30', 'file': 'static/audio/tired1.mp3'},
+            {'id': 'tired2', 'title': 'Slow Revival', 'artist': 'Energy Boosters', 'duration': '3:50', 'file': 'static/audio/tired2.mp3'},
+            {'id': 'tired3', 'title': 'Afternoon Lift', 'artist': 'Refreshers', 'duration': '4:10', 'file': 'static/audio/tired3.mp3'},
+        ],
+        'focused': [
+            {'id': 'focused1', 'title': 'Deep Focus', 'artist': 'Concentration', 'duration': '7:25', 'file': 'static/audio/focused1.mp3'},
+            {'id': 'focused2', 'title': 'Flow State', 'artist': 'Mind Shapers', 'duration': '6:40', 'file': 'static/audio/focused2.mp3'},
+            {'id': 'focused3', 'title': 'Productivity Zone', 'artist': 'Brain Waves', 'duration': '5:55', 'file': 'static/audio/focused3.mp3'},
+        ],
+        'creative': [
+            {'id': 'creative1', 'title': 'Inspiration Flow', 'artist': 'Creative Minds', 'duration': '5:15', 'file': 'static/audio/creative1.mp3'},
+            {'id': 'creative2', 'title': 'Idea Generator', 'artist': 'Vision Makers', 'duration': '4:45', 'file': 'static/audio/creative2.mp3'},
+            {'id': 'creative3', 'title': 'Artistic Journey', 'artist': 'Imagination', 'duration': '6:05', 'file': 'static/audio/creative3.mp3'},
+        ]
+    }
+    
+    try:
+        recommendations = music_library.get(mood, music_library['happy'])
+        return jsonify({
+            "status": "success",
+            "mood": mood,
+            "recommendations": recommendations,
+            "therapy_tip": get_therapy_tip(mood)
+        })
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+def get_therapy_tip(mood):
+    """Provide therapy tips based on mood"""
+    tips = {
+        'happy': "Enhance your positive mood with upbeat music and try to be mindful of what's contributing to your happiness.",
+        'sad': "Sad music can help validate your feelings. Start with music matching your mood, then gradually shift to more uplifting tunes.",
+        'anxious': "Focus on slow, rhythmic music with 60-80 beats per minute to help regulate breathing and reduce anxiety.",
+        'tired': "Gentle, moderately-paced music can help restore energy without overwhelming your senses.",
+        'focused': "Instrumental music without lyrics helps maintain concentration and enhances mental performance.",
+        'creative': "Dynamic, diverse musical pieces can stimulate different parts of your brain and boost creative thinking."
+    }
+    return tips.get(mood, "Listen to music that resonates with how you're feeling right now.")
+
+@app.route('/api/save-music-session', methods=['POST'])
+def save_music_session():
+    """Save a user's music therapy session data"""
+    if not session.get('user_id'):
+        return jsonify({"error": "You must be logged in"}), 401
+        
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+        
+    data = request.json
+    initial_mood = data.get('initial_mood')
+    final_mood = data.get('final_mood')
+    tracks_played = data.get('tracks_played', [])
+    session_duration = data.get('session_duration', 0)
+    
+    # Here we would save the session data to a database
+    # For now, just return success
+    return jsonify({
+        "status": "success",
+        "message": "Session data saved successfully"
+    })
+
+@app.route('/focus-mode')
+def focus_mode():
+    return render_template('focus_mode.html')
+
+@app.route('/honor-score')
+def honor_score():
+    return render_template('honor_score.html')
+
+@app.route('/profile')
+def profile():
+    # Check if user is logged in
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    user_id = session.get('user_id')
+    
+    # Get recent mood entries
+    recent_moods = MoodEntry.query.filter_by(user_id=user_id).order_by(MoodEntry.date_created.desc()).limit(7).all()
+    
+    # Get recent journal entries
+    recent_journals = JournalEntry.query.filter_by(user_id=user_id).order_by(JournalEntry.date_created.desc()).limit(3).all()
+    
+    # Calculate overall mood average if there are entries
+    mood_avg = None
+    if recent_moods:
+        mood_sum = sum(entry.mood_score for entry in recent_moods)
+        mood_avg = round(mood_sum / len(recent_moods), 1)
+    
+    return render_template('profile.html', 
+                          recent_moods=recent_moods, 
+                          recent_journals=recent_journals,
+                          mood_avg=mood_avg)
+
+@app.route('/dashboard')
+def dashboard():
+    if not session.get('user_id'):
+        flash('Please login to access the dashboard', 'error')
+        return redirect(url_for('auth'))
+    
+    # Get user data
+    user = User.query.get(session['user_id'])
+    
+    return render_template('dashboard.html', user=user)
+
+# Journal routes
+@app.route('/journal')
+def journal():
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    entries = JournalEntry.query.filter_by(user_id=session['user_id']).order_by(JournalEntry.date_created.desc()).all()
+    return render_template('journal/index.html', entries=entries)
+
+@app.route('/journal/new', methods=['GET', 'POST'])
+def journal_new():
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        
+        if not title or not content:
+            flash('Title and content are required', 'error')
+            return redirect(url_for('journal_new'))
+        
+        new_entry = JournalEntry(
+            title=title,
+            content=content,
+            user_id=session['user_id']
+        )
+        
+        try:
+            db.session.add(new_entry)
+            db.session.commit()
+            flash('Journal entry created successfully', 'success')
+            return redirect(url_for('journal'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating journal entry: {str(e)}', 'error')
+            return redirect(url_for('journal_new'))
+    
+    return render_template('journal/form.html', entry=None)
+
+@app.route('/journal/view/<int:entry_id>')
+def journal_view(entry_id):
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    entry = JournalEntry.query.get_or_404(entry_id)
+    
+    # Ensure the entry belongs to the current user
+    if entry.user_id != session['user_id']:
+        abort(403)
+    
+    return render_template('journal/view.html', entry=entry)
+
+@app.route('/journal/edit/<int:entry_id>', methods=['GET', 'POST'])
+def journal_edit(entry_id):
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    entry = JournalEntry.query.get_or_404(entry_id)
+    
+    # Ensure the entry belongs to the current user
+    if entry.user_id != session['user_id']:
+        abort(403)
+    
+    if request.method == 'POST':
+        title = request.form.get('title')
+        content = request.form.get('content')
+        
+        if not title or not content:
+            flash('Title and content are required', 'error')
+            return redirect(url_for('journal_edit', entry_id=entry.id))
+        
+        try:
+            entry.title = title
+            entry.content = content
+            db.session.commit()
+            flash('Journal entry updated successfully', 'success')
+            return redirect(url_for('journal_view', entry_id=entry.id))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error updating journal entry: {str(e)}', 'error')
+            return redirect(url_for('journal_edit', entry_id=entry.id))
+    
+    return render_template('journal/form.html', entry=entry)
+
+@app.route('/journal/delete/<int:entry_id>', methods=['POST'])
+def journal_delete(entry_id):
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    entry = JournalEntry.query.get_or_404(entry_id)
+    
+    # Ensure the entry belongs to the current user
+    if entry.user_id != session['user_id']:
+        abort(403)
+    
+    try:
+        db.session.delete(entry)
+        db.session.commit()
+        flash('Journal entry deleted successfully', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting journal entry: {str(e)}', 'error')
+    
+    return redirect(url_for('journal'))
+
+# Mood Tracker routes
+@app.route('/mood-tracker')
+def mood_tracker():
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    entries = MoodEntry.query.filter_by(user_id=session['user_id']).order_by(MoodEntry.date_created.desc()).all()
+    return render_template('mood/index.html', entries=entries)
+
+@app.route('/mood-tracker/new', methods=['GET', 'POST'])
+def mood_new():
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    if request.method == 'POST':
+        mood_score = request.form.get('mood_score')
+        notes = request.form.get('notes')
+        activities = request.form.get('activities')
+        
+        if not mood_score:
+            flash('Mood score is required', 'error')
+            return redirect(url_for('mood_new'))
+        
+        new_entry = MoodEntry(
+            mood_score=mood_score,
+            notes=notes,
+            activities=activities,
+            user_id=session['user_id']
+        )
+        
+        try:
+            db.session.add(new_entry)
+            db.session.commit()
+            flash('Mood entry created successfully', 'success')
+            return redirect(url_for('mood_tracker'))
+        except Exception as e:
+            db.session.rollback()
+            flash(f'Error creating mood entry: {str(e)}', 'error')
+            return redirect(url_for('mood_new'))
+    
+    return render_template('mood/form.html')
+
+@app.route('/mood-tracker/delete/<int:entry_id>', methods=['POST'])
+def mood_delete(entry_id):
+    if not session.get('user_id'):
+        return redirect(url_for('auth'))
+    
+    entry = MoodEntry.query.get_or_404(entry_id)
+    
+    # Ensure the entry belongs to the current user
+    if entry.user_id != session['user_id']:
+        abort(403)
+    
+    try:
+        db.session.delete(entry)
+        db.session.commit()
+        flash('Mood entry deleted successfully', 'success')
+    except Exception as e:
+        db.session.rollback()
+        flash(f'Error deleting mood entry: {str(e)}', 'error')
+    
+    return redirect(url_for('mood_tracker'))
+
+# Custom template filter for converting newlines to <br> tags
+@app.template_filter('nl2br')
+def nl2br(value):
+    if not value:
+        return ''
+    return value.replace('\n', '<br>')
+
+if __name__ == '__main__':
+    app.run(debug=True)

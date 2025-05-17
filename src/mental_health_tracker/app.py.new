@@ -1,0 +1,857 @@
+import os
+from flask import Flask, render_template, redirect, url_for, flash, request, jsonify, session
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, UserMixin, login_user, login_required, logout_user, current_user
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField, SelectField
+from wtforms.validators import DataRequired, Email, EqualTo, Length
+from werkzeug.security import generate_password_hash, check_password_hash
+from datetime import datetime, timedelta
+from flask_wtf.csrf import CSRFProtect
+# Update import to use the consolidated models
+from .models import (
+    db,
+    User,
+    MoodEntry,
+    JournalEntry,
+    ChatHistory,
+    MusicTherapySession,
+    UserActivity
+)
+from .utils.ai_utils import analyze_sentiment, analyze_emotions, get_mood_patterns, generate_chat_response, logger
+from .config import SECRET_KEY, SQLALCHEMY_DATABASE_URI, SQLALCHEMY_TRACK_MODIFICATIONS
+import json
+import random
+import re
+from .routes import (
+    auth,
+    journal,
+    emergency,
+    music,
+    focus,
+    games,
+    dashboard,
+    ai_chat_bp
+)
+
+# Create Flask app
+app = Flask(__name__)
+
+# Load configuration from config.py
+app.config.from_object('src.mental_health_tracker.config')
+
+# Initialize extensions with app
+db.init_app(app)
+csrf = CSRFProtect(app)
+
+# Initialize login manager
+login_manager = LoginManager()
+login_manager.init_app(app)
+login_manager.login_view = 'auth.login'
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+# Context processor to provide current year to all templates
+@app.context_processor
+def inject_now():
+    return {'now': datetime.utcnow()}
+
+# Create database tables
+with app.app_context():
+    # db.drop_all()  # Drop all existing tables - REMOVED to preserve user data between sessions
+    db.create_all()  # Create tables with new schema
+
+# Simple user database (replace with a real database in production)
+users = {}
+
+# Routes
+@app.route('/')
+def index():
+    if current_user.is_authenticated:
+        return redirect(url_for('dashboard.view'))
+    return render_template('index.html')
+
+@app.route('/register', methods=['POST'])
+def register():
+    username = request.form.get('username')
+    email = request.form.get('email')
+    password = request.form.get('password')
+    
+    # Check if username or email already exists
+    if User.query.filter_by(username=username).first():
+        flash('Username already exists', 'error')
+        return redirect(url_for('auth.login'))
+    
+    if User.query.filter_by(email=email).first():
+        flash('Email already exists', 'error')
+        return redirect(url_for('auth.login'))
+    
+    # Create new user with hashed password
+    user = User(
+        username=username,
+        email=email,
+        password=generate_password_hash(password)
+    )
+    db.session.add(user)
+    db.session.commit()
+    
+    flash('Registration successful! Please login.', 'success')
+    return redirect(url_for('auth.login'))
+
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    session.clear()
+    flash('You have been logged out.', 'success')
+    return redirect(url_for('auth.login'))
+
+@app.route('/reset-password')
+def reset_password():
+    return render_template('reset_password.html')
+
+@app.route('/music-therapy')
+def music_therapy():
+    # Check if user is logged in
+    user_id = session.get('user_id')
+    recommended_mood = None
+    
+    # If user is logged in, analyze their mood patterns and track activity
+    if user_id:
+        track_activity(user_id, 'music', 'Started a music therapy session')
+        user = User.query.get(user_id)
+        if user:
+            try:
+                # Get the latest mood entry
+                latest_mood = MoodEntry.query.filter_by(user_id=user_id).order_by(MoodEntry.date_created.desc()).first()
+                if latest_mood:
+                    # Simple mapping from mood score to therapy moods
+                    mood_mapping = {
+                        1: 'sad',
+                        2: 'anxious',
+                        3: 'calm',
+                        4: 'happy',
+                        5: 'energetic'
+                    }
+                    recommended_mood = mood_mapping.get(latest_mood.mood_score, 'calm')
+            except Exception as e:
+                print(f"Error getting mood recommendation: {str(e)}")
+                recommended_mood = 'calm'
+    
+    return render_template('music_therapy.html', recommended_mood=recommended_mood)
+
+@app.route('/api/music-recommendations', methods=['POST'])
+def music_recommendations():
+    """Get music recommendations based on mood"""
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+        
+    data = request.json
+    mood = data.get('mood', 'calm')
+    create_session = data.get('create_session', False)
+    session_id = None
+    
+    # If user is logged in and wants to create a session, record it
+    if session.get('user_id') and create_session:
+        user_id = session.get('user_id')
+        new_session = MusicTherapySession(
+            user_id=user_id,
+            initial_mood=mood,
+            start_time=datetime.utcnow()
+        )
+        
+        db.session.add(new_session)
+        db.session.commit()
+        session_id = new_session.id
+    
+    # Scan the audio directory for actual files
+    mood_tracks = scan_audio_files(mood)
+    
+    # Check if we're using real files or demo files
+    is_demo_mode = True
+    if mood_tracks and 'demo' not in mood_tracks[0].get('id', '').lower():
+        is_demo_mode = False
+    
+    try:
+        response_data = {
+            "status": "success",
+            "mood": mood,
+            "recommendations": mood_tracks,
+            "therapy_tip": get_therapy_tip(mood),
+            "is_demo_mode": is_demo_mode
+        }
+        
+        # If user is logged in, include session ID
+        if session_id:
+            response_data["session_id"] = session_id
+            
+        return jsonify(response_data)
+    except Exception as e:
+        app.logger.error(f"Error processing music recommendations: {str(e)}")
+        return jsonify({
+            "status": "error",
+            "error": "An error occurred while processing music recommendations"
+        }), 500
+
+# Function to scan audio directory for files by mood
+def scan_audio_files(mood):
+    """Scan the audio directory for files matching the mood"""
+    audio_dir = os.path.join(app.static_folder, 'audio')
+    
+    # Fallback to hardcoded music library if directory doesn't exist or mood is invalid
+    if not os.path.exists(audio_dir):
+        return music_library.get(mood, music_library['calm'])
+    
+    # Get list of all audio files for the specified mood
+    mood_files = []
+    pattern = f"{mood}*.mp3"  # Example: calm1.mp3, calm2.mp3, etc.
+    
+    # List all files in the directory matching the pattern
+    for filename in os.listdir(audio_dir):
+        if filename.lower().startswith(mood.lower()) and filename.lower().endswith('.mp3'):
+            file_id = os.path.splitext(filename)[0]  # Remove extension
+            
+            # Create track info
+            track = {
+                'id': file_id,
+                'title': generate_title(file_id),
+                'artist': generate_artist(mood),
+                'duration': '3:30',  # Default duration
+                'file': f'static/audio/{filename}'
+            }
+            mood_files.append(track)
+    
+    # If no files found for this mood, return default library entries
+    if not mood_files:
+        return music_library.get(mood, music_library['calm'])
+    
+    return mood_files
+
+# Helper function to generate a title from file ID
+def generate_title(file_id):
+    """Generate a user-friendly title from the file ID"""
+    # Remove numbers and special chars
+    base_name = ''.join(c for c in file_id if not c.isdigit())
+    
+    # Convert to title case and add some variety
+    mood_titles = {
+        'happy': ['Joyful Moment', 'Sunny Day', 'Celebration', 'Uplifting Spirits', 'Cheerful Melody'],
+        'sad': ['Reflective Moment', 'Rainy Day', 'Melancholy', 'Emotional Journey', 'Heartfelt'],
+        'calm': ['Peaceful Moment', 'Tranquil Waters', 'Serenity', 'Gentle Breeze', 'Mindfulness'],
+        'focus': ['Concentration', 'Deep Work', 'Mind Clarity', 'Flow State', 'Productivity Zone'],
+        'energetic': ['Power Up', 'Dynamic Move', 'Energy Flow', 'Motivation Boost', 'Active Beat'],
+        'sleep': ['Dreamy Night', 'Gentle Lullaby', 'Bedtime Story', 'Night Whispers', 'Starry Sky']
+    }
+    
+    # Extract mood from file_id
+    for mood in mood_titles:
+        if mood in file_id.lower():
+            # Get a random title based on the hash of the file_id for consistency
+            import hashlib
+            hash_val = int(hashlib.md5(file_id.encode()).hexdigest(), 16)
+            return mood_titles[mood][hash_val % len(mood_titles[mood])]
+    
+    # Default title if no mood matched
+    return f"Track {file_id}"
+
+# Helper function to generate an artist name
+def generate_artist(mood):
+    """Generate an artist name based on the mood"""
+    mood_artists = {
+        'happy': ['Joy Makers', 'Sunshine Band', 'Happy Vibes', 'Uplift'],
+        'sad': ['Melancholy', 'Deep Feelings', 'Reflection', 'Soul Journey'],
+        'calm': ['Serenity Now', 'Peace Makers', 'Tranquil Sounds', 'Zen Masters'],
+        'focus': ['Concentration', 'Mind Shapers', 'Focus Flow', 'Brain Waves'],
+        'energetic': ['Energy Boost', 'Power Up', 'Active Minds', 'Momentum'],
+        'sleep': ['Dream Weavers', 'Night Whisperers', 'Slumber', 'Sleep Well']
+    }
+    
+    # Get artist for mood or default
+    artists = mood_artists.get(mood, ['Unknown Artist'])
+    
+    # Use a random artist
+    return random.choice(artists)
+
+# Music library (fallback if directory doesn't exist)
+music_library = {
+    'happy': [
+        {'id': 'happy1', 'title': 'Good Vibes', 'artist': 'Positive Energy', 'duration': '3:45', 'file': 'static/audio/happy1.mp3'},
+        {'id': 'happy2', 'title': 'Sunshine Day', 'artist': 'Mood Lifters', 'duration': '4:20', 'file': 'static/audio/happy2.mp3'},
+        {'id': 'happy3', 'title': 'Joyful Morning', 'artist': 'Spirit Raisers', 'duration': '3:15', 'file': 'static/audio/happy3.mp3'},
+    ],
+    'sad': [
+        {'id': 'sad1', 'title': 'Gentle Comfort', 'artist': 'Emotion Healers', 'duration': '5:10', 'file': 'static/audio/sad1.mp3'},
+        {'id': 'sad2', 'title': 'Rainy Day', 'artist': 'Soul Soothers', 'duration': '4:55', 'file': 'static/audio/sad2.mp3'},
+        {'id': 'sad3', 'title': 'Reflection Time', 'artist': 'Inner Peace', 'duration': '5:30', 'file': 'static/audio/sad3.mp3'},
+    ],
+    'calm': [
+        {'id': 'calm1', 'title': 'Ocean Waves', 'artist': 'Nature Sounds', 'duration': '6:15', 'file': 'static/audio/calm1.mp3'},
+        {'id': 'calm2', 'title': 'Peaceful Garden', 'artist': 'Serenity', 'duration': '5:45', 'file': 'static/audio/calm2.mp3'},
+        {'id': 'calm3', 'title': 'Gentle Breeze', 'artist': 'Relaxation', 'duration': '4:50', 'file': 'static/audio/calm3.mp3'},
+    ],
+    'focus': [
+        {'id': 'focus1', 'title': 'Deep Focus', 'artist': 'Concentration', 'duration': '7:25', 'file': 'static/audio/focus1.mp3'},
+        {'id': 'focus2', 'title': 'Flow State', 'artist': 'Mind Shapers', 'duration': '6:40', 'file': 'static/audio/focus2.mp3'},
+        {'id': 'focus3', 'title': 'Productivity Zone', 'artist': 'Brain Waves', 'duration': '5:55', 'file': 'static/audio/focus3.mp3'},
+    ],
+    'energetic': [
+        {'id': 'energetic1', 'title': 'Morning Boost', 'artist': 'Energy Flow', 'duration': '3:30', 'file': 'static/audio/energetic1.mp3'},
+        {'id': 'energetic2', 'title': 'Power Up', 'artist': 'Motivators', 'duration': '4:15', 'file': 'static/audio/energetic2.mp3'},
+        {'id': 'energetic3', 'title': 'Dynamic Day', 'artist': 'Momentum', 'duration': '3:45', 'file': 'static/audio/energetic3.mp3'},
+    ],
+    'sleep': [
+        {'id': 'sleep1', 'title': 'Starry Night', 'artist': 'Dream Weavers', 'duration': '8:30', 'file': 'static/audio/sleep1.mp3'},
+        {'id': 'sleep2', 'title': 'Gentle Lullaby', 'artist': 'Sleep Therapy', 'duration': '7:45', 'file': 'static/audio/sleep2.mp3'},
+        {'id': 'sleep3', 'title': 'Night Rain', 'artist': 'Slumber', 'duration': '9:10', 'file': 'static/audio/sleep3.mp3'},
+    ]
+}
+
+def get_therapy_tip(mood):
+    """Provide therapy tips based on mood"""
+    tips = {
+        'happy': "Enhance your positive mood with upbeat music and try to be mindful of what's contributing to your happiness.",
+        'sad': "Sad music can help validate your feelings. Start with music matching your mood, then gradually shift to more uplifting tunes.",
+        'calm': "Focus on slow, rhythmic music to maintain your peaceful state. This is perfect for meditation and mindfulness practices.",
+        'focus': "Instrumental music without lyrics helps maintain concentration and enhances mental performance.",
+        'energetic': "Channel your energy with dynamic beats. These tracks can help motivate you for exercise or productive tasks.",
+        'sleep': "These gentle melodies can help calm your mind and prepare your body for restful sleep."
+    }
+    return tips.get(mood, "Listen to music that resonates with how you're feeling right now.")
+
+@app.route('/api/save-music-session', methods=['POST'])
+def save_music_session():
+    """Save a user's music therapy session data"""
+    if not session.get('user_id'):
+        return jsonify({"error": "You must be logged in"}), 401
+        
+    if not request.is_json:
+        return jsonify({"error": "Request must be JSON"}), 400
+        
+    data = request.json
+    session_id = data.get('session_id')
+    final_mood = data.get('final_mood')
+    tracks_played = data.get('tracks_played', [])
+    duration_seconds = data.get('duration_seconds', 0)
+    effectiveness_rating = data.get('effectiveness_rating')
+    notes = data.get('notes', '')
+    
+    # Validate the session_id
+    if not session_id:
+        return jsonify({"error": "Session ID is required"}), 400
+    
+    try:
+        # Find the music therapy session
+        music_session = MusicTherapySession.query.get(session_id)
+        
+        if not music_session:
+            return jsonify({"error": "Session not found"}), 404
+            
+        # Check if the session belongs to the logged-in user
+        if music_session.user_id != session.get('user_id'):
+            return jsonify({"error": "Unauthorized access to this session"}), 403
+            
+        # Update the session
+        music_session.end_time = datetime.utcnow()
+        music_session.final_mood = final_mood
+        music_session.tracks_played = json.dumps(tracks_played)
+        music_session.duration_seconds = duration_seconds
+        music_session.effectiveness_rating = effectiveness_rating
+        music_session.notes = notes
+        
+        db.session.commit()
+        
+        return jsonify({
+            "status": "success",
+            "message": "Session data saved successfully",
+            "session_id": session_id
+        })
+        
+    except Exception as e:
+        db.session.rollback()
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/api/music-history', methods=['GET'])
+def music_history():
+    """Get user's music therapy session history"""
+    user_id = session.get('user_id')
+    
+    if not user_id:
+        return jsonify({"error": "You must be logged in"}), 401
+    
+    try:
+        # Get the user's music therapy sessions
+        sessions = MusicTherapySession.query.filter_by(user_id=user_id)\
+            .order_by(MusicTherapySession.start_time.desc())\
+            .limit(10)\
+            .all()
+        
+        session_list = []
+        for s in sessions:
+            # Parse tracks_played if it's not None
+            tracks = []
+            if s.tracks_played:
+                try:
+                    tracks = json.loads(s.tracks_played)
+                except:
+                    tracks = []
+            
+            session_list.append({
+                "id": s.id,
+                "start_time": s.start_time.isoformat(),
+                "end_time": s.end_time.isoformat() if s.end_time else None,
+                "duration_seconds": s.duration_seconds,
+                "initial_mood": s.initial_mood,
+                "final_mood": s.final_mood,
+                "tracks_played": tracks,
+                "effectiveness_rating": s.effectiveness_rating,
+                "notes": s.notes
+            })
+        
+        return jsonify({
+            "status": "success",
+            "sessions": session_list
+        })
+        
+    except Exception as e:
+        return jsonify({"error": str(e)}), 500
+
+@app.route('/focus-mode')
+def focus_mode():
+    if 'user_id' not in session:
+        return render_template('focus/dashboard.html', sessions=None, requires_login=True)
+    
+    sessions = FocusSession.query.filter_by(user_id=session['user_id']).order_by(FocusSession.start_time.desc()).limit(10).all()
+    return render_template('focus/dashboard.html', sessions=sessions, requires_login=False)
+
+@app.route('/games')
+def games():
+    return render_template('games.html')
+
+@app.route('/games-dashboard')
+def games_dashboard():
+    return render_template('games_dashboard.html')
+
+@app.route('/honor-score')
+def honor_score():
+    return render_template('honor_score.html')
+
+@app.route('/profile')
+def profile():
+    # Check if user is logged in
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+    
+    user_id = session.get('user_id')
+    
+    # Get recent mood entries
+    recent_moods = MoodEntry.query.filter_by(user_id=user_id).order_by(MoodEntry.date_created.desc()).limit(7).all()
+    
+    # Get recent journal entries
+    recent_journals = JournalEntry.query.filter_by(user_id=user_id).order_by(JournalEntry.date_created.desc()).limit(3).all()
+    
+    # Calculate overall mood average if there are entries
+    mood_avg = None
+    if recent_moods:
+        mood_sum = sum(entry.mood_score for entry in recent_moods)
+        mood_avg = round(mood_sum / len(recent_moods), 1)
+    
+    return render_template('profile.html', 
+                          recent_moods=recent_moods, 
+                          recent_journals=recent_journals,
+                          mood_avg=mood_avg)
+
+def track_activity(user_id, activity_type, description):
+    """
+    Helper function to track user activities
+    
+    Args:
+        user_id (int): The ID of the user
+        activity_type (str): Type of activity ('music', 'mood', 'journal', 'focus')
+        description (str): Description of the activity
+    """
+    activity = UserActivity(
+        user_id=user_id,
+        activity_type=activity_type,
+        description=description
+    )
+    db.session.add(activity)
+    db.session.commit()
+
+@app.route('/dashboard')
+@login_required
+def dashboard():
+    # Get recent mood entries
+    recent_moods = MoodEntry.query.filter_by(user_id=current_user.id).order_by(MoodEntry.date_created.desc()).limit(10).all()
+    
+    # Get recent activities
+    recent_activities = UserActivity.query.filter_by(user_id=current_user.id).order_by(UserActivity.created_at.desc()).limit(5).all()
+    
+    # Get recent journal entries
+    journal_entries = JournalEntry.query.filter_by(user_id=current_user.id).order_by(JournalEntry.created_at.desc()).limit(2).all()
+    
+    # Calculate mood trend
+    mood_trend = None
+    if recent_moods:
+        latest_mood = sum(mood.mood_score for mood in recent_moods[:3]) / min(len(recent_moods), 3)
+        older_mood = sum(mood.mood_score for mood in recent_moods[-3:]) / min(len(recent_moods), 3)
+        mood_trend = "improving" if latest_mood > older_mood else "steady" if latest_mood == older_mood else "declining"
+    
+    return render_template('dashboard.html',
+                         recent_moods=recent_moods,
+                         recent_activities=recent_activities,
+                         journal_entries=journal_entries,
+                         mood_trend=mood_trend)
+
+@app.route('/mood-tracker')
+def mood_tracker():
+    # Check if user is logged in
+    user_id = session.get('user_id')
+    if not user_id:
+        flash('Please log in to access the mood tracker', 'error')
+        return redirect(url_for('auth.login'))
+    
+    # Get the mood entries for the user, ordered by date
+    entries = MoodEntry.query.filter_by(user_id=user_id).order_by(MoodEntry.date_created.desc()).all()
+    
+    # Track activity
+    track_activity(user_id, 'mood_tracker', 'Viewed mood tracker')
+    
+    # Analyze emotional patterns
+    pattern_data = analyze_emotional_patterns(user_id)
+    
+    return render_template('mood_tracker.html', entries=entries, pattern_data=pattern_data)
+
+    
+    return render_template('mood_new.html', form=form)
+
+    
+    # Delete the entry
+    db.session.delete(entry)
+    db.session.commit()
+    
+    # Track activity
+    track_activity(user_id, 'mood_delete', f'Deleted mood entry from {entry.date_created}')
+    
+    flash('Mood entry deleted successfully', 'success')
+    return redirect(url_for('mood_tracker'))
+
+@app.route('/chat')
+def chat():
+    if not session.get('user_id'):
+        flash('Please login to access the chat', 'error')
+        return redirect(url_for('auth.login'))
+    return render_template('chat.html')
+
+@app.route('/ai-chat')
+def ai_chat():
+    if not session.get('user_id'):
+        return redirect(url_for('auth.login'))
+        
+    user_id = session.get('user_id')
+    
+    # Get user's emotional patterns and mood patterns
+    patterns = get_mood_patterns(user_id, db)
+    emotional_patterns = analyze_emotional_patterns(user_id)
+    
+    # Get recent chat history
+    chat_history = ChatHistory.query.filter_by(user_id=user_id).order_by(ChatHistory.timestamp.desc()).limit(10).all()
+    
+    return render_template('ai_chat.html', 
+                         chat_history=chat_history,
+                         patterns=patterns,
+                         emotional_patterns=emotional_patterns)
+
+@app.route('/api/chat', methods=['POST'])
+def chat_api():
+    try:
+        print("Starting chat API request processing")
+        data = request.get_json()
+        if not data:
+            print("No data provided in request")
+            return jsonify({'error': 'No data provided'}), 400
+    
+        message = data.get('message', '').strip()
+        if not message:
+            print("Empty message provided")
+            return jsonify({'error': 'Please type a message'}), 400
+        
+        print(f"Processing message: {message}")
+        
+        # Analyze sentiment of the message
+        try:
+            sentiment_score, sentiment_label = analyze_sentiment(message)
+            print(f"Sentiment analysis: {sentiment_label} ({sentiment_score})")
+        except Exception as sent_error:
+            print(f"Error in sentiment analysis: {str(sent_error)}")
+            sentiment_score = 0.0
+            sentiment_label = 'neutral'
+        
+        try:
+            emotions_json = analyze_emotions(message)
+            print(f"Emotion analysis: {emotions_json}")
+        except Exception as emo_error:
+            print(f"Error in emotion analysis: {str(emo_error)}")
+            emotions_json = json.dumps({"neutral": 1.0})
+        
+        # Generate response based on message, user history and context
+        user_id = session.get('user_id')
+        user_context = {}
+        
+        if user_id:
+            try:
+                # Get recent mood entries
+                recent_moods = MoodEntry.query.filter_by(user_id=user_id).order_by(MoodEntry.date_created.desc()).limit(5).all()
+                if recent_moods:
+                    avg_mood = sum(entry.mood_score for entry in recent_moods) / len(recent_moods)
+                    mood_trend = recent_moods[0].mood_score - recent_moods[-1].mood_score if len(recent_moods) > 1 else 0
+                    
+                    user_context['recent_mood_avg'] = avg_mood
+                    user_context['mood_trend'] = mood_trend
+                    user_context['last_mood'] = recent_moods[0].mood_score
+                    user_context['last_mood_label'] = get_mood_label(recent_moods[0].mood_score)
+                
+                # Get recent journal entries
+                recent_journals = JournalEntry.query.filter_by(user_id=user_id).order_by(JournalEntry.date_created.desc()).limit(3).all()
+                if recent_journals:
+                    user_context['has_journal_entries'] = True
+                    user_context['last_journal_sentiment'] = recent_journals[0].sentiment_label
+                    
+                    # Extract emotions from last journal
+                    if recent_journals[0].key_emotions:
+                        try:
+                            emotions = json.loads(recent_journals[0].key_emotions)
+                            top_emotions = sorted(emotions.items(), key=lambda x: x[1], reverse=True)[:2]
+                            user_context['top_journal_emotions'] = [e[0] for e in top_emotions]
+                        except Exception as je_error:
+                            print(f"Error parsing journal emotions: {str(je_error)}")
+                
+                # Get emotional patterns
+                patterns = get_mood_patterns(user_id, db)
+                if patterns:
+                    user_context['mood_patterns'] = patterns
+            except Exception as context_error:
+                print(f"Error getting user context: {str(context_error)}")
+        
+        # Generate personalized response based on user context and message
+        try:
+            response = generate_personalized_response(message, sentiment_label, emotions_json, user_context)
+            print(f"Generated response: {response[:50]}...")
+        except Exception as gen_error:
+            print(f"Error generating response: {str(gen_error)}")
+            response = "I'm here to listen. How can I help you today?"
+        
+        # Store the chat in history if user is logged in
+        if user_id:
+            try:
+                # Store the user's message
+                chat_entry = ChatHistory(
+                    user_id=user_id,
+                    message=message,
+                    is_user=True,
+                    sentiment_score=sentiment_score,
+                    sentiment_label=sentiment_label
+                )
+                db.session.add(chat_entry)
+                
+                # Store the AI's response
+                ai_response = ChatHistory(
+                    user_id=user_id,
+                    message=response,
+                    is_user=False
+                )
+                db.session.add(ai_response)
+                db.session.commit()
+                print("Successfully stored chat history")
+            except Exception as db_error:
+                print(f"Database error in chat history: {str(db_error)}")
+                db.session.rollback()
+        
+        result = {
+            'response': response,
+            'sentiment_label': sentiment_label,
+            'emotions': emotions_json,
+            'updated_patterns': user_context.get('mood_patterns')
+        }
+        print("Successfully prepared response")
+        return jsonify(result)
+
+    except Exception as e:
+        print(f"Critical error in chat API: {str(e)}")
+        import traceback
+        traceback.print_exc()
+        return jsonify({
+            'error': 'An error occurred while processing your message. Please try again.',
+            'response': 'I apologize, but there was an error processing your message. Please try again.',
+            'sentiment_label': 'neutral',
+            'emotions': json.dumps({"neutral": 1.0})
+        }), 500
+
+def get_mood_label(mood_score):
+    """Convert numerical mood score to text label"""
+    mood_labels = {
+        1: 'very low',
+        2: 'low',
+        3: 'neutral',
+        4: 'good',
+        5: 'excellent'
+    }
+    return mood_labels.get(mood_score, 'neutral')
+
+def generate_personalized_response(message, sentiment, emotions_json, user_context):
+    """Generate a more personalized response based on user data and message"""
+    try:
+        message_lower = message.lower()
+        
+        # Check if this is an explicit question about mood or journal trends
+        if any(phrase in message_lower for phrase in ['how am i doing', 'my mood', 'my emotions', 'my progress']):
+            # If we have mood data, provide insights
+            if user_context.get('recent_mood_avg'):
+                avg_mood = user_context['recent_mood_avg']
+                mood_trend = user_context.get('mood_trend', 0)
+                
+                if mood_trend > 0.5:
+                    trend_text = "Your mood has been improving recently."
+                elif mood_trend < -0.5:
+                    trend_text = "Your mood has been declining recently."
+                else:
+                    trend_text = "Your mood has been relatively stable recently."
+                    
+                return f"Based on your recent entries, your average mood has been {get_mood_label(round(avg_mood))}. {trend_text} Would you like some suggestions to maintain or improve your well-being?"
+            else:
+                return "I don't have enough data to analyze your mood patterns yet. Adding regular mood entries will help me provide better insights."
+        
+        # Check if it's a question about journal insights
+        elif any(phrase in message_lower for phrase in ['my journal', 'my entries', 'my thoughts', 'what have i written']):
+            if user_context.get('has_journal_entries'):
+                sentiment = user_context.get('last_journal_sentiment', 'neutral')
+                emotions = user_context.get('top_journal_emotions', [])
+                
+                if emotions:
+                    emotions_text = f" with themes of {' and '.join(emotions)}"
+                else:
+                    emotions_text = ""
+                
+                return f"Your recent journal entries have had a {sentiment} tone{emotions_text}. Journaling regularly can help you track patterns in your thoughts and feelings. Is there anything specific you'd like to explore about your journal entries?"
+            else:
+                return "You haven't created any journal entries yet. Journaling can be a powerful tool for self-reflection and emotional processing. Would you like to start a journal entry now?"
+        
+        # Greeting patterns
+        elif any(word in message_lower for word in ['hi', 'hello', 'hey', 'greetings']):
+            if user_context.get('last_mood'):
+                mood = get_mood_label(user_context['last_mood'])
+                return f"Hello! Your last recorded mood was {mood}. How are you feeling today?"
+            else:
+                return "Hello! I'm here to support you. How are you feeling today?"
+        
+        # Questions about the AI
+        elif any(phrase in message_lower for phrase in ['how are you', 'how do you feel']):
+            return "I'm here and ready to help you! What's on your mind today?"
+        
+        # Gratitude
+        elif 'thank' in message_lower:
+            return "You're welcome! Remember, I'm here whenever you need support."
+        
+        # Help or support requests
+        elif any(word in message_lower for word in ['help', 'support', 'advice']):
+            if user_context.get('last_journal_sentiment') == 'negative' or user_context.get('last_mood', 3) <= 2:
+                return "I notice from your recent entries that you might be going through a difficult time. Would you like to talk about what's troubling you, or would you prefer some coping strategies?"
+            else:
+                return "I'm here to help. Would you like to talk about what's on your mind, or would you prefer some general well-being tips?"
+        
+        # Negative emotions
+        elif any(word in message_lower for word in ['sad', 'depressed', 'unhappy', 'anxious', 'worried']):
+            emotions = json.loads(emotions_json) if emotions_json else {}
+            recommendations = generate_recommendations(emotions)
+            if recommendations:
+                rec = random.choice(recommendations)
+                return f"I hear that you're going through a difficult time. {rec} Would you like to explore this further?"
+            else:
+                return "I hear that you're going through a difficult time. Would you like to tell me more about what's making you feel this way? Remember, it's okay to not be okay, and seeking help is a sign of strength."
+        
+        # Positive emotions
+        elif any(word in message_lower for word in ['happy', 'good', 'great', 'wonderful', 'excited']):
+            return "I'm glad you're feeling positive! What's contributing to your good mood? It's helpful to recognize what brings us joy."
+        
+        # Stress or overwhelm
+        elif any(word in message_lower for word in ['stress', 'overwhelm', 'tired', 'exhausted']):
+            return "It sounds like you're dealing with a lot right now. Would you like to explore some stress management techniques together?"
+        
+        # Default responses for general conversation
+        else:
+            general_responses = [
+                "Could you tell me more about that?",
+                "How does that make you feel?",
+                "What thoughts come up when you think about this?",
+                "I'm listening. Please feel free to share more.",
+                "That's interesting. How long have you been feeling this way?",
+                "Would you like to explore this topic further?",
+                "Your feelings are valid. Would you like to discuss some coping strategies?",
+                "I'm here to support you. What would be most helpful right now?"
+            ]
+            return random.choice(general_responses)
+
+    except Exception as e:
+        logger.error(f"Error generating personalized response: {str(e)}")
+        return "I'm here to listen. How can I help you today?"
+
+@app.route('/api/analyze-mood-patterns', methods=['GET'])
+def analyze_mood_patterns():
+    if not session.get('user_id'):
+        return jsonify({"error": "You must be logged in"}), 401
+    
+    days = request.args.get('days', default=7, type=int)
+    patterns = get_mood_patterns(session['user_id'], db, days)
+    
+    if not patterns:
+        return jsonify({"error": "No mood data available"}), 404
+    
+    return jsonify(patterns)
+
+# Custom template filter for converting newlines to <br> tags
+@app.template_filter('nl2br')
+def nl2br(value):
+    if not value:
+        return ''
+    return value.replace('\n', '<br>')
+
+@app.template_filter('timeago')
+def timeago_filter(date):
+    now = datetime.utcnow()
+    diff = now - date
+
+    if diff.days > 365:
+        years = diff.days // 365
+        return f"{years} year{'s' if years > 1 else ''} ago"
+    elif diff.days > 30:
+        months = diff.days // 30
+        return f"{months} month{'s' if months > 1 else ''} ago"
+    elif diff.days > 0:
+        return f"{diff.days} day{'s' if diff.days > 1 else ''} ago"
+    elif diff.seconds > 3600:
+        hours = diff.seconds // 3600
+        return f"{hours} hour{'s' if hours > 1 else ''} ago"
+    elif diff.seconds > 60:
+        minutes = diff.seconds // 60
+        return f"{minutes} minute{'s' if minutes > 1 else ''} ago"
+    else:
+        return "Just now"
+
+@app.teardown_appcontext
+def shutdown_session(exception=None):
+    """Close db session when app context ends"""
+    db.session.remove()
+
+# Register blueprints
+app.register_blueprint(auth)
+app.register_blueprint(journal)
+app.register_blueprint(emergency)
+app.register_blueprint(music)
+app.register_blueprint(focus)
+app.register_blueprint(games)
+app.register_blueprint(dashboard)
+app.register_blueprint(ai_chat_bp)
+
+if __name__ == '__main__':
+    app.run(debug=True)

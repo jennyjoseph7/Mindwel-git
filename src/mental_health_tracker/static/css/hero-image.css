@@ -1,0 +1,143 @@
+/* Hero Image CSS */
+.hero-illustration {
+  position: relative;
+  width: 180%;
+  height: 380px;
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  overflow: hidden;
+  border-radius: 15px;
+  box-shadow: 0 10px 30px rgba(0, 0, 0, 0.15);
+}
+
+.hero-illustration::before {
+  content: '';
+  position: absolute;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: linear-gradient(135deg, rgba(94,114,228,0.1), rgba(130,94,228,0.2));
+  z-index: 1;
+}
+
+.circle {
+  position: absolute;
+  border-radius: 50%;
+  opacity: 0.7;
+  filter: blur(10px);
+  animation: float 10s infinite ease-in-out;
+}
+
+.circle-1 {
+  width: 120px;
+  height: 120px;
+  background: linear-gradient(45deg, #5e72e4, #8c9eff);
+  top: 20%;
+  left: 15%;
+  animation-duration: 8s;
+}
+
+.circle-2 {
+  width: 140px;
+  height: 140px;
+  background: linear-gradient(45deg, #11cdef, #1171ef);
+  bottom: 20%;
+  right: 20%;
+  animation-duration: 9s;
+  animation-delay: 1s;
+}
+
+.circle-3 {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(45deg, #fb6340, #fbb140);
+  top: 40%;
+  right: 15%;
+  animation-duration: 7s;
+  animation-delay: 2s;
+}
+
+.circle-4 {
+  width: 80px;
+  height: 80px;
+  background: linear-gradient(45deg, #2dce89, #2dcca7);
+  bottom: 25%;
+  left: 25%;
+  animation-duration: 10s;
+  animation-delay: 3s;
+}
+
+.circle-5 {
+  width: 110px;
+  height: 110px;
+  background: linear-gradient(45deg, #9b59b6, #af7ac5);
+  top: 10%;
+  right: 30%;
+  animation-duration: 11s;
+  animation-delay: 1.5s;
+}
+
+.circle-6 {
+  width: 90px;
+  height: 90px;
+  background: linear-gradient(45deg, #e74c3c, #e67e22);
+  bottom: 10%;
+  left: 35%;
+  animation-duration: 8s;
+  animation-delay: 2.5s;
+}
+
+.circle-7 {
+  width: 100px;
+  height: 100px;
+  background: linear-gradient(45deg, #4facfe, #00f2fe);
+  top: 50%;
+  left: 50%;
+  animation-duration: 10s;
+  animation-delay: 0.5s;
+}
+
+.mind-icon {
+  position: relative;
+  z-index: 2;
+  font-size: 5rem;
+  color: white;
+  text-shadow: 0 0 20px rgba(0, 0, 0, 0.2);
+  animation: pulse 4s infinite ease-in-out;
+}
+
+.wellness-text {
+  position: absolute;
+  bottom: 20px;
+  left: 0;
+  width: 100%;
+  text-align: center;
+  color: white;
+  font-size: 1.2rem;
+  font-weight: 500;
+  letter-spacing: 1px;
+  z-index: 2;
+  text-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+@keyframes float {
+  0% { transform: translateY(0) scale(1); }
+  50% { transform: translateY(-20px) scale(1.05); }
+  100% { transform: translateY(0) scale(1); }
+}
+
+@keyframes pulse {
+  0% { transform: scale(1); opacity: 1; }
+  50% { transform: scale(1.1); opacity: 0.8; }
+  100% { transform: scale(1); opacity: 1; }
+}
+
+@media (max-width: 768px) {
+  .hero-illustration { height: 300px; }
+  .circle-1, .circle-5, .circle-7 { width: 80px; height: 80px; }
+  .circle-2, .circle-6 { width: 90px; height: 90px; }
+  .circle-3, .circle-4 { width: 70px; height: 70px; }
+  .mind-icon { font-size: 3.5rem; }
+}

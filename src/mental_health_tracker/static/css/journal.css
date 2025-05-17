@@ -1,0 +1,328 @@
+/* Journal Styles - Enhanced for privacy and calm */
+
+/* Journal Card Styles */
+.journal-card {
+    transition: transform 0.3s ease, box-shadow 0.3s ease;
+    border-radius: 15px;
+    overflow: hidden;
+    background-color: #1e2a38;
+    border: none;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.journal-card:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    background-color: #263545;
+}
+
+.journal-entry-card {
+    border-radius: 15px;
+    background-color: #1e2a38;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border: none;
+    margin-bottom: 2rem;
+    position: relative;
+    overflow: hidden;
+}
+
+.journal-entry-card::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 5px;
+    height: 100%;
+    background: linear-gradient(to bottom, #64b5f6, #9575cd);
+    border-radius: 3px 0 0 3px;
+}
+
+.journal-entry-card .card-header {
+    background-color: rgba(15, 23, 42, 0.3);
+    border-bottom: 1px solid rgba(100, 181, 246, 0.1);
+    padding: 1.2rem 1.5rem;
+}
+
+.journal-entry-card .card-title {
+    color: #e0e0e0;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+}
+
+.journal-entry-card .card-subtitle {
+    color: #b0bec5;
+    font-size: 0.9rem;
+}
+
+.journal-content {
+    font-size: 1.1rem;
+    line-height: 1.8;
+    padding: 1.5rem;
+    white-space: pre-wrap;
+    color: #e0e0e0;
+    background-color: #1e2a38;
+}
+
+/* Journal Form Styles */
+.journal-textarea {
+    min-height: 300px;
+    font-size: 1.1rem;
+    line-height: 1.8;
+    resize: vertical;
+    background-color: #1e2a38;
+    color: #e0e0e0;
+    border: 1px solid #2c3e50;
+    border-radius: 10px;
+    padding: 1rem;
+    transition: all 0.3s ease;
+}
+
+.journal-textarea:focus {
+    background-color: #263545;
+    border-color: #64b5f6;
+    box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
+    outline: none;
+}
+
+.journal-form-card {
+    border-radius: 15px;
+    background-color: #1e2a38;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    border: none;
+    overflow: hidden;
+    padding: 1.5rem;
+}
+
+.journal-form-card .form-label {
+    color: #e0e0e0;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+}
+
+.journal-form-card .form-control {
+    background-color: #1e2a38;
+    color: #e0e0e0;
+    border: 1px solid #2c3e50;
+    border-radius: 8px;
+    padding: 0.75rem 1rem;
+    transition: all 0.3s ease;
+}
+
+.journal-form-card .form-control:focus {
+    background-color: #263545;
+    border-color: #64b5f6;
+    box-shadow: 0 0 0 0.2rem rgba(100, 181, 246, 0.25);
+    outline: none;
+}
+
+/* Journal Actions */
+.journal-actions {
+    display: flex;
+    gap: 1rem;
+    margin-top: 1.5rem;
+}
+
+.journal-btn {
+    padding: 0.6rem 1.5rem;
+    font-weight: 500;
+    border-radius: 8px;
+    transition: all 0.3s ease;
+}
+
+.journal-btn-primary {
+    background: linear-gradient(90deg, #64b5f6, #9575cd);
+    border: none;
+    color: white;
+    box-shadow: 0 4px 15px rgba(100, 181, 246, 0.3);
+}
+
+.journal-btn-primary:hover {
+    transform: translateY(-3px);
+    box-shadow: 0 8px 25px rgba(100, 181, 246, 0.5);
+    background: linear-gradient(90deg, #5aa5e6, #8565bd);
+}
+
+.journal-btn-secondary {
+    background-color: transparent;
+    border: 1px solid #64b5f6;
+    color: #64b5f6;
+}
+
+.journal-btn-secondary:hover {
+    background-color: rgba(100, 181, 246, 0.1);
+    transform: translateY(-3px);
+}
+
+.journal-btn-danger {
+    background-color: transparent;
+    border: 1px solid #e57373;
+    color: #e57373;
+}
+
+.journal-btn-danger:hover {
+    background-color: rgba(229, 115, 115, 0.1);
+    transform: translateY(-3px);
+}
+
+/* Empty State */
+.empty-state {
+    padding: 4rem 2rem;
+    text-align: center;
+    background-color: #1e2a38;
+    border-radius: 15px;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+}
+
+.empty-state-icon {
+    font-size: 4rem;
+    margin-bottom: 1.5rem;
+    color: #64b5f6;
+    opacity: 0.8;
+}
+
+.empty-state-text {
+    color: #b0bec5;
+    font-size: 1.2rem;
+    margin-bottom: 2rem;
+}
+
+/* Journal List */
+.journal-list {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(300px, 1fr));
+    gap: 1.5rem;
+    margin-top: 2rem;
+}
+
+.journal-list-item {
+    background-color: #1e2a38;
+    border-radius: 15px;
+    overflow: hidden;
+    box-shadow: 0 8px 20px rgba(0, 0, 0, 0.1);
+    transition: all 0.3s ease;
+    border: none;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.journal-list-item:hover {
+    transform: translateY(-8px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.2);
+    background-color: #263545;
+}
+
+.journal-list-item .card-body {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+}
+
+.journal-list-item .card-title {
+    color: #e0e0e0;
+    font-weight: 600;
+    margin-bottom: 0.5rem;
+    font-size: 1.3rem;
+}
+
+.journal-list-item .card-subtitle {
+    color: #b0bec5;
+    font-size: 0.9rem;
+    margin-bottom: 1rem;
+}
+
+.journal-list-item .card-text {
+    color: #b0bec5;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    display: -webkit-box;
+    -webkit-line-clamp: 3;
+    -webkit-box-orient: vertical;
+    flex: 1;
+}
+
+.journal-list-item .card-footer {
+    background-color: rgba(15, 23, 42, 0.3);
+    border-top: 1px solid rgba(100, 181, 246, 0.1);
+    padding: 1rem;
+}
+
+/* Privacy Indicator */
+.privacy-indicator {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    background-color: rgba(15, 23, 42, 0.7);
+    color: #e0e0e0;
+    padding: 0.3rem 0.8rem;
+    border-radius: 20px;
+    font-size: 0.8rem;
+    display: flex;
+    align-items: center;
+    gap: 5px;
+    z-index: 2;
+}
+
+.privacy-indicator i {
+    color: #64b5f6;
+}
+
+/* Responsive Adjustments */
+@media (max-width: 768px) {
+    .journal-list {
+        grid-template-columns: 1fr;
+    }
+    
+    .journal-actions {
+        flex-direction: column;
+    }
+    
+    .journal-btn {
+        width: 100%;
+    }
+}
+
+/* Delete Confirmation Modal */
+.modal-content {
+    background-color: #1e2a38;
+    border-radius: 15px;
+    border: none;
+}
+
+.modal-header {
+    border-bottom: 1px solid rgba(100, 181, 246, 0.1);
+    padding: 1.5rem;
+}
+
+.modal-title {
+    color: #e0e0e0;
+    font-weight: 600;
+}
+
+.modal-body {
+    padding: 1.5rem;
+    color: #b0bec5;
+}
+
+.modal-footer {
+    border-top: 1px solid rgba(100, 181, 246, 0.1);
+    padding: 1.5rem;
+}
+
+.btn-close {
+    color: #e0e0e0;
+}
+
+/* Animation for journal entries */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+    }
+    to {
+        opacity: 1;
+    }
+}
+
+.journal-fade-in {
+    animation: fadeIn 0.5s ease-out forwards;
+}

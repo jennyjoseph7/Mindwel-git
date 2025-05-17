@@ -1,0 +1,436 @@
+/* Breathing Exercise Game Styles */
+.breathing-game-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+.breathing-game-card:hover {
+    transform: translateY(-5px);
+}
+
+.breathing-circle {
+    width: 150px;
+    height: 150px;
+    border-radius: 50%;
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    margin: 0 auto;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    color: white;
+    font-size: 1.5rem;
+    transition: all 4s ease-in-out;
+}
+
+.breathing-circle.expand {
+    transform: scale(1.5);
+}
+
+.breathing-instruction {
+    font-weight: bold;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.breathing-timer {
+    font-size: 1.5rem;
+    font-weight: bold;
+    color: #4a5568;
+}
+
+/* Tic Tac Toe Game Styles */
+.tictactoe-game-card {
+    background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+    border: none;
+    transition: transform 0.3s ease;
+}
+
+.tictactoe-game-card:hover {
+    transform: translateY(-5px);
+}
+
+.tic-tac-toe-board {
+    width: 300px;
+    height: 300px;
+    margin: 0 auto;
+    background: #fff;
+    border-radius: 10px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+}
+
+.row {
+    display: flex;
+    justify-content: center;
+    height: 33.33%;
+}
+
+.cell {
+    width: 33.33%;
+    height: 100%;
+    border: 2px solid #e2e8f0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 2.5rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: background-color 0.2s ease;
+}
+
+.cell:hover {
+    background-color: #f7fafc;
+}
+
+.cell.x {
+    color: #e53e3e;
+}
+
+.cell.o {
+    color: #3182ce;
+}
+
+.game-status {
+    text-align: center;
+    font-size: 1.25rem;
+    font-weight: bold;
+    margin: 1rem 0;
+    color: #4a5568;
+}
+
+.game-container {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 1rem;
+}
+
+/* General Game Card Styles */
+.game-card {
+    border-radius: 15px;
+    overflow: hidden;
+}
+
+.feature-icon-wrapper {
+    width: 60px;
+    height: 60px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    margin: 0 auto;
+}
+
+.feature-icon {
+    font-size: 1.5rem;
+    color: #4a5568;
+}
+
+.game-title {
+    color: #2d3748;
+    font-weight: bold;
+}
+
+.game-description {
+    color: #4a5568;
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .tic-tac-toe-board {
+        width: 250px;
+        height: 250px;
+    }
+
+    .cell {
+        font-size: 2rem;
+    }
+
+    .breathing-circle {
+        width: 120px;
+        height: 120px;
+    }
+}
+
+/* Games Dashboard Styles */
+.dashboard-page {
+    background: linear-gradient(135deg, #0f172a 0%, #1e293b 100%);
+    min-height: 100vh;
+}
+
+.main-content h1 {
+    color: #ffffff;
+    font-size: 2.5rem;
+    text-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+}
+
+.main-content .lead {
+    color: #e2e8f0;
+    font-size: 1.2rem;
+    font-weight: 400;
+}
+
+.game-stat-card {
+    background: rgba(30, 41, 59, 0.95);
+    backdrop-filter: blur(10px);
+    -webkit-backdrop-filter: blur(10px);
+    border-radius: 20px;
+    border: 1px solid rgba(255, 255, 255, 0.1);
+    transition: all 0.3s ease;
+    overflow: hidden;
+}
+
+.game-stat-card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 15px 30px rgba(0, 0, 0, 0.4);
+}
+
+.breathing-card {
+    background: linear-gradient(135deg, rgba(34, 197, 94, 0.2), rgba(16, 185, 129, 0.2));
+}
+
+.ttt-card {
+    background: linear-gradient(135deg, rgba(124, 58, 237, 0.2), rgba(99, 102, 241, 0.2));
+}
+
+.snake-card {
+    background: linear-gradient(135deg, rgba(239, 68, 68, 0.2), rgba(248, 113, 113, 0.2));
+}
+
+.color-card {
+    background: linear-gradient(135deg, rgba(14, 165, 233, 0.15), rgba(59, 130, 246, 0.15));
+}
+
+.card-title {
+    color: #ffffff;
+    font-size: 1.5rem;
+    font-weight: 600;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.icon-square {
+    width: 52px;
+    height: 52px;
+    border-radius: 16px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    background: rgba(255, 255, 255, 0.2);
+    position: relative;
+    overflow: hidden;
+}
+
+.icon-square i {
+    color: #ffffff;
+    font-size: 1.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.stats-grid {
+    display: grid;
+    grid-template-columns: repeat(2, 1fr);
+    gap: 1.25rem;
+}
+
+.stat-item {
+    text-align: center;
+    padding: 1.25rem;
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 16px;
+    border: 1px solid rgba(255, 255, 255, 0.15);
+    transition: all 0.3s ease;
+}
+
+.stat-item:hover {
+    background: rgba(255, 255, 255, 0.15);
+    transform: translateY(-2px);
+}
+
+.stat-item h4 {
+    color: #ffffff;
+    font-size: 2rem;
+    font-weight: 700;
+    margin-bottom: 0.5rem;
+    text-shadow: 0 1px 2px rgba(0, 0, 0, 0.2);
+}
+
+.stat-item p {
+    color: #cbd5e1;
+    font-size: 0.95rem;
+    font-weight: 500;
+    margin: 0;
+}
+
+.card-body p {
+    color: #e2e8f0;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+.progress {
+    background: rgba(255, 255, 255, 0.1);
+    border-radius: 12px;
+    overflow: hidden;
+    height: 8px;
+}
+
+.progress-bar {
+    background: linear-gradient(90deg, #3b82f6, #60a5fa);
+    transition: width 0.5s ease;
+}
+
+.badge {
+    padding: 0.5rem 1rem;
+    font-weight: 600;
+    font-size: 0.875rem;
+    letter-spacing: 0.5px;
+    border-radius: 8px;
+    color: #1e293b;
+    background: rgba(255, 255, 255, 0.9) !important;
+    border: none;
+}
+
+.btn-primary {
+    background: rgba(59, 130, 246, 0.9);
+    border: none;
+    color: white;
+    padding: 0.75rem 1.5rem;
+    border-radius: 12px;
+    font-weight: 600;
+    font-size: 1rem;
+    transition: all 0.3s ease;
+}
+
+.btn-primary:hover {
+    background: rgba(59, 130, 246, 1);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(59, 130, 246, 0.4);
+}
+
+.nature-elements {
+    opacity: 0.5;
+    pointer-events: none;
+}
+
+.nature-leaf {
+    position: absolute;
+    width: 100px;
+    height: 100px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='rgba(255,255,255,0.1)'%3E%3Cpath d='M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C6,8 17,8 17,8Z'/%3E%3C/svg%3E");
+    animation: float 20s infinite linear;
+}
+
+.nature-particle {
+    position: absolute;
+    width: 4px;
+    height: 4px;
+    background: rgba(255, 255, 255, 0.2);
+    border-radius: 50%;
+    animation: float 15s infinite linear;
+}
+
+@keyframes float {
+    0% {
+        transform: translate(0, 0) rotate(0deg);
+        opacity: 0;
+    }
+    50% {
+        opacity: 0.5;
+    }
+    100% {
+        transform: translate(100vw, -100vh) rotate(360deg);
+        opacity: 0;
+    }
+}
+
+/* Weekly Activity Chart */
+.card-title.mb-4 {
+    color: #ffffff;
+    font-size: 1.75rem;
+    font-weight: 600;
+    margin-bottom: 1.5rem !important;
+}
+
+/* Recent Activity Table */
+.table {
+    color: #ffffff;
+    margin: 0;
+}
+
+.table thead th {
+    color: #94a3b8;
+    border-bottom: 2px solid rgba(255, 255, 255, 0.1);
+    font-weight: 600;
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.875rem;
+    padding: 1.25rem 1rem;
+}
+
+.table td {
+    color: #e2e8f0;
+    border-color: rgba(255, 255, 255, 0.05);
+    padding: 1.25rem 1rem;
+    vertical-align: middle;
+    font-size: 1rem;
+}
+
+.table tbody tr {
+    transition: all 0.3s ease;
+}
+
+.table tbody tr:hover {
+    background: rgba(255, 255, 255, 0.05);
+}
+
+/* Responsive Design */
+@media (max-width: 768px) {
+    .main-content h1 {
+        font-size: 2rem;
+    }
+
+    .main-content .lead {
+        font-size: 1.1rem;
+    }
+
+    .card-title {
+        font-size: 1.25rem;
+    }
+
+    .stat-item h4 {
+        font-size: 1.75rem;
+    }
+
+    .stat-item p {
+        font-size: 0.875rem;
+    }
+
+    .stats-grid {
+        grid-template-columns: 1fr;
+        gap: 1rem;
+    }
+    
+    .stat-item {
+        padding: 1rem;
+    }
+    
+    .icon-square {
+        width: 44px;
+        height: 44px;
+    }
+
+    .icon-square i {
+        font-size: 1.25rem;
+    }
+    
+    .table td, .table th {
+        padding: 1rem 0.75rem;
+        font-size: 0.875rem;
+    }
+    
+    .badge {
+        padding: 0.4rem 0.8rem;
+        font-size: 0.75rem;
+    }
+} 

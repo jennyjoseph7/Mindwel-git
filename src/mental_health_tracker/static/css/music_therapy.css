@@ -1,0 +1,38 @@
+:root {
+    --primary-blue: #007bff;
+    --success-green: #28a745;
+    --info-cyan: #17a2b8;
+    --warning-yellow: #ffc107;
+    --danger-red: #dc3545;
+    
+    --text-primary: #37474f;
+    --text-secondary: #607d8b;
+    --text-light: #90a4ae;
+    
+    --card-bg: rgba(255, 255, 255, 0.85);
+    --glass-bg: rgba(255, 255, 255, 0.7);
+    --glass-border: rgba(255, 255, 255, 0.2);
+    --glass-shadow: rgba(31, 38, 135, 0.1);
+}
+
+.music-therapy-page {
+    background: linear-gradient(135deg, var(--primary-blue) 0%, var(--info-cyan) 100%);
+}
+
+.floating-circle {
+    position: absolute;
+    border-radius: 50%;
+    background: linear-gradient(45deg, var(--primary-blue), var(--info-cyan));
+    opacity: 0.3;
+    filter: blur(5px);
+    animation: float 15s infinite ease-in-out;
+}
+
+.card {
+    transition: all 0.3s ease;
+}
+
+.card:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 20px rgba(0, 0, 0, 0.2);
+}

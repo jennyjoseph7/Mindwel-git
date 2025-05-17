@@ -1,0 +1,367 @@
+{% extends "base.html" %}
+
+{% block title %}New Journal Entry - MindWell{% endblock %}
+
+{% block content %}
+<style>
+  .mood-list {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 15px;
+    margin-bottom: 1.25rem;
+    background-color: #192734;
+    border-radius: 15px;
+    padding: 15px;
+    position: relative;
+  }
+  .mood-list::before {
+    content: '';
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(to right, #ff5d6e, #ffb56b, #88c9a1, #6bb5ff, #7984ff);
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    border-radius: 2px;
+  }
+  .mood-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0.5rem;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    background-color: #253341;
+    border: none;
+    text-align: center;
+    flex: 1;
+    border-radius: 8px;
+    min-height: 100px;
+    position: relative;
+    overflow: hidden;
+    margin: 0 5px;
+    min-width: 100px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    color: #fff;
+    font-weight: 500;
+  }
+  .mood-button:hover {
+    background-color: #2a3a4a;
+    transform: translateY(-3px);
+    box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+  }
+  .mood-button.active, .mood-button.selected {
+    background-color: #304150;
+    box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    outline: 2px solid #1da1f2;
+  }
+  .mood-emoji {
+    font-size: 2.2rem;
+    margin-bottom: 0.75rem;
+    transition: transform 0.2s ease;
+  }
+  .mood-button:hover .mood-emoji {
+    transform: scale(1.2);
+  }
+  .mood-label {
+    color: #ffffff;
+    font-size: 0.95rem;
+    font-weight: 500;
+    white-space: nowrap;
+  }
+  @media (max-width: 767.98px) {
+    .mood-list {
+      overflow-x: auto;
+      padding: 15px 10px;
+      gap: 10px;
+    }
+    .mood-button {
+      min-width: 80px;
+      margin: 0 3px;
+    }
+    .mood-emoji {
+      font-size: 1.8rem;
+    }
+  }
+  .journal-form-modern {
+    background: linear-gradient(135deg, rgba(30,34,44,0.95) 60%, rgba(49,54,68,0.95) 100%);
+    border-radius: 22px;
+    box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.18);
+    padding: 2.5rem 2rem 2rem 2rem;
+    margin-bottom: 2rem;
+    border: 1.5px solid rgba(255,255,255,0.08);
+    position: relative;
+  }
+  .journal-form-modern h4 {
+    font-weight: 700;
+    color: #e7e9ea;
+    margin-bottom: 2rem;
+  }
+  .journal-form-modern .form-label {
+    color: #e7e9ea;
+    font-weight: 500;
+    margin-bottom: 0.5rem;
+  }
+  .journal-form-modern .form-control, .journal-form-modern textarea.form-control {
+    background: #23293a;
+    color: #e7e9ea;
+    border: 1.5px solid #38444d;
+    border-radius: 0.5rem;
+    margin-bottom: 0.5rem;
+  }
+  .journal-form-modern .form-control:focus, .journal-form-modern textarea.form-control:focus {
+    background: #23293a;
+    border-color: #4cb5f5;
+    color: #e7e9ea;
+    box-shadow: 0 0 0 0.2rem rgba(76,181,245,0.15);
+  }
+  .journal-form-modern .form-text {
+    color: #8899a6;
+    font-size: 0.95rem;
+    margin-bottom: 0.5rem;
+  }
+  .journal-form-modern .invalid-feedback {
+    color: #fa5252;
+    font-size: 0.92rem;
+    margin-top: 0.25rem;
+  }
+  .journal-form-modern .btn-primary {
+    background: linear-gradient(90deg, #43a047, #81c784);
+    border: none;
+    color: #fff;
+    font-weight: 600;
+    border-radius: 10px;
+    padding: 0.7em 2.2em;
+    box-shadow: 0 2px 8px rgba(67,160,71,0.10);
+    transition: background 0.18s, box-shadow 0.18s, transform 0.13s;
+    margin-top: 0.5em;
+    letter-spacing: 0.01em;
+  }
+  .journal-form-modern .btn-primary:hover, .journal-form-modern .btn-primary:focus {
+    background: linear-gradient(90deg, #388e3c, #66bb6a);
+    box-shadow: 0 4px 16px rgba(67,160,71,0.13);
+    transform: translateY(-2px) scale(1.03);
+  }
+  .journal-form-modern .btn-secondary {
+    background: rgba(255,255,255,0.08);
+    color: #e7e9ea;
+    border: none;
+    border-radius: 10px;
+    padding: 0.7em 2.2em;
+    margin-right: 0.5em;
+  }
+  .journal-form-modern .btn-secondary:hover {
+    background: rgba(255,255,255,0.15);
+    color: #fff;
+  }
+  .journal-mood-selector .mood-list {
+    display: flex;
+    flex-direction: row;
+    width: 100%;
+    gap: 15px;
+    margin-bottom: 1.25rem;
+    background-color: #192734 !important;
+    border-radius: 15px !important;
+    padding: 15px !important;
+    position: relative;
+  }
+  .journal-mood-selector .mood-list::before {
+    content: '';
+    position: absolute;
+    height: 4px;
+    background: linear-gradient(to right, #ff5d6e, #ffb56b, #88c9a1, #6bb5ff, #7984ff) !important;
+    bottom: -8px;
+    left: 0;
+    right: 0;
+    border-radius: 2px;
+  }
+  .journal-mood-selector .mood-button {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    padding: 1.5rem 0.5rem !important;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    border: none !important;
+    text-align: center;
+    flex: 1;
+    border-radius: 12px !important;
+    min-height: 100px;
+    position: relative;
+    overflow: hidden;
+    margin: 0 5px !important;
+    min-width: 100px;
+    box-shadow: 0 4px 16px rgba(0, 0, 0, 0.13) !important;
+    color: #fff !important;
+    font-weight: 500;
+    background: #253341 !important;
+    outline: none !important;
+    border: 2.5px solid transparent;
+  }
+  .journal-mood-selector .mood-button[data-mood="very_sad"] {
+    background: linear-gradient(135deg, #ff5d6e 0%, #ffc1cc 100%) !important;
+  }
+  .journal-mood-selector .mood-button[data-mood="sad"] {
+    background: linear-gradient(135deg, #ffb56b 0%, #ffe0b2 100%) !important;
+  }
+  .journal-mood-selector .mood-button[data-mood="neutral"] {
+    background: linear-gradient(135deg, #88c9a1 0%, #b2dfdb 100%) !important;
+    color: #253341 !important;
+  }
+  .journal-mood-selector .mood-button[data-mood="happy"] {
+    background: linear-gradient(135deg, #6bb5ff 0%, #b3e5fc 100%) !important;
+  }
+  .journal-mood-selector .mood-button[data-mood="very_happy"] {
+    background: linear-gradient(135deg, #7984ff 0%, #e1bee7 100%) !important;
+  }
+  .journal-mood-selector .mood-button:hover {
+    filter: brightness(1.08) saturate(1.2);
+    transform: translateY(-3px) scale(1.04);
+    box-shadow: 0 8px 24px rgba(0,0,0,0.18) !important;
+  }
+  .journal-mood-selector .mood-button.active, .journal-mood-selector .mood-button.selected {
+    box-shadow: 0 8px 32px 0 #1da1f2, 0 2px 8px rgba(67,160,71,0.10);
+    border: 2.5px solid #1da1f2 !important;
+    z-index: 2;
+  }
+  .journal-mood-selector .mood-emoji {
+    font-size: 2.2rem !important;
+    margin-bottom: 0.75rem !important;
+    transition: transform 0.2s ease;
+  }
+  .journal-mood-selector .mood-button:hover .mood-emoji {
+    transform: scale(1.2);
+  }
+  .journal-mood-selector .mood-label {
+    color: #ffffff !important;
+    font-size: 0.95rem !important;
+    font-weight: 500;
+    white-space: nowrap;
+    text-shadow: 0 1px 2px rgba(0,0,0,0.13);
+  }
+  .journal-mood-selector .mood-button[data-mood="neutral"] .mood-label {
+    color: #253341 !important;
+  }
+  @media (max-width: 767.98px) {
+    .journal-mood-selector .mood-list {
+      overflow-x: auto;
+      padding: 15px 10px !important;
+      gap: 10px;
+    }
+    .journal-mood-selector .mood-button {
+      min-width: 80px !important;
+      margin: 0 3px !important;
+    }
+    .journal-mood-selector .mood-emoji {
+      font-size: 1.8rem !important;
+    }
+  }
+</style>
+<div class="container py-5">
+  <div class="row mb-4 align-items-center">
+    <div class="col-md-8">
+      <h1 class="fw-bold mb-1" style="color: #fff;">Journal Entry</h1>
+      <p class="text-muted mb-0">Express your thoughts and feelings freely</p>
+    </div>
+    <div class="col-md-4 text-end">
+      <a href="{{ url_for('journal.journal_list') }}" class="btn btn-outline-primary rounded-pill">
+        <i class="fas fa-list me-2"></i>View all entries
+      </a>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <!-- Journal Form -->
+    <div class="col-lg-8 mb-4">
+      <div class="journal-form-modern">
+        <h4 class="fw-semibold mb-4">New Journal Entry</h4>
+        <form method="POST" class="journal-form">
+          {% if form.csrf_token is defined %}
+            {{ form.csrf_token }}
+          {% endif %}
+          <div class="mb-4">
+            {{ form.title.label(class="form-label") }}
+            {{ form.title(class="form-control") }}
+            {% if form.title.errors %}
+              {% for error in form.title.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            {% endif %}
+            <div class="form-text">Give your entry a meaningful title</div>
+          </div>
+          <div class="mb-4 journal-mood-selector">
+            <label class="form-label">How are you feeling?</label>
+            <div class="mood-list">
+              {% set moods = [
+                {'value': 'very_sad', 'emoji': '😢', 'label': 'Very Sad'},
+                {'value': 'sad', 'emoji': '😔', 'label': 'Sad'},
+                {'value': 'neutral', 'emoji': '😐', 'label': 'Neutral'},
+                {'value': 'happy', 'emoji': '😊', 'label': 'Happy'},
+                {'value': 'very_happy', 'emoji': '😄', 'label': 'Very Happy'}
+              ] %}
+              {% for mood in moods %}
+                <input type="radio" name="mood" id="mood-{{ mood.value }}" value="{{ mood.value }}" class="d-none" {% if form.mood.data == mood.value %}checked{% endif %}>
+                <label for="mood-{{ mood.value }}" class="mood-button{% if form.mood.data == mood.value %} active{% endif %}" data-mood="{{ mood.value }}">
+                  <span class="mood-emoji">{{ mood.emoji }}</span>
+                  <span class="mood-label">{{ mood.label }}</span>
+                </label>
+              {% endfor %}
+            </div>
+            {% if form.mood.errors %}
+              {% for error in form.mood.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            {% endif %}
+            <div class="form-text">Choose the mood that best describes your current state</div>
+          </div>
+          <div class="mb-4">
+            {{ form.content.label(class="form-label") }}
+            {{ form.content(class="form-control", rows=8) }}
+            {% if form.content.errors %}
+              {% for error in form.content.errors %}
+                <div class="invalid-feedback d-block">{{ error }}</div>
+              {% endfor %}
+            {% endif %}
+            <div class="form-text">Write freely about your thoughts and feelings</div>
+          </div>
+          <div class="d-flex justify-content-between align-items-center mt-4">
+            <a href="{{ url_for('journal.journal_list') }}" class="btn btn-secondary rounded-pill">
+              <i class="fas fa-arrow-left me-2"></i>Back
+            </a>
+            <button type="submit" class="btn btn-primary rounded-pill px-4">
+              <i class="fas fa-save me-2"></i>Save Entry
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+    <!-- Prompts and Tips Sidebar -->
+    <div class="col-lg-4">
+      <div class="card mb-4 shadow-sm border-0 bg-dark text-light" style="background: linear-gradient(135deg, #232526 0%, #414345 100%); border-radius: 18px;">
+        <div class="card-body">
+          <h5 class="fw-semibold mb-3 text-info"><i class="fas fa-lightbulb me-2"></i>Writing Prompts</h5>
+          <ul class="mb-0 ps-3">
+            <li>What am I grateful for today?</li>
+            <li>How did I feel throughout the day?</li>
+            <li>What's one challenge I overcame?</li>
+            <li>What brought me joy today?</li>
+            <li>What's one thing I learned today?</li>
+          </ul>
+        </div>
+      </div>
+      <div class="card shadow-sm border-0 bg-dark text-light" style="background: linear-gradient(135deg, #232526 0%, #414345 100%); border-radius: 18px;">
+        <div class="card-body">
+          <h5 class="fw-semibold mb-3 text-primary"><i class="fas fa-info-circle me-2"></i>Journal Tips</h5>
+          <ul class="mb-0 ps-3">
+            <li><b>Be honest</b><br>Write authentically without worrying about judgment.</li>
+            <li><b>Be consistent</b><br>Try to journal regularly for the best benefits.</li>
+            <li><b>Be specific</b><br>Include details to better process your experiences.</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+{% endblock %} 

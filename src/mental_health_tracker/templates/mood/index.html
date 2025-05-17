@@ -1,0 +1,362 @@
+{% extends "base.html" %}
+
+{% block title %}Mood Tracker{% endblock %}
+
+{% block extra_css %}
+<style>
+    .mood-entry {
+        border-left: 5px solid transparent;
+        transition: all 0.3s;
+    }
+    
+    .mood-entry:hover {
+        background-color: rgba(0, 0, 0, 0.05);
+    }
+    
+    .mood-1 { border-color: #dc3545; }
+    .mood-2 { border-color: #fd7e14; }
+    .mood-3 { border-color: #ffc107; }
+    .mood-4 { border-color: #20c997; }
+    .mood-5 { border-color: #198754; }
+    
+    .mood-circle {
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 18px;
+        background-image: linear-gradient(135deg, rgba(255,255,255,0.1), rgba(255,255,255,0));
+        box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        margin-right: 15px;
+    }
+    
+    .mood-1 .mood-circle { background-color: #dc3545; color: white; }
+    .mood-2 .mood-circle { background-color: #fd7e14; color: white; }
+    .mood-3 .mood-circle { background-color: #ffc107; color: white; }
+    .mood-4 .mood-circle { background-color: #20c997; color: white; }
+    .mood-5 .mood-circle { background-color: #198754; color: white; }
+    
+    .chart-container {
+        position: relative;
+        height: 350px;
+        margin-bottom: 30px;
+    }
+    
+    .add-entry-btn {
+        position: fixed;
+        bottom: 30px;
+        right: 30px;
+        width: 60px;
+        height: 60px;
+        border-radius: 50%;
+        background: linear-gradient(135deg, #2f80ed, #56ccf2);
+        box-shadow: 0 4px 20px rgba(0,123,255,0.3);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 24px;
+        transition: all 0.3s;
+        z-index: 100;
+    }
+    
+    .add-entry-btn:hover, .add-entry-btn:focus {
+        transform: scale(1.1);
+        box-shadow: 0 6px 25px rgba(0,123,255,0.4);
+        color: white;
+        text-decoration: none;
+    }
+    
+    .no-entries {
+        height: 350px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        flex-direction: column;
+        background-color: rgba(0,0,0,0.02);
+        border-radius: 10px;
+        color: #6c757d;
+    }
+    
+    .cursor-pointer {
+        cursor: pointer;
+    }
+    
+    .ai-analysis-card {
+        background: linear-gradient(135deg, #f8f9fa, #e9ecef);
+        border: none;
+        border-radius: 15px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.05);
+    }
+    
+    .emotion-stability {
+        width: 100%;
+        height: 10px;
+        background-color: #e9ecef;
+        border-radius: 5px;
+        overflow: hidden;
+    }
+    
+    .emotion-stability-bar {
+        height: 100%;
+        transition: width 0.3s ease;
+    }
+    
+    .emotion-stability-high {
+        background-color: #198754;
+    }
+    
+    .emotion-stability-medium {
+        background-color: #ffc107;
+    }
+    
+    .emotion-stability-low {
+        background-color: #dc3545;
+    }
+    
+    .emotion-card {
+        background: white;
+        border-radius: 10px;
+        padding: 15px;
+        margin-bottom: 10px;
+        box-shadow: 0 2px 5px rgba(0,0,0,0.05);
+    }
+    
+    .emotion-score {
+        font-size: 0.9em;
+        color: #6c757d;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row mb-4">
+        <div class="col-md-8">
+            <h1 class="gradient-text">Mood Tracker</h1>
+            <p class="text-muted">Track your emotional journey and discover patterns in your well-being.</p>
+        </div>
+        <div class="col-md-4 text-end">
+            <a href="{{ url_for('mood_new') }}" class="btn btn-primary">
+                <i class="bi bi-plus-circle me-1"></i> Add New Entry
+            </a>
+        </div>
+    </div>
+    
+    <div class="row mb-5">
+        <div class="col-lg-8">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <h3 class="card-title">Your Mood Over Time</h3>
+                    {% if entries %}
+                    <div class="chart-container">
+                        <canvas id="moodChart"></canvas>
+                    </div>
+                    {% else %}
+                    <div class="no-entries">
+                        <i class="bi bi-graph-up" style="font-size: 48px; margin-bottom: 20px;"></i>
+                        <h5>No mood entries yet</h5>
+                        <p>Start tracking your mood to see your emotional journey here.</p>
+                        <a href="{{ url_for('mood_new') }}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-circle me-1"></i> Add Your First Entry
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-lg-4">
+            <div class="card ai-analysis-card">
+                <div class="card-body">
+                    <h3 class="card-title">AI Analysis</h3>
+                    
+                    {% if patterns %}
+                    <div class="mb-4">
+                        <h5>Mood Patterns</h5>
+                        <p class="mb-2">Average Mood: {{ "%.1f"|format(patterns.average_mood) }}/5</p>
+                        <p class="mb-2">Trend: 
+                            {% if patterns.trend > 0 %}
+                            <span class="text-success">Improving</span>
+                            {% elif patterns.trend < 0 %}
+                            <span class="text-danger">Declining</span>
+                            {% else %}
+                            <span class="text-secondary">Stable</span>
+                            {% endif %}
+                        </p>
+                    </div>
+                    {% endif %}
+                    
+                    {% if emotional_patterns %}
+                    <div class="mb-4">
+                        <h5>Emotional Stability</h5>
+                        <div class="emotion-stability mb-2">
+                            {% set stability = emotional_patterns.emotional_stability %}
+                            {% set stability_class = 'emotion-stability-high' if stability > 0.7 else 'emotion-stability-medium' if stability > 0.4 else 'emotion-stability-low' %}
+                            <div class="emotion-stability-bar {{ stability_class }}" style="width: {{ stability * 100 }}%"></div>
+                        </div>
+                        <p class="text-muted small">Based on your recent journal entries</p>
+                    </div>
+                    
+                    <div class="mb-4">
+                        <h5>Dominant Emotions</h5>
+                        {% for emotion, score in emotional_patterns.dominant_emotions.items() %}
+                        <div class="emotion-card">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span class="text-capitalize">{{ emotion }}</span>
+                                <span class="emotion-score">{{ "%.1f"|format(score * 100) }}%</span>
+                            </div>
+                            <div class="progress mt-2" style="height: 5px;">
+                                <div class="progress-bar" role="progressbar" style="width: {{ score * 100 }}%"></div>
+                            </div>
+                        </div>
+                        {% endfor %}
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <div class="row">
+        <div class="col-lg-12">
+            <div class="card feature-card">
+                <div class="card-body">
+                    <h3 class="card-title mb-4">Recent Entries</h3>
+                    {% if entries %}
+                    <div class="table-responsive">
+                        <table class="table table-hover">
+                            <thead>
+                                <tr>
+                                    <th>Date</th>
+                                    <th>Mood</th>
+                                    <th>Activities</th>
+                                    <th>Notes</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for entry in entries[:10] %}
+                                <tr class="mood-entry mood-{{ entry.mood_score }}">
+                                    <td>{{ entry.date_created.strftime('%b %d, %Y') }}<br><small class="text-muted">{{ entry.date_created.strftime('%I:%M %p') }}</small></td>
+                                    <td>
+                                        <div class="d-flex align-items-center">
+                                            <div class="mood-circle">
+                                                <i class="bi {{ ['bi-emoji-frown', 'bi-emoji-expressionless', 'bi-emoji-neutral', 'bi-emoji-smile', 'bi-emoji-laughing'][entry.mood_score-1] }}"></i>
+                                            </div>
+                                            {{ ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'][entry.mood_score-1] }}
+                                        </div>
+                                    </td>
+                                    <td>{{ entry.activities or '—' }}</td>
+                                    <td>{{ entry.notes or '—' }}</td>
+                                </tr>
+                                {% endfor %}
+                            </tbody>
+                        </table>
+                    </div>
+                    
+                    {% if entries|length > 10 %}
+                    <div class="text-center mt-3">
+                        <p>Showing 10 of {{ entries|length }} entries</p>
+                    </div>
+                    {% endif %}
+                    
+                    {% else %}
+                    <div class="text-center py-4">
+                        <p class="text-muted">No mood entries yet.</p>
+                        <a href="{{ url_for('mood_new') }}" class="btn btn-primary mt-2">
+                            <i class="bi bi-plus-circle me-1"></i> Add Your First Entry
+                        </a>
+                    </div>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <a href="{{ url_for('mood_new') }}" class="add-entry-btn">
+        <i class="bi bi-plus"></i>
+    </a>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+    document.addEventListener('DOMContentLoaded', function() {
+        const chartCanvas = document.getElementById('moodChart');
+        if (!chartCanvas) return;
+        
+        // Prepare data from server in JSON format
+        const moodData = [];
+        const moodLabels = [];
+        
+        {% if entries %}
+            {% for entry in entries %}
+                moodData.push({{ entry.mood_score }});
+                moodLabels.push("{{ entry.date_created.strftime('%b %d') }}");
+            {% endfor %}
+            
+            // Only take the last 10 entries for the chart and reverse to show in chronological order
+            const recentData = moodData.slice(-10).reverse();
+            const recentLabels = moodLabels.slice(-10).reverse();
+            
+            // Create the chart
+            const ctx = chartCanvas.getContext('2d');
+            new Chart(ctx, {
+                type: 'line',
+                data: {
+                    labels: recentLabels,
+                    datasets: [{
+                        label: 'Mood Score',
+                        data: recentData,
+                        fill: false,
+                        borderColor: 'rgb(75, 192, 192)',
+                        tension: 0.1,
+                        backgroundColor: 'rgba(75, 192, 192, 0.5)',
+                        borderWidth: 3,
+                        pointBackgroundColor: 'rgb(75, 192, 192)',
+                        pointBorderColor: '#fff',
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgb(75, 192, 192)',
+                        pointRadius: 5,
+                        pointHoverRadius: 7
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    maintainAspectRatio: false,
+                    scales: {
+                        y: {
+                            beginAtZero: false,
+                            min: 0,
+                            max: 6,
+                            ticks: {
+                                stepSize: 1,
+                                callback: function(value) {
+                                    const labels = ['', 'Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+                                    return labels[value] || '';
+                                }
+                            }
+                        }
+                    },
+                    plugins: {
+                        legend: {
+                            display: false
+                        },
+                        tooltip: {
+                            callbacks: {
+                                label: function(context) {
+                                    const labels = ['Very Sad', 'Sad', 'Neutral', 'Happy', 'Very Happy'];
+                                    return labels[context.raw - 1] + ': ' + context.raw;
+                                }
+                            }
+                        }
+                    }
+                }
+            });
+        {% endif %}
+    });
+</script>
+{% endblock %}

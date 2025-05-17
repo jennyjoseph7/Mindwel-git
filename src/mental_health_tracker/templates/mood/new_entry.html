@@ -1,0 +1,557 @@
+{% extends "base.html" %}
+
+{% block title %}New Mood Entry | MindWell{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #007bff;
+        --bg-dark: #15202b;
+        --card-bg: #1a2634;
+        --text-primary: #e7e9ea;
+        --text-secondary: #8899a6;
+        --border-color: #38444d;
+        --input-bg: #253341;
+        --danger: #fa5252;
+        --warning: #ffcc00;
+        --neutral: #8899a6;
+        --info: #4cb5f5;
+        --success: #39cb74;
+    }
+
+    body {
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Header Section */
+    .header-section {
+        background-color: var(--bg-dark);
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .header-section h1 {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    /* Mood Card */
+    .mood-card {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .mood-card .card-title {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    /* Form Elements */
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-label i {
+        color: var(--primary);
+        margin-right: 0.5rem;
+    }
+
+    .form-control {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        background-color: var(--input-bg);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        color: var(--text-primary);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+
+    /* Mood Selector */
+    .mood-title {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .mood-list {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        gap: 15px;
+        margin-bottom: 1.25rem;
+        background-color: #192734;
+        border-radius: 15px;
+        padding: 15px;
+        position: relative;
+    }
+    
+    .mood-list::before {
+        content: '';
+        position: absolute;
+        height: 4px;
+        background: linear-gradient(to right, #ff5d6e, #ffb56b, #88c9a1, #6bb5ff, #7984ff);
+        bottom: -8px;
+        left: 0;
+        right: 0;
+        border-radius: 2px;
+    }
+
+    .mood-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #253341;
+        border: none;
+        text-align: center;
+        flex: 1;
+        border-radius: 8px;
+        min-height: 100px;
+        position: relative;
+        overflow: hidden;
+        margin: 0 5px;
+        min-width: 100px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .mood-button:hover {
+        background-color: #2a3a4a;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .mood-button:focus {
+        outline: none;
+    }
+    
+    .mood-button.active {
+        background-color: #304150;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .mood-button.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 10%;
+        right: 10%;
+        height: 3px;
+        background-color: #1da1f2;
+        border-radius: 2px;
+    }
+    
+    .mood-emoji {
+        font-size: 2.2rem;
+        margin-bottom: 0.75rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .mood-button:hover .mood-emoji {
+        transform: scale(1.2);
+    }
+    
+    .mood-label {
+        color: #ffffff;
+        font-size: 0.9rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    
+    /* Mood-specific colors */
+    .mood-button[data-mood="1"] .mood-emoji {
+        color: #ff5d6e;
+    }
+    
+    .mood-button[data-mood="2"] .mood-emoji {
+        color: #ffb56b;
+    }
+    
+    .mood-button[data-mood="3"] .mood-emoji {
+        color: #88c9a1;
+    }
+    
+    .mood-button[data-mood="4"] .mood-emoji {
+        color: #6bb5ff;
+    }
+    
+    .mood-button[data-mood="5"] .mood-emoji {
+        color: #7984ff;
+    }
+    
+    .mood-button.active[data-mood="1"]::after {
+        background-color: #ff5d6e;
+    }
+    
+    .mood-button.active[data-mood="2"]::after {
+        background-color: #ffb56b;
+    }
+    
+    .mood-button.active[data-mood="3"]::after {
+        background-color: #88c9a1;
+    }
+    
+    .mood-button.active[data-mood="4"]::after {
+        background-color: #6bb5ff;
+    }
+    
+    .mood-button.active[data-mood="5"]::after {
+        background-color: #7984ff;
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .btn-primary:hover {
+        background-color: #0069d9;
+        border-color: #0062cc;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-secondary {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: transparent;
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: var(--text-primary);
+    }
+
+    /* For invalid feedback */
+    .is-invalid {
+        border-color: var(--danger) !important;
+    }
+    
+    .invalid-feedback {
+        color: var(--danger);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Tips Card */
+    .tip-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .tip-list li {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+    
+    .tip-list li::before {
+        content: "•";
+        color: var(--primary);
+        font-size: 1.5rem;
+        position: absolute;
+        left: 0;
+        top: -0.5rem;
+    }
+    
+    .tip-title {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--text-primary);
+    }
+    
+    .tip-desc {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 767.98px) {
+        .mood-list {
+            overflow-x: auto;
+            padding: 15px 10px;
+            gap: 10px;
+        }
+        
+        .mood-button {
+            min-width: 80px;
+            margin: 0 3px;
+        }
+        
+        .mood-emoji {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="mood-page">
+    <!-- Top Header Section -->
+    <div class="container-fluid header-section">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bold mb-1">Mood Tracker</h1>
+                    <p class="text-muted">Track how you're feeling throughout your journey</p>
+                </div>
+                <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
+                    <a href="{{ url_for('dashboard') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-graph-up"></i> Back to Dashboard
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Main Content Section -->
+    <div class="container py-4">
+        <div class="row">
+            <!-- Mood Entry Form -->
+            <div class="col-lg-8">
+                <div class="card mood-card shadow-lg">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4">How are you feeling?</h3>
+                        <form method="POST" action="{{ url_for('mood_new') }}" id="moodForm">
+                            <!-- Mood Selector -->
+                            <div class="mb-4">
+                                <div class="mood-title">
+                                    <i class="bi bi-emoji-smile"></i> Select your mood
+                                </div>
+                                
+                                <div class="mood-list">
+                                    <button type="button" class="mood-button" data-mood="1">
+                                        <div class="mood-emoji">😢</div>
+                                        <div class="mood-label">Very Sad</div>
+                                    </button>
+                                    <button type="button" class="mood-button" data-mood="2">
+                                        <div class="mood-emoji">😔</div>
+                                        <div class="mood-label">Sad</div>
+                                    </button>
+                                    <button type="button" class="mood-button active" data-mood="3">
+                                        <div class="mood-emoji">😐</div>
+                                        <div class="mood-label">Neutral</div>
+                                    </button>
+                                    <button type="button" class="mood-button" data-mood="4">
+                                        <div class="mood-emoji">😊</div>
+                                        <div class="mood-label">Happy</div>
+                                    </button>
+                                    <button type="button" class="mood-button" data-mood="5">
+                                        <div class="mood-emoji">😄</div>
+                                        <div class="mood-label">Very Happy</div>
+                                    </button>
+                                </div>
+                                
+                                <!-- Hidden input field for mood score -->
+                                <input type="hidden" name="mood_score" id="mood_score" value="3">
+                            </div>
+                            
+                            <!-- Notes Field -->
+                            <div class="mb-4">
+                                <label for="notes" class="form-label">
+                                    <i class="bi bi-pencil-fill"></i> Notes
+                                </label>
+                                <textarea class="form-control" id="notes" name="notes" rows="5" 
+                                    placeholder="What's contributing to your mood today? (optional)"></textarea>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="d-flex justify-content-end mt-4">
+                                <a href="{{ url_for('dashboard') }}" class="btn btn-secondary me-2">
+                                    <i class="bi bi-x"></i> Cancel
+                                </a>
+                                <button type="submit" class="btn btn-primary">
+                                    <i class="bi bi-check-circle"></i> Save Mood
+                                </button>
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <!-- Tips Card -->
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                        <h5 class="card-title mb-0">Mood Tracking Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="tip-list">
+                            <li>
+                                <span class="tip-title">Be consistent</span>
+                                <p class="tip-desc">Track your mood at similar times each day for better insights.</p>
+                            </li>
+                            <li>
+                                <span class="tip-title">Note influencing factors</span>
+                                <p class="tip-desc">Record what might be affecting your mood - sleep, exercise, etc.</p>
+                            </li>
+                            <li>
+                                <span class="tip-title">Look for patterns</span>
+                                <p class="tip-desc">Review your mood history to identify trends and triggers.</p>
+                            </li>
+                            <li>
+                                <span class="tip-title">Link to activities</span>
+                                <p class="tip-desc">Notice which activities improve or worsen your mood.</p>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Mood Selection
+    const moodButtons = document.querySelectorAll('.mood-button');
+    const moodInput = document.getElementById('mood_score');
+    
+    moodButtons.forEach(button => {
+        button.addEventListener('click', function() {
+            // Remove active class from all buttons
+            moodButtons.forEach(btn => {
+                btn.classList.remove('active');
+                btn.style.transform = '';
+            });
+            
+            // Add active class to clicked button
+            this.classList.add('active');
+            
+            // Animate the selection
+            animateMoodSelection(this);
+            
+            // Set the value in the hidden input
+            const moodValue = this.getAttribute('data-mood');
+            moodInput.value = moodValue;
+            
+            // Update UI feedback based on mood
+            updateMoodFeedback(moodValue);
+        });
+        
+        // Add hover animation
+        button.addEventListener('mouseenter', function() {
+            if (!this.classList.contains('active')) {
+                this.querySelector('.mood-emoji').style.transform = 'scale(1.2)';
+            }
+        });
+        
+        button.addEventListener('mouseleave', function() {
+            if (!this.classList.contains('active')) {
+                this.querySelector('.mood-emoji').style.transform = '';
+            }
+        });
+    });
+    
+    // Function to animate mood selection
+    function animateMoodSelection(button) {
+        // Pop effect
+        button.style.transform = 'translateY(-5px)';
+        setTimeout(() => {
+            if (button.classList.contains('active')) {
+                button.style.transform = 'translateY(-3px)';
+            }
+        }, 300);
+        
+        // Pulse emoji
+        const emoji = button.querySelector('.mood-emoji');
+        emoji.style.transform = 'scale(1.4)';
+        setTimeout(() => {
+            emoji.style.transform = 'scale(1.2)';
+        }, 300);
+    }
+    
+    // Function to update UI based on mood
+    function updateMoodFeedback(mood) {
+        const feedbackMap = {
+            '1': 'Taking time to acknowledge difficult feelings is important. Consider what support you need right now.',
+            '2': 'It\'s okay to feel down. Writing about your feelings can help process them.',
+            '3': 'A balanced state can be a good time for reflection. What\'s on your mind today?',
+            '4': 'Wonderful! Capture this positive energy in your notes.',
+            '5': 'Excellent! Document what\'s bringing you joy so you can look back on these moments.'
+        };
+        
+        // Check if feedback element exists, otherwise create it
+        let feedbackEl = document.querySelector('.mood-feedback');
+        if (!feedbackEl) {
+            feedbackEl = document.createElement('div');
+            feedbackEl.className = 'mood-feedback text-center mb-3 mt-2';
+            feedbackEl.style.fontSize = '0.9rem';
+            feedbackEl.style.opacity = '0';
+            feedbackEl.style.transition = 'opacity 0.3s ease';
+            
+            const moodListEl = document.querySelector('.mood-list');
+            moodListEl.parentNode.insertBefore(feedbackEl, moodListEl.nextSibling);
+        }
+        
+        // Set feedback text and fade in
+        feedbackEl.textContent = feedbackMap[mood] || '';
+        feedbackEl.style.opacity = '0';
+        
+        setTimeout(() => {
+            feedbackEl.style.opacity = '1';
+        }, 50);
+        
+        // Set color based on mood
+        const colorMap = {
+            '1': '#ff5d6e',
+            '2': '#ffb56b', 
+            '3': '#88c9a1',
+            '4': '#6bb5ff',
+            '5': '#7984ff'
+        };
+        
+        feedbackEl.style.color = colorMap[mood] || 'var(--text-secondary)';
+    }
+    
+    // Trigger feedback for initial active button
+    const activeButton = document.querySelector('.mood-button.active');
+    if (activeButton) {
+        const moodValue = activeButton.getAttribute('data-mood');
+        updateMoodFeedback(moodValue);
+        animateMoodSelection(activeButton);
+    }
+    
+    // Form validation
+    document.getElementById('moodForm').addEventListener('submit', function(e) {
+        // No validation needed as we have a default mood value
+        // This is just a placeholder for any future validation
+    });
+});
+</script>
+{% endblock %} 

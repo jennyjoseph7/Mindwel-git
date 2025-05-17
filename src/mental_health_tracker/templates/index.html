@@ -1,0 +1,971 @@
+{% extends "base.html" %}
+
+{% block content %}
+<!-- Hero Section -->
+<div class="container mt-5">
+    <div class="hero-section py-5">
+        <div class="row align-items-center">
+            <div class="col-lg-7 hero-content">
+                <h1 class="hero-title">Your Mind Matters</h1>
+                <p class="hero-subtitle">An AI-powered platform to help you monitor, understand, and improve your mental health journey.</p>
+                {% if not session.get('user_id') %}
+                    <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                        <a href="{{ url_for('login') }}" class="cta-button btn px-4 me-md-2">Get Started</a>
+                    </div>
+                {% endif %}
+            </div>
+            <div class="col-lg-5">
+                <div class="hero-illustration">
+                    <div class="circle circle-1"></div>
+                    <div class="circle circle-2"></div>
+                    <div class="circle circle-3"></div>
+                    <div class="circle circle-4"></div>
+                    <div class="circle circle-5"></div>
+                    <div class="circle circle-6"></div>
+                    <div class="circle circle-7"></div>
+                    <i class="bi bi-brain mind-icon"></i>
+                    <div class="wellness-text">Peace • Balance • Growth</div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Merged Features Section -->
+    <div class="features-section py-5">
+        <h2 class="features-title">Key Features</h2>
+        
+        <div class="row g-4">
+            <!-- First row of features -->
+            <div class="col-md-3 animated-card">
+                <a href="{{ url_for('mood_new') }}" class="text-decoration-none">
+                    <div class="card h-100 feature-card">
+                        <div class="card-body text-center p-3">
+                            <i class="bi bi-graph-up feature-icon"></i>
+                            <h3 class="feature-title">Mood Tracking</h3>
+                            <p class="feature-description">Track your daily mood patterns and emotional well-being.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 animated-card">
+                <a href="{{ url_for('chat') }}" class="text-decoration-none">
+                    <div class="card h-100 feature-card">
+                        <div class="card-body text-center p-3">
+                            <i class="bi bi-robot feature-icon"></i>
+                            <h3 class="feature-title">AI Analysis</h3>
+                            <p class="feature-description">Get personalized insights powered by AI algorithms.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 animated-card">
+                <a href="{{ url_for('journal_list') }}" class="text-decoration-none">
+                    <div class="card h-100 feature-card journal-card">
+                        <div class="card-body text-center p-3">
+                            <i class="bi bi-journal-text feature-icon"></i>
+                            <h3 class="feature-title">Journal</h3>
+                            <p class="feature-description">Document your thoughts, feelings, and experiences.</p>
+                        </div>
+                    </div>
+                </a>
+            </div>
+
+            <div class="col-md-3 animated-card">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center p-3">
+                        <i class="bi bi-smartwatch feature-icon"></i>
+                        <h3 class="feature-title">Wearable Integration</h3>
+                        <p class="feature-description">Track biometric data via wearable devices.</p>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Second row of features -->
+            <div class="col-md-4 animated-card">
+                <div class="card h-100 feature-card music-therapy-card">
+                    <div class="card-body text-center p-3">
+                        <i class="bi bi-music-note-beamed feature-icon"></i>
+                        <h3 class="feature-title">Music Therapy</h3>
+                        <p class="feature-description">Enhance mental well-being through curated music therapy content.</p>
+                        <a href="{{ url_for('music_dashboard') }}" class="btn btn-light mt-3">
+                            <i class="bi bi-play-fill me-2"></i>Play Music
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 animated-card">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center p-3">
+                        <i class="bi bi-trophy feature-icon"></i>
+                        <h3 class="feature-title">Gamification</h3>
+                        <p class="feature-description">Gamification uses game-like elements such as points, rewards, and challenges to boost user engagement and motivation..</p>
+                        <a href="{{ url_for('games_list') }}" class="btn btn-light mt-3">
+                            <i class="bi bi-joystick me-2"></i>Play Games
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4 animated-card">
+                <div class="card h-100 feature-card counseling-card" id="counseling-booking-card">
+                    <div class="card-body text-center p-3">
+                        <i class="bi bi-calendar-check feature-icon"></i>
+                        <h3 class="feature-title">Counseling Booking</h3>
+                        <p class="feature-description">Professional counseling booking system.</p>
+                        
+                        <div class="date-select-container mt-3 mb-2">
+                            <div class="current-date">
+                                <span id="current-day">Monday</span>, <span id="current-date">Mar 16</span>, <span id="current-year">2025</span>
+                            </div>
+                            <input type="date" class="form-control date-picker mt-2" id="counseling-date">
+                        </div>
+                        
+                        <div class="btn-container mt-3">
+                            <button class="btn rounded-pill book-now-btn">Book Appointment</button>
+                        </div>
+                        
+                        <div class="counseling-animation">
+                            <div class="calendar-icon">
+                                <div class="calendar-top"></div>
+                                <div class="calendar-body"></div>
+                            </div>
+                            <div class="pulse-circle"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Third row of features -->
+            <div class="col-md-6 animated-card">
+                <div class="card h-100 feature-card focus-mode-card">
+                    <div class="card-body text-center p-3">
+                        <i class="bi bi-lightning-charge feature-icon"></i>
+                        <h3 class="feature-title">Focus Mode</h3>
+                        <p class="feature-description">Block distractions and manage ADHD symptoms with structured focus sessions.</p>
+                        <a href="{{ url_for('focus_dashboard') }}" class="btn btn-light mt-3">
+                            <i class="bi bi-clock-fill me-2"></i>Start Focus
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-6 animated-card">
+                <div class="card h-100 feature-card">
+                    <div class="card-body text-center p-3">
+                        <i class="bi bi-activity feature-icon"></i>
+                        <h3 class="feature-title">Real-Time Monitoring</h3>
+                        <p class="feature-description">Real-time monitoring for contacts to provide immediate support when needed.</p>
+                        <a href="{{ url_for('dashboard') }}" class="btn btn-light mt-3">
+                            <i class="bi bi-heart-pulse me-2"></i>View Status
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Testimonials Section -->
+    <div class="py-5">
+        <h2 class="features-title">What Our Users Say</h2>
+        <div class="row g-4">
+            <div class="col-md-4 animated-card">
+                <div class="card h-100 feature-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-quote display-4 text-primary me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Sarah J.</h5>
+                                <div class="text-warning mb-2">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="feature-description">"This app has transformed how I understand my mental health patterns. The journal feature is particularly helpful for processing my thoughts."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 animated-card">
+                <div class="card h-100 feature-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-quote display-4 text-primary me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Michael T.</h5>
+                                <div class="text-warning mb-2">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-half"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="feature-description">"The AI insights have helped me identify triggers I wasn't even aware of. I've made significant progress in managing my anxiety."</p>
+                    </div>
+                </div>
+            </div>
+            
+            <div class="col-md-4 animated-card">
+                <div class="card h-100 feature-card">
+                    <div class="card-body p-4">
+                        <div class="d-flex mb-3">
+                            <i class="bi bi-quote display-4 text-primary me-3"></i>
+                            <div>
+                                <h5 class="mb-1">Priya K.</h5>
+                                <div class="text-warning mb-2">
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                    <i class="bi bi-star-fill"></i>
+                                </div>
+                            </div>
+                        </div>
+                        <p class="feature-description">"I love how easy it is to track my moods and journal my thoughts. The interface is intuitive and the insights are genuinely helpful."</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Global no-underline rule */
+    a, a:hover, a:focus, a:active, a:visited,
+    .no-underline, .no-underline *, 
+    .counseling-card, .counseling-card *,
+    .card-link, .card-link * {
+        text-decoration: none !important;
+        border-bottom: none !important;
+    }
+    
+    .no-underline:visited,
+    .no-underline:hover,
+    .no-underline:active,
+    .no-underline:focus,
+    .counseling-card *,
+    .counseling-card *:link,
+    .counseling-card *:visited,
+    .counseling-card *:hover,
+    .counseling-card *:active,
+    .counseling-card *:focus,
+    .counseling-card h3,
+    .counseling-card p,
+    .counseling-card div {
+        text-decoration: none !important;
+        border-bottom: none !important;
+        outline: none !important;
+    }
+    
+    .card-link, 
+    .card-link:link,
+    .card-link:visited,
+    .card-link:hover, 
+    .card-link:active,
+    .card-link:focus,
+    .no-underline,
+    .no-underline:link,
+    .no-underline:visited,
+    .no-underline:hover,
+    .no-underline:active,
+    .no-underline:focus {
+        display: block;
+        color: inherit;
+        height: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .card-link:hover {
+        color: inherit;
+        transform: translateY(-5px);
+    }
+    
+    .card-link:hover .feature-card {
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .feature-card {
+        border-radius: 15px;
+        border: none;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .feature-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .card-link:hover .counseling-card:after {
+        opacity: 1;
+    }
+    
+    .counseling-card:after {
+        content: "Book Now →";
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        padding: 5px 12px;
+        background-color: #f39c12;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    /* Hero Section Styling */
+    .hero-section {
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .hero-title {
+        font-size: 3.5rem;
+        font-weight: 700;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #2f80ed, #56ccf2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    
+    .hero-subtitle {
+        font-size: 1.25rem;
+        line-height: 1.7;
+        margin-bottom: 2rem;
+        color: #505050;
+    }
+    
+    .cta-button {
+        background: linear-gradient(135deg, #2f80ed, #56ccf2);
+        color: white;
+        border: none;
+        padding: 12px 25px;
+        border-radius: 30px;
+        font-weight: 500;
+        font-size: 1.1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .cta-button:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 10px 20px rgba(0, 0, 0, 0.1);
+        background: linear-gradient(135deg, #2278e5, #4fc3f7);
+        color: white;
+    }
+    
+    /* Hero Illustration */
+    .hero-illustration {
+        position: relative;
+        height: 400px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    
+    .mind-icon {
+        font-size: 5rem;
+        color: #2f80ed;
+        position: relative;
+        z-index: 2;
+    }
+    
+    .wellness-text {
+        position: absolute;
+        bottom: 20%;
+        font-size: 1.2rem;
+        font-weight: 500;
+        color: #505050;
+        letter-spacing: 2px;
+    }
+    
+    .circle {
+        position: absolute;
+        border-radius: 50%;
+        background: linear-gradient(135deg, rgba(47, 128, 237, 0.2), rgba(86, 204, 242, 0.2));
+        animation: float 8s ease-in-out infinite;
+    }
+    
+    .circle-1 {
+        width: 150px;
+        height: 150px;
+        top: 20%;
+        left: 10%;
+    }
+    
+    .circle-2 {
+        width: 100px;
+        height: 100px;
+        top: 50%;
+        left: 25%;
+        animation-delay: 1s;
+    }
+    
+    .circle-3 {
+        width: 80px;
+        height: 80px;
+        bottom: 30%;
+        left: 15%;
+        animation-delay: 2s;
+    }
+    
+    .circle-4 {
+        width: 50px;
+        height: 50px;
+        bottom: 40%;
+        left: 40%;
+        animation-delay: 3s;
+    }
+    
+    .circle-5 {
+        width: 120px;
+        height: 120px;
+        top: 20%;
+        right: 15%;
+        animation-delay: 2.5s;
+    }
+    
+    .circle-6 {
+        width: 70px;
+        height: 70px;
+        top: 60%;
+        right: 20%;
+        animation-delay: 1.5s;
+    }
+    
+    .circle-7 {
+        width: 40px;
+        height: 40px;
+        bottom: 25%;
+        right: 35%;
+        animation-delay: 3.5s;
+    }
+    
+    @keyframes float {
+        0% { transform: translateY(0) rotate(0deg); }
+        50% { transform: translateY(-20px) rotate(5deg); }
+        100% { transform: translateY(0) rotate(0deg); }
+    }
+    
+    /* Features Section */
+    .features-section {
+        padding: 5rem 0;
+    }
+    
+    .features-title {
+        text-align: center;
+        font-size: 2.5rem;
+        font-weight: 700;
+        margin-bottom: 3rem;
+        background: linear-gradient(135deg, #2f80ed, #56ccf2);
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+    }
+    
+    .feature-card {
+        border-radius: 15px;
+        border: none;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .feature-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 10px 30px rgba(0, 0, 0, 0.1);
+    }
+    
+    .feature-icon {
+        font-size: 2.5rem;
+        margin-bottom: 1.5rem;
+        display: inline-block;
+        color: #2f80ed;
+        background: radial-gradient(circle, rgba(47, 128, 237, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+        width: 80px;
+        height: 80px;
+        line-height: 80px;
+        border-radius: 50%;
+    }
+    
+    .feature-title {
+        font-size: 1.4rem;
+        font-weight: 600;
+        margin-bottom: 1rem;
+        color: #333;
+    }
+    
+    .feature-description {
+        color: #666;
+        font-size: 1rem;
+        line-height: 1.6;
+    }
+    
+    /* Journal card specific styling */
+    .journal-card {
+        background: linear-gradient(to bottom right, rgba(46, 204, 113, 0.05), rgba(46, 204, 113, 0.1));
+        border-left: 3px solid #27ae60;
+    }
+    
+    .journal-card .feature-icon {
+        color: #27ae60;
+        background: radial-gradient(circle, rgba(46, 204, 113, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+    }
+    
+    /* Counseling Booking card specific styling */
+    .counseling-card {
+        background: linear-gradient(to bottom right, rgba(241, 196, 15, 0.05), rgba(243, 156, 18, 0.1));
+        border-left: 3px solid #f39c12;
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .counseling-card .feature-icon {
+        color: #f39c12;
+        background: radial-gradient(circle, rgba(241, 196, 15, 0.1) 0%, rgba(255, 255, 255, 0) 70%);
+    }
+    
+    .counseling-animation {
+        position: absolute;
+        bottom: 10px;
+        right: 20px;
+        width: 50px;
+        height: 50px;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    .counseling-card:hover .counseling-animation {
+        opacity: 1;
+    }
+    
+    .calendar-icon {
+        position: relative;
+        width: 30px;
+        height: 30px;
+        margin: 0 auto;
+    }
+    
+    .calendar-top {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 6px;
+        background-color: #e74c3c;
+        border-radius: 2px 2px 0 0;
+    }
+    
+    .calendar-body {
+        position: absolute;
+        top: 5px;
+        left: 0;
+        width: 100%;
+        height: 25px;
+        background-color: white;
+        border: 1px solid #f39c12;
+        border-radius: 2px;
+    }
+    
+    .calendar-day {
+        position: absolute;
+        top: 12px;
+        width: 100%;
+        text-align: center;
+        color: #f39c12;
+        font-size: 12px;
+        font-weight: bold;
+    }
+    
+    .pulse-circle {
+        position: absolute;
+        top: 50%;
+        left: 50%;
+        transform: translate(-50%, -50%);
+        width: 40px;
+        height: 40px;
+        border-radius: 50%;
+        background-color: rgba(243, 156, 18, 0.2);
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.7;
+        }
+        50% {
+            transform: translate(-50%, -50%) scale(1.2);
+            opacity: 0.3;
+        }
+        100% {
+            transform: translate(-50%, -50%) scale(0.8);
+            opacity: 0.7;
+        }
+    }
+    
+    /* Focus Mode Card */
+    .focus-mode-card {
+        background: linear-gradient(135deg, #1d4ed8, #3b82f6);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .focus-mode-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(59, 130, 246, 0.3);
+    }
+    
+    .focus-mode-card .feature-icon {
+        color: #93c5fd;
+    }
+    
+    .focus-mode-card .btn {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: white;
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .focus-mode-card .btn:hover {
+        background-color: rgba(255, 255, 255, 0.3);
+        transform: translateY(-2px);
+    }
+    
+    /* Music Therapy card specific styling */
+    .music-therapy-card {
+        background: linear-gradient(135deg, #4c1d95, #7c3aed);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .music-therapy-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(124, 58, 237, 0.3);
+    }
+    
+    .music-therapy-card .feature-icon {
+        color: #a78bfa;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #8b5cf6, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .music-therapy-card .feature-title {
+        background: linear-gradient(135deg, #8b5cf6, #c084fc);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+        font-weight: 700;
+    }
+    
+    .music-therapy-card .feature-description {
+        color: #cbd5e1;
+    }
+    
+    .music-therapy-card .btn {
+        background: white;
+        color: #4c1d95;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(139, 92, 246, 0.2);
+    }
+    
+    .music-therapy-card .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 14px rgba(139, 92, 246, 0.3);
+        background: #f9fafb;
+    }
+    
+    /* Real-Time Monitoring Card */
+    .monitoring-card {
+        background: linear-gradient(135deg, #dc2626, #f87171);
+        border: none;
+        transition: all 0.3s ease;
+    }
+    
+    .monitoring-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 30px rgba(220, 38, 38, 0.3);
+    }
+    
+    .monitoring-card .feature-icon {
+        color: #fca5a5;
+        font-size: 2.5rem;
+        margin-bottom: 1rem;
+        background: linear-gradient(135deg, #ef4444, #fca5a5);
+        -webkit-background-clip: text;
+        background-clip: text;
+        -webkit-text-fill-color: transparent;
+    }
+    
+    .monitoring-card .feature-title {
+        color: white;
+        font-weight: 700;
+    }
+    
+    .monitoring-card .feature-description {
+        color: #fecaca;
+    }
+    
+    .monitoring-card .btn {
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(220, 38, 38, 0.2);
+    }
+    
+    .monitoring-card .btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 14px rgba(220, 38, 38, 0.3);
+    }
+    
+    /* Card Links and No Underline Elements */
+    .card-link, 
+    .card-link:link,
+    .card-link:visited,
+    .card-link:hover, 
+    .card-link:active,
+    .card-link:focus,
+    .no-underline,
+    .no-underline:link,
+    .no-underline:visited,
+    .no-underline:hover,
+    .no-underline:active,
+    .no-underline:focus {
+        display: block;
+        color: inherit;
+        height: 100%;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .card-link:hover {
+        color: inherit;
+        transform: translateY(-5px);
+    }
+    
+    .card-link:hover .feature-card {
+        box-shadow: 0 15px 30px rgba(0, 0, 0, 0.15);
+    }
+    
+    .feature-card {
+        border-radius: 15px;
+        border: none;
+        transition: all 0.3s ease;
+        overflow: hidden;
+        height: 100%;
+    }
+    
+    .feature-card:hover {
+        transform: none;
+        box-shadow: none;
+    }
+    
+    .card-link:hover .counseling-card:after {
+        opacity: 1;
+    }
+    
+    .counseling-card:after {
+        content: "Book Now →";
+        position: absolute;
+        bottom: 15px;
+        right: 15px;
+        padding: 5px 12px;
+        background-color: #f39c12;
+        color: white;
+        border-radius: 20px;
+        font-size: 0.8rem;
+        opacity: 0;
+        transition: opacity 0.3s ease;
+    }
+    
+    /* Book now button */
+    .book-now-btn {
+        background: linear-gradient(135deg, #2f80ed, #56ccf2);
+        color: white;
+        border: none;
+        padding: 8px 20px;
+        font-size: 0.9rem;
+        transition: all 0.3s ease;
+        box-shadow: 0 4px 6px rgba(50, 50, 93, 0.11), 0 1px 3px rgba(0, 0, 0, 0.08);
+    }
+    
+    .book-now-btn:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 7px 14px rgba(50, 50, 93, 0.1), 0 3px 6px rgba(0, 0, 0, 0.08);
+        background: linear-gradient(135deg, #2278e5, #4fc3f7);
+        color: white;
+    }
+    
+    .date-select-container {
+        opacity: 0;
+        height: 0;
+        overflow: hidden;
+        transition: opacity 0.3s ease, height 0.3s ease;
+    }
+    
+    .counseling-card:hover .date-select-container {
+        opacity: 1;
+        height: auto;
+    }
+    
+    .current-date {
+        font-size: 0.9rem;
+        font-weight: 500;
+        color: #333;
+        margin-bottom: 0.5rem;
+    }
+    
+    .date-picker {
+        border: 1px solid rgba(47, 128, 237, 0.3);
+        border-radius: 20px;
+        font-size: 0.85rem;
+        text-align: center;
+        padding: 0.4rem 1rem;
+        background-color: rgba(47, 128, 237, 0.05);
+        transition: all 0.3s ease;
+    }
+    
+    .date-picker:focus {
+        border-color: #2f80ed;
+        box-shadow: 0 0 0 0.2rem rgba(47, 128, 237, 0.25);
+        outline: none;
+    }
+</style>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+    // Add animation to cards when they come into view
+    document.addEventListener('DOMContentLoaded', function() {
+        const animatedCards = document.querySelectorAll('.animated-card');
+        
+        const observer = new IntersectionObserver((entries) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    entry.target.style.opacity = 1;
+                    entry.target.style.transform = 'translateY(0)';
+                }
+            });
+        }, { threshold: 0.1 });
+        
+        animatedCards.forEach(card => {
+            card.style.opacity = 0;
+            card.style.transform = 'translateY(20px)';
+            card.style.transition = 'opacity 0.5s ease, transform 0.5s ease';
+            observer.observe(card);
+        });
+        
+        // Additional animation for counseling booking card
+        const counselingCard = document.getElementById('counseling-booking-card');
+        if (counselingCard) {
+            // Set current date in calendar icon
+            const today = new Date();
+            const days = ['Sunday', 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday'];
+            const months = ['Jan', 'Feb', 'Mar', 'Apr', 'May', 'Jun', 'Jul', 'Aug', 'Sep', 'Oct', 'Nov', 'Dec'];
+            
+            document.getElementById('current-day').textContent = days[today.getDay()];
+            document.getElementById('current-date').textContent = months[today.getMonth()] + ' ' + today.getDate();
+            document.getElementById('current-year').textContent = today.getFullYear();
+            
+            // Set default value for the date picker (today + 1 day)
+            const tomorrow = new Date(today);
+            tomorrow.setDate(tomorrow.getDate() + 1);
+            const dateString = tomorrow.toISOString().split('T')[0];
+            document.getElementById('counseling-date').value = dateString;
+            
+            // Start animations periodically if card is visible
+            if (window.innerWidth > 768) {
+                // Only on larger screens
+                setInterval(() => {
+                    const animationContainer = counselingCard.querySelector('.counseling-animation');
+                    if (animationContainer) {
+                        animationContainer.style.opacity = '1';
+                        setTimeout(() => {
+                            animationContainer.style.opacity = '0';
+                        }, 3000);
+                    }
+                }, 10000);
+            }
+            
+            // Add click event to card
+            counselingCard.addEventListener('click', function(e) {
+                // Don't handle clicks on buttons, links, or input fields within the card
+                if (!e.target.closest('a') && !e.target.closest('button') && !e.target.closest('input')) {
+                    // Show the date selection
+                    const dateContainer = this.querySelector('.date-select-container');
+                    if (dateContainer) {
+                        dateContainer.style.opacity = '1';
+                        dateContainer.style.height = 'auto';
+                    }
+                }
+            });
+            
+            // Make the cursor a pointer to indicate clickable
+            counselingCard.style.cursor = 'pointer';
+            
+            // Make the Book Now button also work
+            const bookNowBtn = counselingCard.querySelector('.book-now-btn');
+            if (bookNowBtn) {
+                bookNowBtn.addEventListener('click', function(e) {
+                    e.stopPropagation(); // Prevent card click
+                    
+                    // Get selected date
+                    const selectedDate = document.getElementById('counseling-date').value;
+                    
+                    // Create booking effect
+                    const bookEffect = document.createElement('div');
+                    bookEffect.className = 'booking-effect';
+                    bookEffect.textContent = 'Booking for ' + selectedDate + '...';
+                    bookEffect.style.position = 'absolute';
+                    bookEffect.style.top = '50%';
+                    bookEffect.style.left = '50%';
+                    bookEffect.style.transform = 'translate(-50%, -50%)';
+                    bookEffect.style.backgroundColor = 'rgba(47, 128, 237, 0.9)';
+                    bookEffect.style.color = 'white';
+                    bookEffect.style.padding = '12px 20px';
+                    bookEffect.style.borderRadius = '20px';
+                    bookEffect.style.zIndex = '10';
+                    
+                    counselingCard.style.position = 'relative';
+                    counselingCard.appendChild(bookEffect);
+                    
+                    // Navigate after a brief delay
+                    setTimeout(() => {
+                        window.location.href = '/counseling-booking?date=' + selectedDate;
+                    }, 800);
+                });
+            }
+            
+            // Also activate animation on hover
+            counselingCard.addEventListener('mouseenter', function() {
+                const animationContainer = this.querySelector('.counseling-animation');
+                if (animationContainer) {
+                    animationContainer.style.opacity = '1';
+                }
+            });
+            
+            counselingCard.addEventListener('mouseleave', function() {
+                const animationContainer = this.querySelector('.counseling-animation');
+                if (animationContainer) {
+                    animationContainer.style.opacity = '0';
+                }
+            });
+        }
+    });
+</script>
+{% endblock %}

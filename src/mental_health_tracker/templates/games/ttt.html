@@ -1,0 +1,474 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nature's Tic Tac Toe - Mental Health Tracker</title>
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #22c55e;
+            --primary-dark: #16a34a;
+            --primary-light: #86efac;
+            --background: #0f172a;
+            --surface: #1e293b;
+            --text: #f8fafc;
+            --text-secondary: #94a3b8;
+        }
+
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Poppins', sans-serif;
+            background: var(--background);
+            color: var(--text);
+            min-height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            padding: 1rem;
+            background-image: linear-gradient(rgba(15, 23, 42, 0.3), rgba(15, 23, 42, 0.4)), 
+                              url('https://images.unsplash.com/photo-1523712999610-f77fbcfc3843?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=85');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+        }
+
+        .container {
+            background: rgba(30, 41, 59, 0.7);
+            padding: 2rem;
+            border-radius: 1rem;
+            box-shadow: 0 10px 25px -5px rgba(0, 0, 0, 0.2), 0 8px 10px -6px rgba(0, 0, 0, 0.1);
+            width: 100%;
+            max-width: 600px;
+            position: relative;
+            backdrop-filter: blur(8px);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+        }
+
+        .back-btn {
+            position: absolute;
+            top: 1rem;
+            left: 1rem;
+            background: var(--primary);
+            color: var(--text);
+            border: none;
+            padding: 0.5rem 1rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            transition: all 0.3s ease;
+        }
+
+        .back-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        .sound-control {
+            position: absolute;
+            top: 1rem;
+            right: 1rem;
+            background: var(--primary);
+            color: var(--text);
+            border: none;
+            width: 2.5rem;
+            height: 2.5rem;
+            border-radius: 50%;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+        }
+
+        .sound-control:hover {
+            background: var(--primary-dark);
+            transform: scale(1.1);
+        }
+
+        .game-title {
+            text-align: center;
+            color: var(--primary);
+            font-size: clamp(1.5rem, 4vw, 2rem);
+            margin-bottom: 2rem;
+            font-weight: 600;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+        }
+
+        .players {
+            display: flex;
+            justify-content: space-around;
+            margin-bottom: 2rem;
+            gap: 1rem;
+        }
+
+        .player-card {
+            background: var(--background);
+            padding: 1rem;
+            border-radius: 0.5rem;
+            text-align: center;
+            flex: 1;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .player-card.active {
+            border: 2px solid var(--primary);
+            transform: translateY(-4px);
+        }
+
+        .player-symbol {
+            width: 2rem;
+            height: 2rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .player-name {
+            color: var(--text);
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            margin-bottom: 0.25rem;
+        }
+
+        .player-score {
+            color: var(--primary);
+            font-size: clamp(1.25rem, 3vw, 1.5rem);
+            font-weight: 600;
+        }
+
+        .game-board {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 0.5rem;
+            margin-bottom: 2rem;
+            aspect-ratio: 1;
+            max-width: 400px;
+            margin-left: auto;
+            margin-right: auto;
+        }
+
+        .cell {
+            background: var(--background);
+            border: none;
+            border-radius: 0.5rem;
+            aspect-ratio: 1;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            transition: all 0.3s ease;
+            position: relative;
+            overflow: hidden;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+        }
+
+        .cell:hover:not(.filled) {
+            background: var(--primary-dark);
+            transform: scale(0.95);
+        }
+
+        .cell.filled {
+            cursor: not-allowed;
+        }
+
+        .cell.winner {
+            background: var(--primary);
+        }
+
+        .symbol {
+            width: 60%;
+            height: 60%;
+            position: relative;
+            animation: symbolAppear 0.3s ease-out;
+        }
+
+        @keyframes symbolAppear {
+            from {
+                transform: scale(0);
+                opacity: 0;
+            }
+            to {
+                transform: scale(1);
+                opacity: 1;
+            }
+        }
+
+        .status {
+            text-align: center;
+            color: var(--text);
+            font-size: clamp(1rem, 2.5vw, 1.25rem);
+            margin-bottom: 1.5rem;
+            min-height: 1.5em;
+            font-weight: 500;
+            text-shadow: 0 1px 2px rgba(0, 0, 0, 0.3);
+        }
+
+        .reset-btn {
+            background: var(--primary);
+            color: var(--text);
+            border: none;
+            padding: 0.75rem 1.5rem;
+            border-radius: 0.5rem;
+            cursor: pointer;
+            font-family: 'Poppins', sans-serif;
+            font-weight: 500;
+            font-size: clamp(0.875rem, 2vw, 1rem);
+            display: block;
+            margin: 0 auto;
+            transition: all 0.3s ease;
+        }
+
+        .reset-btn:hover {
+            background: var(--primary-dark);
+            transform: translateY(-2px);
+        }
+
+        @media (max-width: 480px) {
+            .container {
+                padding: 1.5rem;
+            }
+
+            .game-board {
+                gap: 0.25rem;
+            }
+
+            .cell {
+                border-radius: 0.25rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <button class="back-btn" onclick="window.location.href='/games'">
+            ← Back
+        </button>
+        <button class="sound-control" id="soundToggle" aria-label="Toggle sound">
+            🔊
+        </button>
+        <h1 class="game-title">Nature's Tic Tac Toe</h1>
+        <div class="players">
+            <div class="player-card" id="leafPlayer">
+                <svg class="player-symbol" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+                </svg>
+                <div class="player-name">Leaf</div>
+                <div class="player-score" id="leafScore">0</div>
+            </div>
+            <div class="player-card" id="twigPlayer">
+                <svg class="player-symbol" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,2L4,12L12,22L20,12L12,2M12,4.5L17.5,12L12,19.5L6.5,12L12,4.5Z"/>
+                </svg>
+                <div class="player-name">Twig</div>
+                <div class="player-score" id="twigScore">0</div>
+            </div>
+        </div>
+        <div class="game-board" id="board" role="grid" aria-label="Tic Tac Toe game board">
+            <button class="cell" role="gridcell" aria-label="Cell 1" data-index="0"></button>
+            <button class="cell" role="gridcell" aria-label="Cell 2" data-index="1"></button>
+            <button class="cell" role="gridcell" aria-label="Cell 3" data-index="2"></button>
+            <button class="cell" role="gridcell" aria-label="Cell 4" data-index="3"></button>
+            <button class="cell" role="gridcell" aria-label="Cell 5" data-index="4"></button>
+            <button class="cell" role="gridcell" aria-label="Cell 6" data-index="5"></button>
+            <button class="cell" role="gridcell" aria-label="Cell 7" data-index="6"></button>
+            <button class="cell" role="gridcell" aria-label="Cell 8" data-index="7"></button>
+            <button class="cell" role="gridcell" aria-label="Cell 9" data-index="8"></button>
+        </div>
+        <div class="status" id="status" role="status" aria-live="polite">Leaf's turn</div>
+        <button class="reset-btn" id="resetBtn" aria-label="Reset game">New Game</button>
+    </div>
+
+    <script>
+        // Game state
+        let currentPlayer = 'leaf';
+        let gameState = ['', '', '', '', '', '', '', '', ''];
+        let gameActive = true;
+        let gameStartTime = Date.now();
+        let soundEnabled = true;
+
+        // Sound effects
+        const sounds = {
+            place: new Audio('/static/sounds/place.mp3'),
+            win: new Audio('/static/sounds/win.mp3'),
+            draw: new Audio('/static/sounds/draw.mp3')
+        };
+
+        // Winning combinations
+        const winningCombos = [
+            [0, 1, 2], [3, 4, 5], [6, 7, 8], // Rows
+            [0, 3, 6], [1, 4, 7], [2, 5, 8], // Columns
+            [0, 4, 8], [2, 4, 6] // Diagonals
+        ];
+
+        // Player symbols
+        const symbols = {
+            leaf: `<svg class="symbol" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C7,8 17,8 17,8Z"/>
+                </svg>`,
+            twig: `<svg class="symbol" viewBox="0 0 24 24" fill="currentColor">
+                    <path d="M12,2L4,12L12,22L20,12L12,2M12,4.5L17.5,12L12,19.5L6.5,12L12,4.5Z"/>
+                </svg>`
+        };
+
+        // Handle cell click
+        function handleCellClick(e) {
+            const cell = e.target;
+            const index = parseInt(cell.getAttribute('data-index'));
+
+            if (gameState[index] !== '' || !gameActive) return;
+
+            gameState[index] = currentPlayer;
+            cell.innerHTML = symbols[currentPlayer];
+            cell.classList.add('filled');
+            
+            if (soundEnabled) {
+                sounds.place.play();
+            }
+
+            checkResult();
+        }
+
+        // Check for win or draw
+        function checkResult() {
+            let gameWon = false;
+            let winningCombo = null;
+
+            for (const combo of winningCombos) {
+                const [a, b, c] = combo;
+                if (gameState[a] && gameState[a] === gameState[b] && gameState[a] === gameState[c]) {
+                    gameWon = true;
+                    winningCombo = combo;
+                    break;
+                }
+            }
+
+            if (gameWon) {
+                endGame('win', winningCombo);
+            } else if (!gameState.includes('')) {
+                endGame('draw');
+            } else {
+                changePlayer();
+            }
+        }
+
+        // End the game
+        function endGame(result, winningCombo = null) {
+            gameActive = false;
+            const duration = Math.round((Date.now() - gameStartTime) / 1000);
+            const moves = gameState.filter(cell => cell !== '').length;
+
+            if (winningCombo) {
+                winningCombo.forEach(index => {
+                    document.querySelector(`[data-index="${index}"]`).classList.add('winner');
+                });
+            }
+
+            if (soundEnabled) {
+                sounds[result].play();
+            }
+
+            let message = '';
+            if (result === 'win') {
+                message = `${currentPlayer === 'leaf' ? 'Leaf' : 'Twig'} wins!`;
+                updateScore(currentPlayer);
+            } else {
+                message = "It's a draw!";
+            }
+
+            document.getElementById('status').textContent = message;
+            saveGameStats(result === 'win' ? currentPlayer : 'draw', moves, duration);
+        }
+
+        // Change the current player
+        function changePlayer() {
+            currentPlayer = currentPlayer === 'leaf' ? 'twig' : 'leaf';
+            document.getElementById('status').textContent = `${currentPlayer === 'leaf' ? 'Leaf' : 'Twig'}'s turn`;
+            
+            document.getElementById('leafPlayer').classList.toggle('active');
+            document.getElementById('twigPlayer').classList.toggle('active');
+        }
+
+        // Reset the game
+        function resetGame() {
+            gameState = ['', '', '', '', '', '', '', '', ''];
+            gameActive = true;
+            gameStartTime = Date.now();
+            currentPlayer = 'leaf';
+            
+            document.querySelectorAll('.cell').forEach(cell => {
+                cell.innerHTML = '';
+                cell.classList.remove('filled', 'winner');
+            });
+            
+            document.getElementById('status').textContent = "Leaf's turn";
+            document.getElementById('leafPlayer').classList.add('active');
+            document.getElementById('twigPlayer').classList.remove('active');
+        }
+
+        // Update player score
+        function updateScore(player) {
+            const scoreElement = document.getElementById(`${player}Score`);
+            scoreElement.textContent = parseInt(scoreElement.textContent) + 1;
+        }
+
+        // Save game statistics
+        async function saveGameStats(winner, moves, duration) {
+            try {
+                const response = await fetch('/api/save-ttt-game', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        winner,
+                        moves,
+                        duration
+                    })
+                });
+
+                if (!response.ok) {
+                    throw new Error('Failed to save game statistics');
+                }
+            } catch (error) {
+                console.error('Error saving game statistics:', error);
+            }
+        }
+
+        // Toggle sound
+        function toggleSound() {
+            soundEnabled = !soundEnabled;
+            document.getElementById('soundToggle').textContent = soundEnabled ? '🔊' : '🔇';
+        }
+
+        // Event listeners
+        document.querySelectorAll('.cell').forEach(cell => {
+            cell.addEventListener('click', handleCellClick);
+        });
+
+        document.getElementById('resetBtn').addEventListener('click', resetGame);
+        document.getElementById('soundToggle').addEventListener('click', toggleSound);
+
+        // Keyboard navigation
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+
+            const key = e.key;
+            if (key >= '1' && key <= '9') {
+                const index = key - 1;
+                const cell = document.querySelector(`[data-index="${index}"]`);
+                if (cell && !cell.classList.contains('filled')) {
+                    cell.click();
+                }
+            }
+        });
+
+        // Initialize game
+        resetGame();
+    </script>
+</body>
+</html>

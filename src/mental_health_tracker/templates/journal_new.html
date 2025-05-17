@@ -1,0 +1,835 @@
+{% extends "base.html" %}
+
+{% block title %}Journal Entry | MindWell{% endblock %}
+
+{% block extra_css %}
+<style>
+    :root {
+        --primary: #007bff;
+        --bg-dark: #15202b;
+        --card-bg: #1a2634;
+        --text-primary: #e7e9ea;
+        --text-secondary: #8899a6;
+        --border-color: #38444d;
+        --input-bg: #253341;
+        --danger: #fa5252;
+        --warning: #ffcc00;
+        --neutral: #8899a6;
+        --info: #4cb5f5;
+        --success: #39cb74;
+    }
+
+    body {
+        background-color: var(--bg-dark);
+        color: var(--text-primary);
+        font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    /* Header Section */
+    .header-section {
+        background-color: var(--bg-dark);
+        border-bottom: 1px solid var(--border-color);
+        margin-bottom: 1.5rem;
+    }
+
+    .header-section h1 {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    /* Journal Card */
+    .journal-card {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 1rem;
+        overflow: hidden;
+        box-shadow: 0 8px 24px rgba(0, 0, 0, 0.2);
+    }
+
+    .journal-card .card-title {
+        color: var(--text-primary);
+        font-weight: 700;
+    }
+
+    /* Form Elements */
+    .form-label {
+        color: var(--text-primary);
+        font-weight: 500;
+        margin-bottom: 0.75rem;
+    }
+
+    .form-label i {
+        color: var(--primary);
+        margin-right: 0.5rem;
+    }
+
+    .form-control {
+        background-color: var(--input-bg);
+        border: 1px solid var(--border-color);
+        border-radius: 0.5rem;
+        color: var(--text-primary);
+        padding: 0.75rem 1rem;
+        transition: all 0.2s ease;
+    }
+
+    .form-control:focus {
+        background-color: var(--input-bg);
+        border-color: var(--primary);
+        box-shadow: 0 0 0 0.2rem rgba(0, 123, 255, 0.25);
+        color: var(--text-primary);
+    }
+
+    .form-control::placeholder {
+        color: var(--text-secondary);
+    }
+
+    /* Content Area */
+    .content-area {
+        min-height: 200px;
+        resize: vertical;
+        transition: all 0.3s ease;
+    }
+    
+    .content-area:focus {
+        min-height: 250px;
+    }
+    
+    .character-counter {
+        color: var(--text-secondary);
+        transition: color 0.2s ease;
+    }
+
+    /* Mood Selector */
+    .mood-title {
+        color: var(--text-primary);
+        margin-bottom: 1rem;
+        font-size: 1.1rem;
+        font-weight: 500;
+    }
+
+    .mood-list {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        gap: 15px;
+        margin-bottom: 1.25rem;
+        background-color: #192734;
+        border-radius: 15px;
+        padding: 15px;
+        position: relative;
+    }
+    
+    .mood-list::before {
+        content: '';
+        position: absolute;
+        height: 4px;
+        background: linear-gradient(to right, #ff5d6e, #ffb56b, #88c9a1, #6bb5ff, #7984ff);
+        bottom: -8px;
+        left: 0;
+        right: 0;
+        border-radius: 2px;
+    }
+
+    .mood-button {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        padding: 1.5rem 0.5rem;
+        cursor: pointer;
+        transition: all 0.3s ease;
+        background-color: #253341;
+        border: none;
+        text-align: center;
+        flex: 1;
+        border-radius: 8px;
+        min-height: 100px;
+        position: relative;
+        overflow: hidden;
+        margin: 0 5px;
+        min-width: 100px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .mood-button:hover {
+        background-color: #2a3a4a;
+        transform: translateY(-3px);
+        box-shadow: 0 6px 8px rgba(0, 0, 0, 0.3);
+    }
+    
+    .mood-button:focus {
+        outline: none;
+    }
+    
+    .mood-button.active {
+        background-color: #304150;
+        box-shadow: 0 5px 15px rgba(0, 0, 0, 0.3);
+    }
+    
+    .mood-button.active::after {
+        content: '';
+        position: absolute;
+        bottom: 0;
+        left: 10%;
+        right: 10%;
+        height: 3px;
+        background-color: #1da1f2;
+        border-radius: 2px;
+    }
+    
+    .mood-emoji {
+        font-size: 2.2rem;
+        margin-bottom: 0.75rem;
+        transition: transform 0.2s ease;
+    }
+    
+    .mood-button:hover .mood-emoji {
+        transform: scale(1.2);
+    }
+    
+    .mood-label {
+        color: #ffffff;
+        font-size: 0.9rem;
+        font-weight: 500;
+        white-space: nowrap;
+    }
+    
+    /* Mood-specific colors */
+    .mood-button[data-mood="very_sad"] .mood-emoji {
+        color: #ff5d6e;
+    }
+    
+    .mood-button[data-mood="sad"] .mood-emoji {
+        color: #ffb56b;
+    }
+    
+    .mood-button[data-mood="neutral"] .mood-emoji {
+        color: #88c9a1;
+    }
+    
+    .mood-button[data-mood="happy"] .mood-emoji {
+        color: #6bb5ff;
+    }
+    
+    .mood-button[data-mood="very_happy"] .mood-emoji {
+        color: #7984ff;
+    }
+    
+    .mood-button.active[data-mood="very_sad"]::after {
+        background-color: #ff5d6e;
+    }
+    
+    .mood-button.active[data-mood="sad"]::after {
+        background-color: #ffb56b;
+    }
+    
+    .mood-button.active[data-mood="neutral"]::after {
+        background-color: #88c9a1;
+    }
+    
+    .mood-button.active[data-mood="happy"]::after {
+        background-color: #6bb5ff;
+    }
+    
+    .mood-button.active[data-mood="very_happy"]::after {
+        background-color: #7984ff;
+    }
+
+    /* Cards and Sidebar */
+    .card {
+        background-color: var(--card-bg);
+        border: none;
+        border-radius: 1rem;
+    }
+    
+    .card-header {
+        background-color: rgba(255, 255, 255, 0.05);
+        border-bottom: 1px solid var(--border-color);
+        padding: 1rem 1.25rem;
+    }
+    
+    .card-header .card-title {
+        font-size: 1rem;
+        font-weight: 600;
+        margin-bottom: 0;
+    }
+    
+    /* Writing Prompts */
+    .prompt-list {
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
+    }
+    
+    .prompt-item {
+        padding: 0.75rem 1rem;
+        background-color: var(--input-bg);
+        border-radius: 0.5rem;
+        color: var(--text-primary);
+        font-size: 0.875rem;
+        cursor: pointer;
+        transition: all 0.2s ease;
+        border-left: 3px solid var(--primary);
+    }
+    
+    .prompt-item:hover {
+        background-color: rgba(0, 123, 255, 0.15);
+        transform: translateX(3px);
+    }
+
+    /* Tips List */
+    .tip-list {
+        list-style: none;
+        padding: 0;
+        margin: 0;
+    }
+    
+    .tip-list li {
+        margin-bottom: 1rem;
+        padding-left: 1.5rem;
+        position: relative;
+    }
+    
+    .tip-list li::before {
+        content: "•";
+        color: var(--primary);
+        font-size: 1.5rem;
+        position: absolute;
+        left: 0;
+        top: -0.5rem;
+    }
+    
+    .tip-title {
+        display: block;
+        font-weight: 600;
+        margin-bottom: 0.25rem;
+        color: var(--text-primary);
+    }
+    
+    .tip-desc {
+        margin: 0;
+        font-size: 0.875rem;
+        color: var(--text-secondary);
+    }
+
+    /* Buttons */
+    .btn {
+        padding: 0.5rem 1.25rem;
+        border-radius: 0.5rem;
+        font-weight: 500;
+        transition: all 0.2s ease;
+    }
+    
+    .btn-primary {
+        background-color: var(--primary);
+        border-color: var(--primary);
+    }
+    
+    .btn-primary:hover {
+        background-color: #0069d9;
+        border-color: #0062cc;
+        transform: translateY(-2px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+    }
+    
+    .btn-secondary {
+        background-color: rgba(255, 255, 255, 0.1);
+        border-color: transparent;
+        color: var(--text-primary);
+    }
+    
+    .btn-secondary:hover {
+        background-color: rgba(255, 255, 255, 0.15);
+        color: var(--text-primary);
+    }
+
+    /* For invalid feedback */
+    .is-invalid {
+        border-color: var(--danger) !important;
+    }
+    
+    .invalid-feedback {
+        color: var(--danger);
+        font-size: 0.875rem;
+        margin-top: 0.25rem;
+    }
+
+    /* Responsive Adjustments */
+    @media (max-width: 767.98px) {
+        .mood-list {
+            overflow-x: auto;
+            padding: 15px 10px;
+            gap: 10px;
+        }
+        
+        .mood-button {
+            min-width: 80px;
+            margin: 0 3px;
+        }
+        
+        .mood-emoji {
+            font-size: 1.8rem;
+        }
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="journal-page">
+    <!-- Top Header Section -->
+    <div class="container-fluid header-section">
+        <div class="container py-4">
+            <div class="row align-items-center">
+                <div class="col-md-6">
+                    <h1 class="display-5 fw-bold mb-1">Journal Entry</h1>
+                    <p class="text-muted">Express your thoughts and feelings freely</p>
+                </div>
+                <div class="col-md-6 d-flex justify-content-md-end mt-3 mt-md-0">
+                    <a href="{{ url_for('journal_entries') }}" class="btn btn-outline-primary">
+                        <i class="bi bi-journals"></i> View all entries
+                    </a>
+                </div>
+        </div>
+    </div>
+</div>
+
+    <!-- Main Content Section -->
+    <div class="container py-4">
+    <div class="row">
+            <!-- Journal Entry Form -->
+        <div class="col-lg-8">
+                <div class="card journal-card shadow-lg">
+                    <div class="card-body p-4">
+                        <h3 class="card-title mb-4">New Journal Entry</h3>
+                        <form method="POST" action="{{ url_for('journal_new') }}" id="journalForm">
+                    {{ form.hidden_tag() }}
+                    
+                            <!-- Title Field -->
+                    <div class="mb-4">
+                                <label for="{{ form.title.id }}" class="form-label">
+                                    <i class="bi bi-pencil-fill"></i> Title
+                                </label>
+                                {{ form.title(class="form-control", placeholder="What's on your mind today?", autocomplete="off") }}
+                    </div>
+                    
+                            <!-- Mood Selector -->
+                            <div class="mb-4">
+                                <div class="mood-title">
+                                    <i class="bi bi-emoji-smile"></i> How are you feeling?
+                                </div>
+                                
+                                <div class="mood-list">
+                                    <button type="button" class="mood-button" data-mood="very_sad">
+                                        <div class="mood-emoji">😢</div>
+                                        <div class="mood-label">Very Sad</div>
+                                    </button>
+                                    <button type="button" class="mood-button" data-mood="sad">
+                                        <div class="mood-emoji">😔</div>
+                                        <div class="mood-label">Sad</div>
+                                    </button>
+                                    <button type="button" class="mood-button active" data-mood="neutral">
+                                        <div class="mood-emoji">😐</div>
+                                        <div class="mood-label">Neutral</div>
+                                    </button>
+                                    <button type="button" class="mood-button" data-mood="happy">
+                                        <div class="mood-emoji">😊</div>
+                                        <div class="mood-label">Happy</div>
+                                    </button>
+                                    <button type="button" class="mood-button" data-mood="very_happy">
+                                        <div class="mood-emoji">😄</div>
+                                        <div class="mood-label">Very Happy</div>
+                                    </button>
+                                </div>
+                                
+                                <!-- Hidden select field -->
+                                <div style="display: none;">
+                                    {{ form.mood(class="form-select") }}
+                                </div>
+                            </div>
+                            
+                            <!-- Content Field -->
+                            <div class="mb-4">
+                                <label for="{{ form.content.id }}" class="form-label">
+                                    <i class="bi bi-journal-text"></i> Your Journal
+                                </label>
+                                {{ form.content(class="form-control content-area", rows="12", placeholder="Share your thoughts here...", id="journalContent") }}
+                                <div class="d-flex justify-content-between mt-2">
+                                    <div class="text-muted small">
+                                        <i class="bi bi-lock-fill"></i> Private & Secure
+                                    </div>
+                                    <div class="character-counter small">0 characters</div>
+                                </div>
+                            </div>
+                            
+                            <!-- Submit Button -->
+                            <div class="d-flex justify-content-end mt-4">
+                                <button type="button" class="btn btn-secondary me-2" id="saveDraft">
+                                    <i class="bi bi-save"></i> Save Draft
+                                </button>
+                                {{ form.submit(class="btn btn-primary", value="Save Entry") }}
+                            </div>
+                        </form>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Sidebar -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <!-- Writing Prompts Card -->
+                <div class="card shadow-sm mb-4">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="bi bi-lightbulb-fill text-warning me-2"></i>
+                        <h5 class="card-title mb-0">Writing Prompts</h5>
+                    </div>
+                    <div class="card-body">
+                        <div class="prompt-list">
+                            <div class="prompt-item">What am I grateful for today?</div>
+                            <div class="prompt-item">How did I feel throughout the day?</div>
+                            <div class="prompt-item">What's one challenge I overcame?</div>
+                            <div class="prompt-item">What brought me joy today?</div>
+                            <div class="prompt-item">What's one thing I learned today?</div>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Tips Card -->
+                <div class="card shadow-sm">
+                    <div class="card-header d-flex align-items-center">
+                        <i class="bi bi-info-circle-fill text-primary me-2"></i>
+                        <h5 class="card-title mb-0">Journal Tips</h5>
+                    </div>
+                    <div class="card-body">
+                        <ul class="tip-list">
+                            <li>
+                                <span class="tip-title">Be honest</span>
+                                <p class="tip-desc">Write authentically without worrying about judgment.</p>
+                            </li>
+                            <li>
+                                <span class="tip-title">Be consistent</span>
+                                <p class="tip-desc">Try to journal regularly for the best benefits.</p>
+                            </li>
+                            <li>
+                                <span class="tip-title">Be specific</span>
+                                <p class="tip-desc">Include details to better process your experiences.</p>
+                            </li>
+                        </ul>
+                </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+        // Mood Selection
+        const moodButtons = document.querySelectorAll('.mood-button');
+        const moodSelect = document.querySelector('select[name="mood"]');
+        
+        // Set initial value for the form
+        if (moodSelect && document.querySelector('.mood-button.active')) {
+            const activeMood = document.querySelector('.mood-button.active').getAttribute('data-mood');
+            setMoodSelectValue(activeMood, moodSelect);
+            
+            // Add animation to initial active button
+            const activeButton = document.querySelector('.mood-button.active');
+            animateMoodSelection(activeButton);
+        }
+        
+        moodButtons.forEach(button => {
+            button.addEventListener('click', function() {
+                // Remove active class from all buttons
+                moodButtons.forEach(btn => {
+                    btn.classList.remove('active');
+                    btn.style.transform = '';
+                });
+                
+                // Add active class to clicked button
+                this.classList.add('active');
+                
+                // Animate the selection
+                animateMoodSelection(this);
+                
+                // Set the value in the hidden select
+                const moodValue = this.getAttribute('data-mood');
+                setMoodSelectValue(moodValue, moodSelect);
+                
+                // Update UI feedback based on mood
+                updateMoodFeedback(moodValue);
+            });
+            
+            // Add hover animation
+            button.addEventListener('mouseenter', function() {
+                if (!this.classList.contains('active')) {
+                    this.querySelector('.mood-emoji').style.transform = 'scale(1.2)';
+                }
+            });
+            
+            button.addEventListener('mouseleave', function() {
+                if (!this.classList.contains('active')) {
+                    this.querySelector('.mood-emoji').style.transform = '';
+                }
+            });
+        });
+        
+        // Function to animate mood selection
+        function animateMoodSelection(button) {
+            // Pop effect
+            button.style.transform = 'translateY(-5px)';
+            setTimeout(() => {
+                if (button.classList.contains('active')) {
+                    button.style.transform = 'translateY(-3px)';
+                }
+            }, 300);
+            
+            // Pulse emoji
+            const emoji = button.querySelector('.mood-emoji');
+            emoji.style.transform = 'scale(1.4)';
+            setTimeout(() => {
+                emoji.style.transform = 'scale(1.2)';
+            }, 300);
+        }
+        
+        // Function to update UI based on mood
+        function updateMoodFeedback(mood) {
+            const feedbackMap = {
+                'very_sad': 'Taking time to acknowledge difficult feelings is important. Consider what support you need right now.',
+                'sad': 'It\'s okay to feel down. Writing about your feelings can help process them.',
+                'neutral': 'A balanced state can be a good time for reflection. What\'s on your mind today?',
+                'happy': 'Wonderful! Capture this positive energy in your journal entry.',
+                'very_happy': 'Excellent! Document what\'s bringing you joy so you can look back on these moments.'
+            };
+            
+            // Check if feedback element exists, otherwise create it
+            let feedbackEl = document.querySelector('.mood-feedback');
+            if (!feedbackEl) {
+                feedbackEl = document.createElement('div');
+                feedbackEl.className = 'mood-feedback text-center mb-3 mt-2';
+                feedbackEl.style.fontSize = '0.9rem';
+                feedbackEl.style.opacity = '0';
+                feedbackEl.style.transition = 'opacity 0.3s ease';
+                
+                const moodListEl = document.querySelector('.mood-list');
+                moodListEl.parentNode.insertBefore(feedbackEl, moodListEl.nextSibling);
+            }
+            
+            // Set feedback text and fade in
+            feedbackEl.textContent = feedbackMap[mood] || '';
+            feedbackEl.style.opacity = '0';
+            
+            setTimeout(() => {
+                feedbackEl.style.opacity = '1';
+            }, 50);
+            
+            // Set color based on mood
+            const colorMap = {
+                'very_sad': '#ff5d6e',
+                'sad': '#ffb56b', 
+                'neutral': '#88c9a1',
+                'happy': '#6bb5ff',
+                'very_happy': '#7984ff'
+            };
+            
+            feedbackEl.style.color = colorMap[mood] || 'var(--text-secondary)';
+        }
+        
+        // Helper function to set the mood select value
+        function setMoodSelectValue(moodValue, selectElement) {
+            if (!selectElement) return;
+            
+            // Map mood value to select option
+            const moodMap = {
+                'very_sad': 'verysad',
+                'sad': 'sad',
+                'neutral': 'neutral',
+                'happy': 'happy', 
+                'very_happy': 'veryhappy'
+            };
+            
+            const mappedValue = moodMap[moodValue] || moodValue.replace('_', '');
+            
+            // Find the corresponding option in the select
+            const selectOptions = selectElement.options;
+            for (let i = 0; i < selectOptions.length; i++) {
+                if (selectOptions[i].value.toLowerCase() === mappedValue) {
+                    selectElement.selectedIndex = i;
+                    break;
+                }
+            }
+        }
+        
+        // Character Counter
+        const journalContent = document.getElementById('journalContent');
+        const charCounter = document.querySelector('.character-counter');
+        
+        journalContent.addEventListener('input', function() {
+            const count = this.value.length;
+            charCounter.textContent = count + ' characters';
+            
+            // Change color based on length
+            if (count > 1000) {
+                charCounter.style.color = '#228BE6'; // Info color for longer entries
+            } else if (count > 500) {
+                charCounter.style.color = '#40C057'; // Success color for medium entries
+            } else {
+                charCounter.style.color = ''; // Default color for short entries
+            }
+        });
+        
+        // Writing Prompts
+        const promptItems = document.querySelectorAll('.prompt-item');
+        
+        promptItems.forEach(item => {
+            item.addEventListener('click', function() {
+                const promptText = this.textContent;
+                const currentContent = journalContent.value;
+                
+                // Add the prompt to the content area
+                if (currentContent) {
+                    journalContent.value = currentContent + '\n\n' + promptText + '\n';
+                } else {
+                    journalContent.value = promptText + '\n';
+                }
+                
+                // Trigger input event to update character count
+                const event = new Event('input', {
+                    bubbles: true,
+                    cancelable: true,
+                });
+                journalContent.dispatchEvent(event);
+                
+                // Focus on the textarea
+                journalContent.focus();
+                
+                // Move cursor to the end
+                journalContent.selectionStart = journalContent.value.length;
+                journalContent.selectionEnd = journalContent.value.length;
+                
+                // Provide visual feedback
+                this.style.backgroundColor = 'var(--primary-light)';
+                setTimeout(() => {
+                    this.style.backgroundColor = '';
+                }, 300);
+            });
+        });
+        
+        // Save Draft Button
+        const saveDraftBtn = document.getElementById('saveDraft');
+        
+        saveDraftBtn.addEventListener('click', function() {
+            // Get form values
+            const title = document.querySelector('input[name="title"]').value || 'Untitled Draft';
+            const content = journalContent.value;
+            const mood = moodSelect.options[moodSelect.selectedIndex].value;
+            
+            // Save to localStorage
+            const draft = {
+                title: title,
+                content: content,
+                mood: mood,
+                timestamp: new Date().toISOString()
+            };
+            
+            localStorage.setItem('journalDraft', JSON.stringify(draft));
+            
+            // Show confirmation
+            const originalText = this.innerHTML;
+            this.innerHTML = '<i class="bi bi-check-circle"></i> Draft Saved';
+            this.disabled = true;
+            
+            setTimeout(() => {
+                this.innerHTML = originalText;
+                this.disabled = false;
+            }, 2000);
+        });
+        
+        // Check for saved draft when page loads
+        const savedDraft = localStorage.getItem('journalDraft');
+        
+        if (savedDraft) {
+            const draft = JSON.parse(savedDraft);
+            const loadDraftBanner = document.createElement('div');
+            loadDraftBanner.className = 'alert alert-info alert-dismissible fade show d-flex align-items-center';
+            loadDraftBanner.innerHTML = `
+                <i class="bi bi-info-circle-fill me-2"></i>
+                <div>
+                    You have a saved draft from ${new Date(draft.timestamp).toLocaleString()}. 
+                    <button type="button" class="btn btn-link p-0 ms-2" id="loadDraftBtn">Load draft</button>
+                </div>
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            document.querySelector('.card-body').insertBefore(loadDraftBanner, document.querySelector('form'));
+            
+            document.getElementById('loadDraftBtn').addEventListener('click', function() {
+                document.querySelector('input[name="title"]').value = draft.title;
+                journalContent.value = draft.content;
+                
+                // Set mood
+                const moodValue = draft.mood.toLowerCase();
+                const draftMoodMapping = {
+                    'verysad': 'very_sad',
+                    'sad': 'sad',
+                    'neutral': 'neutral',
+                    'happy': 'happy',
+                    'veryhappy': 'very_happy'
+                };
+                
+                const mappedMoodValue = draftMoodMapping[moodValue] || moodValue;
+                
+                moodButtons.forEach(button => {
+                    if (button.getAttribute('data-mood') === mappedMoodValue) {
+                        button.click();
+                    }
+                });
+                
+                // Update character count
+                journalContent.dispatchEvent(new Event('input', {
+                    bubbles: true,
+                    cancelable: true,
+                }));
+                
+                // Remove banner
+                loadDraftBanner.remove();
+            });
+        }
+        
+        // Form Submit Validation
+        document.getElementById('journalForm').addEventListener('submit', function(e) {
+            if (!journalContent.value.trim()) {
+                e.preventDefault();
+                
+                journalContent.classList.add('is-invalid');
+                
+                // Create validation message
+                const invalidFeedback = document.createElement('div');
+                invalidFeedback.className = 'invalid-feedback';
+                invalidFeedback.textContent = 'Please write something in your journal.';
+                
+                // Add after textarea if not already present
+                if (!document.querySelector('.invalid-feedback')) {
+                    journalContent.parentNode.appendChild(invalidFeedback);
+                }
+                
+                journalContent.focus();
+            } else {
+                // Clear draft when successfully submitting
+                localStorage.removeItem('journalDraft');
+            }
+        });
+        
+        // Remove validation error when user starts typing
+        journalContent.addEventListener('input', function() {
+            if (this.classList.contains('is-invalid')) {
+                this.classList.remove('is-invalid');
+                const feedback = document.querySelector('.invalid-feedback');
+                if (feedback) {
+                    feedback.remove();
+                }
+            }
+        });
+    });
+</script>
+{% endblock %}

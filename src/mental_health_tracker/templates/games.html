@@ -1,0 +1,679 @@
+{% extends "base.html" %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/games.css') }}">
+<link rel="stylesheet" href="{{ url_for('static', filename='css/dashboard.css') }}">
+<style>
+    body {
+        background: linear-gradient(135deg, #1a1f2c 0%, #2d3748 100%);
+        min-height: 100vh;
+        padding-bottom: 3rem;
+        color: #ffffff;
+        font-family: 'Inter', system-ui, -apple-system, sans-serif;
+    }
+    
+    .main-content {
+        position: relative;
+        z-index: 1;
+    }
+    
+    @media (max-width: 768px) {
+        .stat-highlight {
+            margin-bottom: 1.5rem;
+        }
+    }
+
+    .game-card {
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.3);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+        border-radius: 16px;
+        color: #f8fafc;
+    }
+
+    .game-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px 0 rgba(0, 0, 0, 0.4);
+    }
+
+    .breathing-game-card {
+        background: linear-gradient(135deg, rgba(34, 197, 94, 0.9), rgba(16, 185, 129, 0.9));
+        box-shadow: 0 4px 15px rgba(34, 197, 94, 0.3);
+    }
+    
+    .tictactoe-game-card {
+        background: linear-gradient(135deg, rgba(124, 58, 237, 0.9), rgba(99, 102, 241, 0.9));
+        box-shadow: 0 4px 15px rgba(124, 58, 237, 0.3);
+    }
+    
+    .snake-game-card {
+        background: linear-gradient(135deg, rgba(239, 68, 68, 0.9), rgba(248, 113, 113, 0.9));
+        box-shadow: 0 4px 15px rgba(239, 68, 68, 0.3);
+    }
+    
+    .color-matching-card {
+        background: linear-gradient(135deg, rgba(14, 165, 233, 0.9), rgba(59, 130, 246, 0.9));
+        box-shadow: 0 4px 15px rgba(14, 165, 233, 0.3);
+    }
+    
+    .dashboard-card {
+        background: linear-gradient(135deg, rgba(244, 143, 177, 0.95), rgba(236, 64, 122, 0.95));
+    }
+
+    .game-description {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 1.1rem;
+        margin-bottom: 2rem;
+        line-height: 1.6;
+        font-weight: 500;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .game-title {
+        font-weight: 700;
+        color: #ffffff;
+        font-size: 1.8rem;
+        margin-bottom: 1rem;
+        position: relative;
+        display: inline-block;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .dashboard-title {
+        color: #ffffff;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.4);
+    }
+
+    .dashboard-subtitle {
+        color: rgba(255, 255, 255, 0.9);
+        font-weight: 500;
+    }
+
+    .text-muted {
+        color: rgba(255, 255, 255, 0.7) !important;
+        font-weight: 500;
+    }
+
+    .small.text-muted {
+        color: rgba(255, 255, 255, 0.7) !important;
+        font-weight: 500;
+    }
+
+    .btn-link {
+        color: var(--deep-moss);
+        font-weight: 500;
+        text-decoration: none;
+    }
+
+    .btn-link:hover {
+        color: var(--dark-forest);
+        text-decoration: underline;
+    }
+
+    /* Game status and info text */
+    .game-status span,
+    .game-info span {
+        color: var(--dark-brown);
+        font-weight: 600;
+    }
+
+    /* Breathing instruction text */
+    .breathing-instruction {
+        color: var(--dark-brown);
+        font-weight: 600;
+        font-size: 1.2rem;
+    }
+
+    /* Stats text */
+    .stat-highlight h4 {
+        color: var(--dark-brown);
+        font-weight: 600;
+    }
+
+    .stat-highlight p {
+        color: var(--medium-brown);
+        font-weight: 500;
+    }
+
+    /* Card body text */
+    .glass-card .card-body {
+        color: var(--dark-brown);
+    }
+
+    /* Nature badge text */
+    .nature-badge span {
+        color: var(--dark-brown);
+        font-weight: 600;
+    }
+
+    /* Game scores and stats */
+    #snake-score,
+    #color-moves,
+    #color-pairs,
+    #tictactoe-status {
+        color: var(--dark-brown);
+        font-weight: 600;
+    }
+
+    /* Button text */
+    .btn-primary {
+        color: var(--dark-brown);
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.9);
+    }
+
+    .btn-secondary {
+        color: var(--dark-brown);
+        font-weight: 600;
+        background: rgba(255, 255, 255, 0.8);
+    }
+
+    /* Card text contrast */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9); /* More opaque background */
+    }
+
+    .glass-card .card-body {
+        color: #2c3e50; /* Darker text in cards */
+    }
+
+    /* Game status text */
+    .game-status span,
+    .game-info span {
+        color: #2c3e50; /* Darker text for game status */
+    }
+
+    /* Breathing instruction text */
+    .breathing-instruction {
+        color: #1a1a1a; /* Darker text for breathing instructions */
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Add a subtle wood-like texture to cards */
+    .glass-card {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(139, 69, 19, 0.3);
+    }
+
+    /* Feature icons with earthy background */
+    .feature-icon-wrapper {
+        background: rgba(139, 69, 19, 0.2);
+    }
+
+    .feature-icon {
+        color: var(--dark-brown);
+        text-shadow: 0 1px 3px rgba(255, 255, 255, 0.5);
+    }
+
+    /* Game title underline in brown */
+    .game-title::after {
+        background: rgba(139, 69, 19, 0.5);
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page position-fixed w-100 h-100" style="top: 0; left: 0; z-index: -1;"></div>
+
+<!-- Decorative Nature Elements -->
+<div class="nature-elements position-fixed w-100 h-100" style="top: 0; left: 0; z-index: -1; pointer-events: none;">
+    <div class="leaf leaf-1"></div>
+    <div class="leaf leaf-2"></div>
+    <div class="leaf leaf-3"></div>
+    <div class="leaf leaf-4"></div>
+    <div class="floating-particle particle-1"></div>
+    <div class="floating-particle particle-2"></div>
+    <div class="floating-particle particle-3"></div>
+</div>
+
+<div class="container mt-5">
+    <div class="dashboard-header text-center mb-5">
+        <h1 class="dashboard-title">Relaxation & Focus Games</h1>
+        <p class="dashboard-subtitle">Engage with these interactive games designed to reduce stress and promote calm</p>
+        <div class="nature-badge">
+            <i class="bi bi-controller-fill pulse-icon"></i>
+            <span>Your Mental Wellness Playground</span>
+        </div>
+    </div>
+
+    <div class="row g-4 mb-5">
+        <!-- Breathing Exercise -->
+        <div class="col-lg-6 mb-4">
+            <div class="card glass-card breathing-game-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon-wrapper mb-3">
+                        <i class="fas fa-wind feature-icon fa-2x"></i>
+                    </div>
+                    <h3 class="game-title mb-3">Guided Breathing</h3>
+                    <p class="game-description">Experience deep relaxation with our guided breathing exercise. Follow the calming animation and let your stress melt away.</p>
+                    <div class="d-flex justify-content-center">
+                        <a href="{{ url_for('breathing_exercise') }}" class="btn btn-primary">Start Exercise</a>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Tic Tac Toe Game -->
+        <div class="col-lg-6 mb-4">
+            <div class="card glass-card tictactoe-game-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon-wrapper mb-3">
+                        <i class="bi bi-grid-3x3 feature-icon"></i>
+                    </div>
+                    <h3 class="game-title mb-3">Tic Tac Toe</h3>
+                    <p class="game-description mb-4">A classic game of Tic Tac Toe to relax your mind while engaging in simple strategy.</p>
+                    
+                    <!-- Initial Start Button -->
+                    <div id="tictactoe-start-screen" class="text-center">
+                        <a href="{{ url_for('ttt_excercise') }}" class="btn btn-primary btn-lg px-4 mb-3">Start Game</a>
+                        <p class="small text-muted mt-2">Play against a friend taking turns on the same device</p>
+                    </div>
+                    
+                    <!-- Game Interface - Hidden Initially -->
+                    <div id="tictactoe-game" class="mt-4" style="display: none;">
+                        <div class="game-status mb-3">
+                            <span id="tictactoe-status">Player X's turn</span>
+                        </div>
+                        <div class="tictactoe-board">
+                            <div class="tictactoe-cell" data-cell-index="0"></div>
+                            <div class="tictactoe-cell" data-cell-index="1"></div>
+                            <div class="tictactoe-cell" data-cell-index="2"></div>
+                            <div class="tictactoe-cell" data-cell-index="3"></div>
+                            <div class="tictactoe-cell" data-cell-index="4"></div>
+                            <div class="tictactoe-cell" data-cell-index="5"></div>
+                            <div class="tictactoe-cell" data-cell-index="6"></div>
+                            <div class="tictactoe-cell" data-cell-index="7"></div>
+                            <div class="tictactoe-cell" data-cell-index="8"></div>
+                        </div>
+                        <div class="mt-4">
+                            <button id="restart-tictactoe" class="btn btn-secondary">Restart Game</button>
+                        </div>
+                        <div class="mt-3 game-stats">
+                            <a href="{{ url_for('games_dashboard') }}" class="btn btn-link">View Game Stats</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row g-4">
+        <!-- Snake Game -->
+        <div class="col-lg-6 mb-4">
+            <div class="card glass-card snake-game-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon-wrapper mb-3">
+                        <i class="bi bi-controller feature-icon"></i>
+                    </div>
+                    <h3 class="game-title mb-3">Snake Game</h3>
+                    <p class="game-description mb-4">Navigate the snake to collect food while avoiding collisions. An engaging game to occupy your mind.</p>
+                    
+                    <!-- Initial Start Button -->
+                    <div id="snake-start-screen" class="text-center">
+                        <a href="{{ url_for('snake_exercise') }}" class="btn btn-primary btn-lg px-4 mb-3">Start Game</a>
+                        <p class="small text-muted mt-2">Use arrow keys to control the snake</p>
+                    </div>
+                    
+                    <!-- Game Interface - Hidden Initially -->
+                    <div id="snake-game-container" class="mt-4" style="display: none;">
+                        <div class="game-info mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Score: <span id="snake-score">0</span></span>
+                                <button id="start-snake" class="btn btn-secondary">Restart</button>
+                            </div>
+                        </div>
+                        <div class="snake-canvas-container">
+                            <canvas id="snake-canvas" width="300" height="300"></canvas>
+                        </div>
+                        <div class="mt-3 game-stats">
+                            <a href="{{ url_for('games_dashboard') }}" class="btn btn-link">View Game Stats</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Color Matching Game -->
+        <div class="col-lg-6 mb-4">
+            <div class="card glass-card color-matching-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon-wrapper mb-3">
+                        <i class="bi bi-palette feature-icon"></i>
+                    </div>
+                    <h3 class="game-title mb-3">Color Matching</h3>
+                    <p class="game-description mb-4">Test your memory by matching pairs of colored cards. A simple yet engaging memory game.</p>
+                    
+                    <!-- Initial Start Button -->
+                    <div id="color-matching-start-screen" class="text-center">
+                        <a href="{{ url_for('matching_exercise') }}" class="btn btn-primary btn-lg px-4 mb-3">Start Game</a>
+                        <p class="small text-muted mt-2">Find all matching color pairs</p>
+                    </div>
+                    
+                    <!-- Game Interface - Hidden Initially -->
+                    <div id="color-matching-container" class="mt-4" style="display: none;">
+                        <div class="game-info mb-3">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <span>Moves: <span id="color-moves">0</span></span>
+                                <span>Pairs: <span id="color-pairs">0</span>/<span>8</span></span>
+                            </div>
+                        </div>
+                        <div class="color-matching-board"></div>
+                        <div class="mt-3">
+                            <button id="start-color-matching" class="btn btn-secondary">New Game</button>
+                            <a href="{{ url_for('games_dashboard') }}" class="btn btn-link">View Game Stats</a>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Games Dashboard Card -->
+    <div class="row mt-4 mb-5">
+        <div class="col-12">
+            <div class="card glass-card dashboard-card h-100">
+                <div class="card-body text-center p-4">
+                    <div class="feature-icon-wrapper mb-3">
+                        <i class="bi bi-bar-chart-line feature-icon"></i>
+                    </div>
+                    <h3 class="game-title mb-3">Games Dashboard</h3>
+                    <p class="game-description mb-4">Track your progress, view statistics, and see your achievements across all games in one place.</p>
+                    
+                    <div class="dashboard-preview">
+                        <div class="row mt-4">
+                            <div class="col-md-4">
+                                <div class="stat-highlight">
+                                    <i class="bi bi-grid-3x3 text-primary mb-2"></i>
+                                    <h4>Tic Tac Toe</h4>
+                                    <p class="text-muted">Win rate & statistics</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-highlight">
+                                    <i class="bi bi-controller text-primary mb-2"></i>
+                                    <h4>Snake Game</h4>
+                                    <p class="text-muted">High scores & recent games</p>
+                                </div>
+                            </div>
+                            <div class="col-md-4">
+                                <div class="stat-highlight">
+                                    <i class="bi bi-palette text-primary mb-2"></i>
+                                    <h4>Color Matching</h4>
+                                    <p class="text-muted">Best moves & averages</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-4">
+                        <a href="{{ url_for('games_dashboard') }}" class="btn btn-primary btn-lg px-4">
+                            <i class="bi bi-bar-chart-line me-2"></i>View Dashboard
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block scripts %}
+<script src="{{ url_for('static', filename='js/games.js') }}"></script>
+{% endblock %}
+
+{% block extra_css %}
+<style>
+    /* Enhanced card styling to match dashboard */
+    .glass-card {
+        border: 1px solid rgba(139, 69, 19, 0.3);
+        box-shadow: 0 8px 32px 0 rgba(62, 39, 35, 0.2);
+        backdrop-filter: blur(8px);
+        -webkit-backdrop-filter: blur(8px);
+        transition: all 0.3s ease;
+        margin-bottom: 2rem;
+    }
+    
+    .glass-card:hover {
+        transform: translateY(-10px);
+        box-shadow: 0 15px 40px 0 rgba(62, 39, 35, 0.3);
+    }
+    
+    .glass-card .card-body {
+        padding: 2rem;
+    }
+    
+    /* Feature icons with animated pulse effect */
+    .feature-icon-wrapper {
+        width: 80px;
+        height: 80px;
+        margin: 0 auto 1.5rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        border-radius: 50%;
+        background: rgba(139, 69, 19, 0.2);
+        backdrop-filter: blur(5px);
+        box-shadow: 0 8px 25px rgba(62, 39, 35, 0.2);
+        position: relative;
+        overflow: hidden;
+    }
+    
+    .feature-icon-wrapper::after {
+        content: '';
+        position: absolute;
+        width: 100%;
+        height: 100%;
+        background: radial-gradient(circle, rgba(139, 69, 19, 0.3) 0%, rgba(139, 69, 19, 0) 70%);
+        opacity: 0;
+        border-radius: 50%;
+        animation: pulse-ring 3s infinite;
+    }
+    
+    @keyframes pulse-ring {
+        0% {
+            transform: scale(0.8);
+            opacity: 0;
+        }
+        50% {
+            opacity: 0.5;
+        }
+        100% {
+            transform: scale(1.5);
+            opacity: 0;
+        }
+    }
+    
+    .feature-icon {
+        font-size: 35px;
+        color: var(--dark-brown);
+        text-shadow: 0 2px 10px rgba(255, 255, 255, 0.5);
+        z-index: 1;
+    }
+    
+    /* Enhanced game title styling */
+    .game-title::after {
+        content: '';
+        position: absolute;
+        bottom: -8px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 40px;
+        height: 3px;
+        background: rgba(139, 69, 19, 0.5);
+        border-radius: 3px;
+    }
+    
+    /* Button styling to match dashboard */
+    .btn-primary {
+        background: rgba(255, 255, 255, 0.9);
+        border: 1px solid rgba(139, 69, 19, 0.3);
+        backdrop-filter: blur(5px);
+        color: var(--dark-brown);
+        font-weight: 600;
+        box-shadow: 0 4px 10px rgba(62, 39, 35, 0.15);
+        transition: all 0.3s ease;
+    }
+    
+    .btn-primary:hover {
+        background: rgba(255, 255, 255, 0.95);
+        transform: translateY(-3px);
+        box-shadow: 0 7px 15px rgba(62, 39, 35, 0.2);
+        border-color: rgba(139, 69, 19, 0.5);
+    }
+    
+    .btn-secondary {
+        background: rgba(255, 255, 255, 0.8);
+        border: 1px solid rgba(139, 69, 19, 0.2);
+        color: var(--medium-brown);
+    }
+    
+    .btn-secondary:hover {
+        background: rgba(255, 255, 255, 0.9);
+        color: var(--dark-brown);
+    }
+    
+    .game-status, .game-info {
+        color: var(--dark-brown);
+        font-weight: 600;
+        text-shadow: 0 1px 3px rgba(255, 255, 255, 0.3);
+    }
+    
+    /* Game interfaces */
+    .breathing-circle {
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        background: rgba(139, 69, 19, 0.15);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin: 0 auto;
+        transition: all 4s ease-in-out;
+        box-shadow: 0 0 30px rgba(139, 69, 19, 0.2);
+    }
+    
+    .breathing-instruction {
+        color: var(--dark-brown);
+        font-weight: 600;
+        font-size: 1.2rem;
+        text-shadow: 0 1px 2px rgba(255, 255, 255, 0.5);
+    }
+    
+    /* Game components with brown accents */
+    .tictactoe-board {
+        display: grid;
+        grid-template-columns: repeat(3, 1fr);
+        gap: 10px;
+        max-width: 300px;
+        margin: 0 auto;
+    }
+    
+    .tictactoe-cell {
+        aspect-ratio: 1;
+        background: rgba(139, 69, 19, 0.15);
+        border-radius: 10px;
+        cursor: pointer;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 2rem;
+        font-weight: bold;
+        color: var(--dark-brown);
+        transition: all 0.3s ease;
+    }
+    
+    .tictactoe-cell:hover {
+        background: rgba(139, 69, 19, 0.25);
+        transform: scale(1.05);
+    }
+
+    /* Snake game elements */
+    .snake-canvas-container {
+        border-radius: 12px;
+        overflow: hidden;
+        margin: 0 auto;
+        max-width: 300px;
+        background: rgba(139, 69, 19, 0.15);
+        padding: 2px;
+    }
+    
+    #snake-canvas {
+        display: block;
+        background: rgba(255, 255, 255, 0.9);
+        border-radius: 10px;
+    }
+    
+    /* Color matching game */
+    .color-matching-board {
+        display: grid;
+        grid-template-columns: repeat(4, 1fr);
+        grid-template-rows: repeat(4, 1fr);
+        gap: 10px;
+        max-width: 300px;
+        margin: 10px auto;
+    }
+    
+    .color-card {
+        aspect-ratio: 1;
+        background: rgba(139, 69, 19, 0.15);
+        border-radius: 8px;
+        cursor: pointer;
+        transition: all 0.3s ease;
+    }
+    
+    .color-card:hover {
+        transform: scale(1.05);
+        background: rgba(139, 69, 19, 0.25);
+    }
+    
+    /* Stat highlight boxes */
+    .stat-highlight {
+        padding: 1.5rem;
+        border-radius: 10px;
+        background: rgba(139, 69, 19, 0.1);
+        margin-bottom: 1rem;
+        transition: all 0.3s ease;
+    }
+    
+    .stat-highlight:hover {
+        background: rgba(139, 69, 19, 0.2);
+        transform: translateY(-5px);
+    }
+    
+    .stat-highlight i {
+        font-size: 2rem;
+        color: var(--medium-brown);
+        opacity: 0.9;
+    }
+    
+    .dashboard-preview {
+        margin-top: 2rem;
+        margin-bottom: 2rem;
+    }
+    
+    /* Responsive adjustments */
+    @media (max-width: 768px) {
+        .feature-icon-wrapper {
+            width: 60px;
+            height: 60px;
+        }
+        
+        .feature-icon {
+            font-size: 28px;
+        }
+        
+        .game-title {
+            font-size: 1.5rem;
+        }
+        
+        .breathing-circle {
+            width: 120px;
+            height: 120px;
+        }
+    }
+</style>
+{% endblock %}

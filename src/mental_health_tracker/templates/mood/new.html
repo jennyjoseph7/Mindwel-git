@@ -1,0 +1,111 @@
+{% extends "base.html" %}
+
+{% block title %}New Mood Entry{% endblock %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header bg-primary text-white">
+                    <h4 class="mb-0">How are you feeling today?</h4>
+                </div>
+                <div class="card-body">
+                    <form method="POST" action="{{ url_for('mood_new') }}">
+                        <div class="mb-4">
+                            <label class="form-label">Mood Rating</label>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div class="mood-options">
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="mood_score" id="mood1" value="1" required>
+                                        <label class="form-check-label" for="mood1">
+                                            <i class="bi bi-emoji-frown"></i> Very Sad
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="mood_score" id="mood2" value="2">
+                                        <label class="form-check-label" for="mood2">
+                                            <i class="bi bi-emoji-sad"></i> Sad
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="mood_score" id="mood3" value="3">
+                                        <label class="form-check-label" for="mood3">
+                                            <i class="bi bi-emoji-neutral"></i> Neutral
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="mood_score" id="mood4" value="4">
+                                        <label class="form-check-label" for="mood4">
+                                            <i class="bi bi-emoji-smile"></i> Happy
+                                        </label>
+                                    </div>
+                                    <div class="form-check form-check-inline">
+                                        <input class="form-check-input" type="radio" name="mood_score" id="mood5" value="5">
+                                        <label class="form-check-label" for="mood5">
+                                            <i class="bi bi-emoji-laughing"></i> Very Happy
+                                        </label>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="notes" class="form-label">Notes (Optional)</label>
+                            <textarea class="form-control" id="notes" name="notes" rows="3" 
+                                    placeholder="What's on your mind? What's affecting your mood today?"></textarea>
+                        </div>
+
+                        <div class="mb-3">
+                            <label for="activities" class="form-label">Activities (Optional)</label>
+                            <input type="text" class="form-control" id="activities" name="activities" 
+                                   placeholder="What activities have you done today?">
+                        </div>
+
+                        <div class="d-grid gap-2">
+                            <button type="submit" class="btn btn-primary">
+                                <i class="bi bi-save me-2"></i>Save Mood Entry
+                            </button>
+                            <a href="{{ url_for('mood_tracker') }}" class="btn btn-secondary">
+                                <i class="bi bi-arrow-left me-2"></i>Back to Mood Tracker
+                            </a>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+.mood-options {
+    display: flex;
+    justify-content: space-between;
+    width: 100%;
+    padding: 1rem;
+    background-color: #f8f9fa;
+    border-radius: 0.5rem;
+}
+
+.form-check-inline {
+    margin-right: 0;
+    padding: 0.5rem;
+    border-radius: 0.25rem;
+    transition: background-color 0.2s;
+}
+
+.form-check-inline:hover {
+    background-color: #e9ecef;
+}
+
+.form-check-input:checked + .form-check-label {
+    color: #0d6efd;
+    font-weight: bold;
+}
+
+.bi {
+    font-size: 1.5rem;
+    margin-right: 0.5rem;
+}
+</style>
+{% endblock %} 

@@ -1,0 +1,192 @@
+<context>
+# Overview  
+MindWell is a comprehensive mental health tracking application designed to help users monitor, understand, and improve their emotional well-being. In today's fast-paced world, many people struggle with mental health challenges but lack effective tools to track and manage their emotional state. MindWell addresses this problem by providing a holistic platform that combines journaling, mood tracking, AI-powered insights, and interactive wellness activities.
+
+The application serves anyone looking to improve their mental well-being, from those managing diagnosed conditions to individuals simply seeking greater emotional awareness. By making mental health tracking intuitive, engaging, and insightful, MindWell empowers users to take control of their emotional health journey.
+
+# Core Features  
+## Journaling
+- **What it does**: Provides a structured, secure space for users to document thoughts, feelings, and experiences.
+- **Why it's important**: Regular journaling has been shown to reduce stress, improve emotional processing, and increase self-awareness.
+- **How it works**: Users can create journal entries with customizable templates, mood tags, and rich text formatting. The journal interface uses a nature-inspired theme to create a calming environment conducive to reflection.
+
+## Mood Tracking
+- **What it does**: Allows users to log their emotional state multiple times per day, visualize trends over time, and identify patterns.
+- **Why it's important**: Understanding emotional patterns helps users recognize triggers, track treatment effectiveness, and communicate more effectively with healthcare providers.
+- **How it works**: A simple, intuitive interface lets users select their current mood on a scale with visual indicators. The application stores this data and displays it in interactive charts and summary statistics.
+
+## AI-Powered Insights
+- **What it does**: Analyzes journal entries and mood data to generate personalized insights, suggest coping strategies, and identify potential triggers.
+- **Why it's important**: Many users struggle to see patterns in their own behavior or recognize early warning signs of declining mental health.
+- **How it works**: Natural language processing analyzes journal content and correlates it with mood data to identify patterns, themes, and potential intervention points.
+
+## Wellness Activities
+- **What it does**: Offers interactive tools including focus mode, music therapy, and mindfulness games.
+- **Why it's important**: Active engagement with wellness techniques reinforces healthy coping mechanisms and provides immediate relief during difficult moments.
+- **How it works**: Each activity is designed with established psychological principles and gamification elements to maximize engagement and effectiveness.
+
+## Counseling Integration
+- **What it does**: Allows users to book sessions with mental health professionals and share their data securely.
+- **Why it's important**: Professional support is essential for many mental health conditions, and data sharing improves treatment efficacy.
+- **How it works**: A booking system connects users with professionals, while secure data sharing features give users control over what information they share.
+
+# User Experience  
+## User Personas
+1. **Emma, 28, Professional with Anxiety**
+   - Highly functioning but struggles with work-related anxiety
+   - Needs tools that fit into a busy schedule
+   - Values privacy and professional design
+
+2. **Marcus, 19, College Student with Depression**
+   - Managing his condition while navigating academic pressures
+   - Looking for engaging features that don't feel clinical
+   - Wants to track medication effectiveness
+
+3. **Sophia, 42, Wellness Enthusiast**
+   - No diagnosed conditions but prioritizes emotional wellness
+   - Wants to deepen self-awareness and improve emotional intelligence
+   - Values beautiful design and holistic approaches
+
+## Key User Flows
+1. **Daily Check-in Flow**
+   - User logs in → views dashboard summary → logs current mood → receives a relevant prompt for journaling → completes a short journal entry → views updated insights
+
+2. **Crisis Moment Flow**
+   - User experiencing distress → accesses quick help section → selects guided breathing exercise → completes activity → logs mood change → receives affirmation
+
+3. **Progress Review Flow**
+   - User accesses insights section → views mood trends for selected time period → examines journal theme analysis → reviews suggested connections between activities and mood improvements → exports report for therapist
+
+## UI/UX Considerations
+- **Calming Aesthetics**: Nature-inspired color palette with gentle gradients and organic shapes to create a soothing environment.
+- **Accessibility**: High contrast options, screen reader compatibility, and straightforward navigation for users of all abilities.
+- **Progressive Disclosure**: Core features are immediately accessible, with more complex options revealed as users become comfortable with the platform.
+- **Emotional Safety**: Careful consideration in how negative emotions and potentially triggering content are displayed and managed.
+</context>
+<PRD>
+# Technical Architecture  
+## System Components
+- **Frontend**: A responsive web application built with HTML5, CSS3, and JavaScript, using the Flask templating engine for server-side rendering.
+- **Backend**: Python-based Flask application handling business logic, data processing, and API integration.
+- **Database**: SQLite for development and PostgreSQL for production, storing user data, journal entries, mood records, and application settings.
+- **AI Processing**: Integration with AI services for natural language processing and sentiment analysis of journal entries.
+- **Authentication System**: Secure user authentication and authorization with session management and password encryption.
+
+## Data Models
+- **User**: User account information, preferences, and account settings.
+- **Journal Entry**: Text content, creation timestamp, associated mood, tags, and user reference.
+- **Mood Record**: Mood score (1-5), timestamp, optional notes, and user reference.
+- **Activity Log**: Activity type, duration, completion status, timestamp, and user reference.
+- **Insight**: Generated insights, relevance score, creation date, and associated user/data points.
+- **Counseling Booking**: Appointment details, counselor information, status, and user reference.
+
+## APIs and Integrations
+- **AI Integration**: API connection to Claude or similar NLP service for journal analysis and insights generation.
+- **Authentication**: OAuth integration for social login options (Google, Facebook).
+- **Data Visualization**: Chart.js or D3.js for displaying mood trends and statistics.
+- **Notification System**: Email and in-app notification capabilities for reminders and important alerts.
+- **Export Functionality**: Capability to export data in PDF and CSV formats for sharing with healthcare providers.
+
+## Infrastructure Requirements
+- **Hosting**: Cloud-based hosting service like AWS, GCP, or Heroku.
+- **Database**: PostgreSQL database for production environment.
+- **File Storage**: Secure cloud storage for user-uploaded media and application assets.
+- **Caching**: Redis for session management and performance optimization.
+- **Security**: SSL encryption, regular security audits, and compliance with healthcare data regulations.
+
+# Development Roadmap  
+## Phase 1: Foundation and Core Functionality (MVP)
+- User authentication system (registration, login, password recovery)
+- Basic user profile and settings
+- Simple journal entry creation and viewing
+- Basic mood tracking with 5-point scale
+- Minimalist dashboard showing recent entries and mood
+- Responsive design for mobile and desktop use
+
+## Phase 2: Enhanced Features and Analytics
+- Advanced journaling with formatting options and templates
+- Comprehensive mood tracking with factor tagging
+- Basic insights generation from mood data
+- Interactive mood charts and visualizations
+- Customizable reminders and notifications
+- Data export functionality
+
+## Phase 3: AI Integration and Advanced Features
+- AI-powered journal analysis for theme detection
+- Correlation detection between activities and mood
+- Personalized coping strategy suggestions
+- Focus mode with timer and distraction blocking
+- Music therapy integration with curated playlists
+- Rich media support in journal entries
+
+## Phase 4: Wellness Ecosystem and Professional Integration
+- Interactive mindfulness games and activities
+- Counseling booking system
+- Secure data sharing with healthcare providers
+- Community features (optional and privacy-focused)
+- Advanced insights dashboard with predictive elements
+- Wearable device integration for physical health metrics
+
+# Logical Dependency Chain
+## Foundation Layer (Build First)
+1. Basic application setup and environment configuration
+2. User authentication and account management
+3. Core database models and relationships
+4. Simple, functional UI with responsive design principles
+
+## Essential User Features (Build Second)
+5. Journal entry system with basic CRUD operations
+6. Mood tracking functionality with simple visualization
+7. User dashboard displaying recent activity and stats
+8. Settings and preference management
+
+## Enhanced Experience Layer (Build Third)
+9. Advanced journal features (templates, formatting)
+10. Comprehensive mood analysis and visualization
+11. Reminder and notification system
+12. Initial AI integration for basic insights
+
+## Advanced Integration Layer (Build Fourth)
+13. Full AI-powered journal analysis and pattern detection
+14. Interactive wellness activities and tools
+15. Counseling booking and professional integration
+16. Data export and sharing capabilities
+
+# Risks and Mitigations  
+## Technical Challenges
+- **Risk**: AI analysis may produce incorrect or overly generalized insights.
+  **Mitigation**: Implement confidence scoring for insights, clearly label AI-generated content, and allow user feedback to improve algorithms.
+
+- **Risk**: Handling sensitive mental health data securely.
+  **Mitigation**: Implement robust encryption, regular security audits, and compliance with healthcare data regulations (HIPAA, GDPR).
+
+- **Risk**: Performance issues with data visualization of large datasets.
+  **Mitigation**: Implement data aggregation, lazy loading, and efficient querying techniques.
+
+## MVP Scope Management
+- **Risk**: Feature creep extending development timeline.
+  **Mitigation**: Strictly prioritize features based on user needs, implement agile development methodology, and maintain a clear separation between MVP and future enhancements.
+
+- **Risk**: Overly complex UI reducing user adoption.
+  **Mitigation**: Focus on progressive disclosure UX principles, conduct early user testing, and prioritize intuitive design over feature density.
+
+## Resource Constraints
+- **Risk**: Limited development resources for all planned features.
+  **Mitigation**: Adopt modular architecture allowing features to be added incrementally, consider strategic use of existing libraries and services, prioritize core user experience.
+
+- **Risk**: High computational costs for AI processing.
+  **Mitigation**: Implement batch processing for non-time-sensitive analysis, optimize query frequency, and use tiered service levels based on user needs.
+
+# Appendix  
+## Research Findings
+- Studies show journaling combined with mood tracking improves emotional self-awareness by approximately 32% after 8 weeks of regular use.
+- User research indicates a strong preference (78% of participants) for nature-themed interfaces in mental wellness applications.
+- Analysis of similar applications reveals high abandonment rates (65%) when interfaces feel clinical or overly complicated.
+
+## Technical Specifications
+- Browser Compatibility: Chrome, Firefox, Safari, Edge (latest 2 versions)
+- Minimum Mobile Requirements: iOS 13+, Android 8+
+- Recommended Database Scaling: Initial capacity for 10,000 users with 5MB average data storage
+- API Response Time Targets: <500ms for standard requests, <3s for AI processing
+- Accessibility Compliance: WCAG 2.1 Level AA
+</PRD> 

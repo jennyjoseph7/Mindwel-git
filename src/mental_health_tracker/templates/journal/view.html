@@ -1,0 +1,156 @@
+{% extends "base.html" %}
+
+{% block content %}
+<div class="container mt-4">
+    <div class="row">
+        <div class="col-md-8">
+            <div class="card">
+                <div class="card-header">
+                    <h2>{{ entry.title }}</h2>
+                    <small class="text-muted">Posted on {{ entry.date_created.strftime('%Y-%m-%d %H:%M') }}</small>
+                </div>
+                <div class="card-body">
+                    <div class="journal-content">
+                        {{ entry.content | nl2br }}
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <div class="col-md-4">
+            <!-- AI Analysis Card -->
+            <div class="card mb-4">
+                <div class="card-header bg-primary text-white">
+                    <h4><i class="bi bi-graph-up"></i> AI Analysis</h4>
+                </div>
+                <div class="card-body">
+                    <h5>Sentiment Analysis</h5>
+                    {% if entry.sentiment_label %}
+                        <div class="mb-3">
+                            <span class="badge {% if entry.sentiment_label == 'positive' %}bg-success{% elif entry.sentiment_label == 'negative' %}bg-danger{% else %}bg-secondary{% endif %} mb-2">{{ entry.sentiment_label|capitalize }}</span>
+                            <div class="progress">
+                                <div class="progress-bar 
+                                    {% if entry.sentiment_label == 'positive' %}
+                                        bg-success
+                                    {% elif entry.sentiment_label == 'negative' %}
+                                        bg-danger
+                                    {% else %}
+                                        bg-secondary
+                                    {% endif %}" 
+                                    role="progressbar" 
+                                    style="width: {{ ((entry.sentiment_score + 1) / 2 * 100)|round }}%" 
+                                    aria-valuenow="{{ ((entry.sentiment_score + 1) / 2 * 100)|round }}" 
+                                    aria-valuemin="0" 
+                                    aria-valuemax="100">
+                                </div>
+                            </div>
+                            <small class="text-muted">Sentiment Score: {{ entry.sentiment_score|round(2) }}</small>
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No sentiment analysis available</p>
+                    {% endif %}
+                    
+                    <h5 class="mt-4">Detected Emotions</h5>
+                    {% if entry.key_emotions %}
+                        <div class="emotions-chart mb-3">
+                            {% set emotions = entry.key_emotions|fromjson %}
+                            {% for emotion, value in emotions.items() %}
+                                <div class="mb-2">
+                                    <div class="d-flex justify-content-between">
+                                        <span>{{ emotion|capitalize }}</span>
+                                        <span>{{ (value * 100)|round }}%</span>
+                                    </div>
+                                    <div class="progress" style="height: 10px;">
+                                        <div class="progress-bar 
+                                            {% if emotion == 'joy' or emotion == 'happy' %}
+                                                bg-success
+                                            {% elif emotion == 'sadness' %}
+                                                bg-info
+                                            {% elif emotion == 'anger' %}
+                                                bg-danger
+                                            {% elif emotion == 'fear' %}
+                                                bg-warning
+                                            {% else %}
+                                                bg-secondary
+                                            {% endif %}" 
+                                            role="progressbar" 
+                                            style="width: {{ (value * 100)|round }}%" 
+                                            aria-valuenow="{{ (value * 100)|round }}" 
+                                            aria-valuemin="0" 
+                                            aria-valuemax="100">
+                                        </div>
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        <p class="text-muted">No emotion analysis available</p>
+                    {% endif %}
+                    
+                    <!-- AI Recommendations Section -->
+                    <h5 class="mt-4">AI Recommendations</h5>
+                    <div class="recommendations-container">
+                        {% if entry.key_emotions %}
+                            {% set emotions = entry.key_emotions|fromjson %}
+                            {% set recommendations = generate_recommendations(emotions) %}
+                            {% if recommendations %}
+                                <ul class="list-group">
+                                    {% for recommendation in recommendations %}
+                                        <li class="list-group-item">{{ recommendation }}</li>
+                                    {% endfor %}
+                                </ul>
+                            {% else %}
+                                <p class="text-muted">Continue journaling to receive personalized recommendations.</p>
+                            {% endif %}
+                        {% else %}
+                            <p class="text-muted">Continue journaling to receive personalized recommendations.</p>
+                        {% endif %}
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Journal Navigation -->
+            <div class="card">
+                <div class="card-header bg-secondary text-white">
+                    <h4>Actions</h4>
+                </div>
+                <div class="card-body">
+                    <div class="d-grid gap-2">
+                        <a href="{{ url_for('journal_edit', entry_id=entry.id) }}" class="btn btn-outline-primary">
+                            <i class="bi bi-pencil"></i> Edit Entry
+                        </a>
+                        <a href="{{ url_for('journal') }}" class="btn btn-outline-secondary">
+                            <i class="bi bi-arrow-left"></i> Back to Journal
+                        </a>
+                        <button type="button" class="btn btn-outline-danger" data-bs-toggle="modal" data-bs-target="#deleteEntryModal">
+                            <i class="bi bi-trash"></i> Delete Entry
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirmation Modal -->
+<div class="modal fade" id="deleteEntryModal" tabindex="-1" aria-labelledby="deleteEntryModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="deleteEntryModalLabel">Confirm Delete</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to delete this journal entry? This action cannot be undone.
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <form action="{{ url_for('journal_delete', entry_id=entry.id) }}" method="POST">
+                    <input type="hidden" name="csrf_token" value="{{ csrf_token() }}">
+                    <button type="submit" class="btn btn-danger">Delete</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

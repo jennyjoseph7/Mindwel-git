@@ -1,0 +1,1276 @@
+{% extends 'base.html' %}
+
+{% block title %}Games & Activities{% endblock %}
+
+{% block head %}
+<link rel="stylesheet" href="{{ url_for('static', filename='css/games.css') }}">
+<link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+    :root {
+        --forest-green: #22c55e;
+        --leaf-green: #4a7d55;
+        --light-green: #a8d5b5;
+        --bark-brown: #8b5a2b;
+        --soil-brown: #5d4037;
+        --sky-blue: #87ceeb;
+        --sunlight: #ffd700;
+        --mist-white: rgba(255, 255, 255, 0.8);
+        --heading-font: 'Poppins', sans-serif;
+        --body-font: 'Poppins', sans-serif;
+    }
+    
+    body {
+        background-image: linear-gradient(135deg, #1a2e35 0%, #253746 100%);
+        color: #f8fafc !important;
+        font-family: var(--body-font) !important;
+        line-height: 1.6;
+        position: relative;
+        overflow-x: hidden;
+    }
+    
+    /* Dashboard Header */
+    .dashboard-header {
+        position: relative;
+        padding: 3rem 0 4rem;
+        background: linear-gradient(to bottom, rgba(15, 23, 42, 0.8), transparent);
+        overflow: hidden;
+        margin-bottom: -3rem;
+    }
+    
+    .dashboard-title {
+        animation: fadeInUp 0.8s ease-out forwards;
+        font-size: 2.5rem;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 10px rgba(0, 0, 0, 0.3);
+        background: linear-gradient(135deg, var(--forest-green), var(--leaf-green));
+        -webkit-background-clip: text;
+        background-clip: text;
+        color: transparent;
+        font-weight: 800;
+    }
+    
+    .dashboard-subtitle {
+        animation: fadeInUp 1s ease-out forwards;
+        animation-delay: 0.2s;
+        opacity: 0;
+        font-size: 1.2rem;
+        color: var(--light-green);
+        margin-bottom: 1.5rem;
+    }
+    
+    .nature-badge {
+        animation: fadeInUp 1.2s ease-out forwards;
+        animation-delay: 0.4s;
+        opacity: 0;
+        display: inline-flex;
+        align-items: center;
+        background: rgba(34, 197, 94, 0.15);
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        border: 1px solid rgba(34, 197, 94, 0.3);
+        color: var(--light-green);
+        margin-top: 1rem;
+    }
+    
+    .nature-badge i {
+        margin-right: 0.5rem;
+        color: var(--forest-green);
+    }
+    
+    .pulse-icon {
+        animation: pulse 2s infinite;
+    }
+    
+    @keyframes pulse {
+        0% {
+            transform: scale(1);
+            opacity: 1;
+        }
+        50% {
+            transform: scale(1.1);
+            opacity: 0.8;
+        }
+        100% {
+            transform: scale(1);
+            opacity: 1;
+        }
+    }
+    
+    /* Nature Elements */
+    .nature-elements {
+        position: absolute;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        overflow: hidden;
+        pointer-events: none;
+        z-index: 0;
+    }
+    
+    .leaf {
+        position: absolute;
+        width: 30px;
+        height: 30px;
+        background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234a7d55"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C6,8 17,8 17,8Z" /></svg>');
+        background-size: contain;
+        background-repeat: no-repeat;
+        opacity: 0.6;
+        z-index: -1;
+    }
+    
+    .leaf-1 {
+        top: 10%;
+        left: 5%;
+        animation: floating 15s ease-in-out infinite;
+    }
+    
+    .leaf-2 {
+        top: 15%;
+        right: 10%;
+        animation: floating 20s ease-in-out infinite;
+        animation-delay: 2s;
+    }
+    
+    .leaf-3 {
+        top: 40%;
+        left: 20%;
+        animation: floating 18s ease-in-out infinite;
+        animation-delay: 4s;
+    }
+    
+    .leaf-4 {
+        top: 30%;
+        right: 25%;
+        animation: floating 25s ease-in-out infinite;
+        animation-delay: 6s;
+    }
+    
+    .floating-particle {
+        position: absolute;
+        width: 6px;
+        height: 6px;
+        background-color: rgba(255, 255, 255, 0.4);
+        border-radius: 50%;
+        filter: blur(1px);
+    }
+    
+    .particle-1 {
+        bottom: 20%;
+        left: 10%;
+        animation: floating 15s linear infinite;
+    }
+    
+    .particle-2 {
+        bottom: 40%;
+        right: 15%;
+        animation: floating 20s linear infinite;
+        animation-delay: 3s;
+    }
+    
+    .particle-3 {
+        bottom: 30%;
+        left: 40%;
+        animation: floating 18s linear infinite;
+        animation-delay: 7s;
+    }
+    
+    @keyframes floating {
+        0% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+        25% {
+            transform: translate(10px, -15px) rotate(5deg);
+        }
+        50% {
+            transform: translate(20px, 0) rotate(0deg);
+        }
+        75% {
+            transform: translate(10px, 15px) rotate(-5deg);
+        }
+        100% {
+            transform: translate(0, 0) rotate(0deg);
+        }
+    }
+    
+    /* Animation styles */
+    @keyframes fadeInUp {
+        from {
+            opacity: 0;
+            transform: translateY(20px);
+        }
+        to {
+            opacity: 1;
+            transform: translateY(0);
+        }
+    }
+    
+    @keyframes fadeIn {
+        from {
+            opacity: 0;
+        }
+        to {
+            opacity: 1;
+        }
+    }
+    
+    /* Improved Glass Card Design */
+    .glass-card {
+        background: rgba(30, 41, 59, 0.95);
+        backdrop-filter: blur(15px);
+        border-radius: 24px;
+        padding: 2rem;
+        position: relative;
+        overflow: hidden;
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        box-shadow: 0 15px 35px rgba(0, 0, 0, 0.4);
+        z-index: 1;
+        margin-bottom: 2rem;
+        color: #ffffff;
+        opacity: 0;
+        transform: translateY(20px);
+        transition: all 0.5s ease-out;
+    }
+    
+    .card-content {
+        position: relative;
+        z-index: 2;
+    }
+    
+    .card-glow {
+        position: absolute;
+        width: 150px;
+        height: 150px;
+        border-radius: 50%;
+        top: -50px;
+        left: -50px;
+        opacity: 0.5;
+        z-index: 0;
+        pointer-events: none;
+        transition: all 0.5s ease;
+    }
+    
+    .breathing-card .card-glow {
+        background: radial-gradient(circle, rgba(34, 197, 94, 0.6) 0%, rgba(34, 197, 94, 0) 70%);
+    }
+    
+    .ttt-card .card-glow {
+        background: radial-gradient(circle, rgba(124, 58, 237, 0.6) 0%, rgba(124, 58, 237, 0) 70%);
+    }
+    
+    .matching-card .card-glow {
+        background: radial-gradient(circle, rgba(59, 130, 246, 0.6) 0%, rgba(59, 130, 246, 0) 70%);
+    }
+    
+    .snake-card .card-glow {
+        background: radial-gradient(circle, rgba(239, 68, 68, 0.6) 0%, rgba(239, 68, 68, 0) 70%);
+    }
+    
+    /* Progress bar styling with CSS classes instead of inline styles */
+    .progress-bar-green {
+        background: linear-gradient(90deg, #22c55e, #4ade80);
+        border-radius: 50px;
+        height: 100%;
+    }
+    
+    .progress-bar-purple {
+        background: linear-gradient(90deg, #7c3aed, #8b5cf6);
+        border-radius: 50px;
+        height: 100%;
+    }
+    
+    .progress-bar-blue {
+        background: linear-gradient(90deg, #3b82f6, #60a5fa);
+        border-radius: 50px;
+        height: 100%;
+    }
+    
+    .progress-bar-red {
+        background: linear-gradient(90deg, #ef4444, #f87171);
+        border-radius: 50px;
+        height: 100%;
+    }
+    
+    /* Stat boxes with improved contrast */
+    .stat-box {
+        position: relative;
+        background: rgba(15, 23, 42, 0.6);
+        border-radius: 12px;
+        padding: 1.25rem 1rem;
+        text-align: center;
+        border: 1px solid rgba(255, 255, 255, 0.1);
+        overflow: hidden;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+        transition: transform 0.3s ease;
+    }
+    
+    .stat-box:hover {
+        transform: translateY(-3px);
+    }
+    
+    .stat-icon {
+        font-size: 1.25rem;
+        margin-bottom: 0.5rem;
+    }
+    
+    .stat-value {
+        font-size: 2.25rem;
+        font-weight: 800;
+        color: white;
+        margin-bottom: 0.5rem;
+        text-shadow: 0 2px 8px rgba(0, 0, 0, 0.5);
+        line-height: 1;
+    }
+    
+    .stat-label {
+        color: rgba(255, 255, 255, 0.9);
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-weight: 600;
+    }
+    
+    /* Section Headings */
+    .section-heading {
+        animation: fadeIn 0.6s ease-out forwards;
+        animation-delay: 0.2s;
+        opacity: 0;
+        display: flex;
+        align-items: center;
+        margin-bottom: 1.5rem;
+        position: relative;
+        z-index: 1;
+    }
+    
+    .heading-icon {
+        width: 50px;
+        height: 50px;
+        border-radius: 15px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        margin-right: 1rem;
+        font-size: 1.5rem;
+    }
+    
+    .heading-text h3 {
+        margin: 0;
+        color: white;
+        font-size: 1.5rem;
+        font-weight: 700;
+        text-shadow: 0 2px 4px rgba(0, 0, 0, 0.3);
+    }
+    
+    .heading-text p {
+        margin: 0;
+        color: rgba(255, 255, 255, 0.8);
+        font-size: 0.9rem;
+    }
+    
+    /* Game stats styling */
+    .game-stats {
+        display: grid;
+        grid-template-columns: 1fr 1fr;
+        gap: 1.25rem;
+        margin-bottom: 1.75rem;
+    }
+    
+    /* Color-specific styles for the different game cards */
+    /* Breathing Exercise Card */
+    .breathing-card .heading-icon {
+        background: rgba(34, 197, 94, 0.2);
+        color: #4ade80;
+    }
+    
+    .breathing-card .stat-icon {
+        color: #4ade80;
+    }
+    
+    .breathing-card .progress-percent {
+        color: #4ade80;
+        font-weight: 600;
+    }
+    
+    .breathing-card .achievement-badge {
+        background: rgba(34, 197, 94, 0.15);
+        border-color: rgba(34, 197, 94, 0.4);
+    }
+    
+    /* Tic Tac Toe Card */
+    .ttt-card .heading-icon {
+        background: rgba(124, 58, 237, 0.2);
+        color: #a78bfa;
+    }
+    
+    .ttt-card .stat-icon.purple-icon {
+        color: #a78bfa;
+    }
+    
+    .ttt-card .progress-percent.purple-text {
+        color: #a78bfa;
+        font-weight: 600;
+    }
+    
+    .ttt-card .achievement-badge.purple-badge {
+        background: rgba(124, 58, 237, 0.15);
+        border-color: rgba(124, 58, 237, 0.4);
+    }
+    
+    /* Color Matching Card */
+    .matching-card .heading-icon {
+        background: rgba(59, 130, 246, 0.2);
+        color: #60a5fa;
+    }
+    
+    .matching-card .stat-icon.blue-icon {
+        color: #60a5fa;
+    }
+    
+    .matching-card .progress-percent.blue-text {
+        color: #60a5fa;
+        font-weight: 600;
+    }
+    
+    .matching-card .achievement-badge.blue-badge {
+        background: rgba(59, 130, 246, 0.15);
+        border-color: rgba(59, 130, 246, 0.4);
+    }
+    
+    /* Snake Game Card */
+    .snake-card .heading-icon {
+        background: rgba(239, 68, 68, 0.2);
+        color: #f87171;
+    }
+    
+    .snake-card .stat-icon.red-icon {
+        color: #f87171;
+    }
+    
+    .snake-card .progress-percent.red-text {
+        color: #f87171;
+        font-weight: 600;
+    }
+    
+    .snake-card .achievement-badge.red-badge {
+        background: rgba(239, 68, 68, 0.15);
+        border-color: rgba(239, 68, 68, 0.4);
+    }
+    
+    /* Achievement badge styling */
+    .achievement-badge {
+        animation: fadeIn 0.6s ease-out forwards;
+        animation-delay: 0.3s;
+        opacity: 0;
+        display: inline-flex;
+        align-items: center;
+        padding: 0.75rem 1.25rem;
+        border-radius: 12px;
+        background: rgba(255, 255, 255, 0.15);
+        border: 1px solid rgba(255, 255, 255, 0.3);
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+        color: white;
+        width: 100%;
+        justify-content: center;
+        box-shadow: 0 4px 12px rgba(0, 0, 0, 0.2);
+    }
+    
+    .achievement-badge i {
+        margin-right: 0.75rem;
+    }
+    
+    /* Progress bar styling */
+    .progress-container {
+        margin: 1.5rem 0;
+    }
+    
+    .progress-label {
+        display: flex;
+        justify-content: space-between;
+        font-size: 0.95rem;
+        margin-bottom: 0.5rem;
+        color: white;
+        font-weight: 500;
+    }
+    
+    .progress {
+        height: 12px;
+        background: rgba(0, 0, 0, 0.3);
+        border-radius: 50px;
+        overflow: hidden;
+        margin-bottom: 1.5rem;
+        box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.2);
+    }
+    
+    .progress-bar {
+        border-radius: 50px;
+        height: 100%;
+    }
+    
+    /* Game description with better contrast */
+    .game-description {
+        margin-bottom: 1.25rem;
+        color: white;
+        line-height: 1.5;
+        font-weight: 500;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 1rem;
+        border-radius: 10px;
+        border-left: 3px solid rgba(255, 255, 255, 0.2);
+    }
+    
+    .last-activity {
+        font-size: 0.95rem;
+        color: white;
+        margin-bottom: 1.5rem;
+        display: flex;
+        align-items: center;
+        padding: 0.75rem 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 8px;
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+    }
+    
+    .last-activity i {
+        margin-right: 0.75rem;
+        color: rgba(255, 255, 255, 0.8);
+    }
+    
+    /* Benefit tags with better visibility */
+    .benefit-tag {
+        display: flex;
+        gap: 0.5rem;
+        margin-bottom: 1.5rem;
+        flex-wrap: wrap;
+    }
+    
+    .benefit-tag span {
+        background: rgba(0, 0, 0, 0.3);
+        color: white;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        font-size: 0.9rem;
+        font-weight: 600;
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        box-shadow: 0 2px 4px rgba(0, 0, 0, 0.2);
+        display: flex;
+        align-items: center;
+    }
+    
+    .benefit-tag span i {
+        margin-right: 0.5rem;
+    }
+    
+    /* Challenge level indicator */
+    .challenge-level {
+        margin-bottom: 1.5rem;
+        background: rgba(0, 0, 0, 0.2);
+        padding: 0.75rem 1rem;
+        border-radius: 10px;
+    }
+    
+    .challenge-label {
+        font-size: 0.9rem;
+        color: white;
+        margin-bottom: 0.5rem;
+        font-weight: 500;
+    }
+    
+    .challenge-dots {
+        display: flex;
+        gap: 6px;
+    }
+    
+    .dot {
+        width: 12px;
+        height: 12px;
+        border-radius: 50%;
+        background: rgba(255, 255, 255, 0.2);
+    }
+    
+    .breathing-card .dot.active {
+        background: #4ade80;
+    }
+    
+    .ttt-card .dot.active {
+        background: #a78bfa;
+    }
+    
+    .matching-card .dot.active {
+        background: #60a5fa;
+    }
+    
+    .snake-card .dot.active {
+        background: #f87171;
+    }
+    
+    /* Button styling for consistency */
+    .btn-primary, .btn-purple, .btn-blue, .btn-red {
+        color: white;
+        font-weight: 600;
+        padding: 0.75rem 1.5rem;
+        border-radius: 50px;
+        box-shadow: 0 4px 15px rgba(0, 0, 0, 0.2);
+        transition: all 0.3s ease;
+        border: none;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 0.5rem;
+    }
+    
+    .btn-primary {
+        background: linear-gradient(90deg, #16a34a, #22c55e);
+    }
+    
+    .btn-purple {
+        background: linear-gradient(90deg, #6d28d9, #7c3aed);
+    }
+    
+    .btn-blue {
+        background: linear-gradient(90deg, #1d4ed8, #3b82f6);
+    }
+    
+    .btn-red {
+        background: linear-gradient(90deg, #b91c1c, #ef4444);
+    }
+    
+    .btn:hover {
+        transform: translateY(-3px);
+        box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+    }
+    
+    /* Back button styling */
+    .back-btn {
+        animation: fadeInUp 0.6s ease-out forwards;
+        display: inline-flex;
+        align-items: center;
+        color: white;
+        font-weight: 500;
+        margin-bottom: 1.5rem;
+        padding: 0.5rem 1rem;
+        border-radius: 50px;
+        background: rgba(0, 0, 0, 0.3);
+        border: 1px solid rgba(255, 255, 255, 0.2);
+        transition: all 0.3s ease;
+        text-decoration: none;
+    }
+    
+    .back-btn:hover {
+        background: rgba(0, 0, 0, 0.5);
+        transform: translateX(-3px);
+        color: white;
+    }
+    
+    .back-btn i {
+        margin-right: 0.5rem;
+    }
+    
+    /* Table styling */
+    .table {
+        color: white;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        overflow: hidden;
+    }
+    
+    .table thead th {
+        background: rgba(0, 0, 0, 0.4);
+        color: white;
+        font-weight: 600;
+        border-bottom: none;
+        padding: 1rem;
+    }
+    
+    .table tbody td {
+        border-color: rgba(255, 255, 255, 0.1);
+        padding: 1rem;
+        vertical-align: middle;
+    }
+    
+    /* Badge styling */
+    .badge {
+        padding: 0.5rem 0.75rem;
+        border-radius: 50px;
+        font-weight: 500;
+    }
+    
+    .bg-success, .bg-green {
+        background-color: rgba(34, 197, 94, 0.3) !important;
+        color: #4ade80 !important;
+        border: 1px solid rgba(34, 197, 94, 0.5);
+    }
+    
+    .bg-primary, .bg-blue {
+        background-color: rgba(59, 130, 246, 0.3) !important;
+        color: #60a5fa !important;
+        border: 1px solid rgba(59, 130, 246, 0.5);
+    }
+    
+    .bg-purple {
+        background-color: rgba(124, 58, 237, 0.3) !important;
+        color: #a78bfa !important;
+        border: 1px solid rgba(124, 58, 237, 0.5);
+    }
+    
+    .bg-danger, .bg-red {
+        background-color: rgba(239, 68, 68, 0.3) !important;
+        color: #f87171 !important;
+        border: 1px solid rgba(239, 68, 68, 0.5);
+    }
+    
+    /* Activity chart container */
+    .activity-chart-container {
+        padding: 1rem;
+        background: rgba(0, 0, 0, 0.2);
+        border-radius: 10px;
+        margin-bottom: 1rem;
+    }
+</style>
+{% endblock %}
+
+{% block content %}
+<div class="dashboard-page">
+    <!-- Dashboard Header with Nature Theme -->
+    <div class="dashboard-header">
+        <div class="container">
+            <div class="row align-items-center">
+                <div class="col-lg-8 offset-lg-2 text-center">
+                    <h1 class="dashboard-title">Mind Games & Activities</h1>
+                    <p class="dashboard-subtitle">Track your progress across mindfulness games and activities designed to improve your mental well-being</p>
+                    <div class="nature-badge">
+                        <i class="fas fa-gamepad pulse-icon"></i>
+                        <span>Your Wellness Journey</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+        <!-- Nature-themed decorative elements -->
+        <div class="nature-elements">
+            <div class="leaf leaf-1"></div>
+            <div class="leaf leaf-2"></div>
+            <div class="leaf leaf-3"></div>
+            <div class="leaf leaf-4"></div>
+            <div class="floating-particle particle-1"></div>
+            <div class="floating-particle particle-2"></div>
+            <div class="floating-particle particle-3"></div>
+        </div>
+    </div>
+    
+    <div class="container py-5">
+        <!-- Back Button -->
+        <a href="{{ url_for('games_list') }}" class="back-btn">
+            <i class="fas fa-arrow-left"></i>
+            <span>Back to Games</span>
+        </a>
+        
+        <!-- Summary Stats -->
+        <div class="glass-card">
+            <div class="section-heading">
+                <div class="heading-icon">
+                    <i class="fas fa-chart-line"></i>
+                </div>
+                <div class="heading-text">
+                    <h3>Your Wellness Overview</h3>
+                    <p>Summary of your mindfulness activities</p>
+                </div>
+            </div>
+            
+            <div class="row g-4 mt-2">
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-box">
+                        <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                        <div class="stat-value">{{ stats.breathing.total_sessions + stats.ttt.total_games + stats.matching.total_games }}</div>
+                        <div class="stat-label">Total Activities</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-box">
+                        <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                        <div class="stat-value">{{ stats.breathing.total_minutes }}</div>
+                        <div class="stat-label">Minutes Spent</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-box">
+                        <div class="stat-icon"><i class="fas fa-trophy"></i></div>
+                        <div class="stat-value">{{ stats.matching.best_score }}</div>
+                        <div class="stat-label">Best Score</div>
+                    </div>
+                </div>
+                <div class="col-md-3 col-sm-6">
+                    <div class="stat-box">
+                        <div class="stat-icon"><i class="fas fa-calendar-day"></i></div>
+                        <div class="stat-value">{{ stats.breathing.weekly_sessions }}</div>
+                        <div class="stat-label">This Week</div>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Games Grid -->
+        <div class="row g-4 mt-3">
+            <!-- Breathing Exercise Card -->
+            <div class="col-lg-6">
+                <div class="glass-card breathing-card">
+                    <div class="card-glow"></div>
+                    <div class="section-heading">
+                        <div class="heading-icon">
+                            <i class="fas fa-wind"></i>
+                        </div>
+                        <div class="heading-text">
+                            <h3>Nature's Breath</h3>
+                            <p>Guided breathing exercises</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="achievement-badge">
+                            <i class="fas fa-award"></i> Completed {{ stats.breathing.total_sessions }} sessions
+                        </div>
+                        
+                        <div class="game-stats">
+                            <div class="stat-box">
+                                <div class="stat-icon"><i class="fas fa-clock"></i></div>
+                                <div class="stat-value">{{ stats.breathing.total_minutes }}</div>
+                                <div class="stat-label">Minutes</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-icon"><i class="fas fa-calendar-check"></i></div>
+                                <div class="stat-value">{{ stats.breathing.weekly_sessions }}</div>
+                                <div class="stat-label">This Week</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Weekly Goal Progress</span>
+                                <span class="progress-percent">{{ stats.breathing.weekly_progress }}%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar-green" role="progressbar" aria-valuenow="{{ stats.breathing.weekly_progress }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ stats.breathing.weekly_progress }}%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="last-activity">
+                            <i class="fas fa-history"></i> Last session: {{ stats.breathing.last_session_date }}
+                        </div>
+                        
+                        <div class="benefit-tag">
+                            <span><i class="fas fa-brain"></i> Reduces Stress</span> 
+                            <span><i class="fas fa-bullseye"></i> Improves Focus</span>
+                        </div>
+                        
+                        <a href="{{ url_for('breathing_exercise') }}" class="btn btn-primary w-100">
+                            <i class="fas fa-play"></i> Start Breathing Session
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Tic Tac Toe Stats -->
+            <div class="col-lg-6">
+                <div class="glass-card ttt-card">
+                    <div class="card-glow"></div>
+                    <div class="section-heading">
+                        <div class="heading-icon">
+                            <i class="fas fa-th"></i>
+                        </div>
+                        <div class="heading-text">
+                            <h3>Nature's Tic Tac Toe</h3>
+                            <p>Leaves vs. Twigs</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="achievement-badge purple-badge">
+                            <i class="fas fa-trophy"></i> {{ stats.ttt.leaf_wins }} Leaf Victories
+                        </div>
+                        
+                        <div class="game-stats">
+                            <div class="stat-box">
+                                <div class="stat-icon purple-icon"><i class="fas fa-gamepad"></i></div>
+                                <div class="stat-value">{{ stats.ttt.total_games }}</div>
+                                <div class="stat-label">Games Played</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-icon purple-icon"><i class="fas fa-percentage"></i></div>
+                                <div class="stat-value">{{ (stats.ttt.leaf_wins / stats.ttt.total_games * 100)|round|int if stats.ttt.total_games > 0 else 0 }}</div>
+                                <div class="stat-label">Win Rate</div>
+                            </div>
+                        </div>
+                        
+                        <div class="progress-container">
+                            <div class="progress-label">
+                                <span>Leaf Win Rate</span>
+                                <span class="progress-percent purple-text">{{ (stats.ttt.leaf_wins / stats.ttt.total_games * 100)|round|int if stats.ttt.total_games > 0 else 0 }}%</span>
+                            </div>
+                            <div class="progress">
+                                <div class="progress-bar-purple" role="progressbar" aria-valuenow="{{ (stats.ttt.leaf_wins / stats.ttt.total_games * 100)|round|int if stats.ttt.total_games > 0 else 0 }}" aria-valuemin="0" aria-valuemax="100" style="width: {{ (stats.ttt.leaf_wins / stats.ttt.total_games * 100)|round|int if stats.ttt.total_games > 0 else 0 }}%;"></div>
+                            </div>
+                        </div>
+                        
+                        <div class="game-description">
+                            <p>Play the classic game with a natural twist - be the first to align three leaves in a row to win!</p>
+                        </div>
+                        
+                        <div class="benefit-tag">
+                            <span><i class="fas fa-chess"></i> Strategy Skills</span> 
+                            <span><i class="fas fa-brain"></i> Mental Focus</span>
+                        </div>
+                        
+                        <a href="{{ url_for('ttt_excercise') }}" class="btn btn-purple w-100">
+                            <i class="fas fa-gamepad"></i> Play Tic Tac Toe
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Color Matching Card -->
+            <div class="col-lg-6">
+                <div class="glass-card matching-card">
+                    <div class="card-glow"></div>
+                    <div class="section-heading">
+                        <div class="heading-icon">
+                            <i class="fas fa-palette"></i>
+                        </div>
+                        <div class="heading-text">
+                            <h3>Color Matching</h3>
+                            <p>Memory challenge with natural elements</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="achievement-badge blue-badge">
+                            <i class="fas fa-medal"></i> Best Score: {{ stats.matching.best_score }}
+                        </div>
+                        
+                        <div class="game-stats">
+                            <div class="stat-box">
+                                <div class="stat-icon blue-icon"><i class="fas fa-gamepad"></i></div>
+                                <div class="stat-value">{{ stats.matching.total_games }}</div>
+                                <div class="stat-label">Games Played</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-icon blue-icon"><i class="fas fa-brain"></i></div>
+                                <div class="stat-value">{{ stats.matching.best_score }}</div>
+                                <div class="stat-label">Top Score</div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-level">
+                            <div class="challenge-label">Difficulty Levels</div>
+                            <div class="challenge-dots">
+                                <span class="dot active"></span>
+                                <span class="dot active"></span>
+                                <span class="dot active"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                            <div class="mt-1">
+                                <small>Easy, Medium, and Hard levels available</small>
+                            </div>
+                        </div>
+                        
+                        <div class="game-description">
+                            <p>Sharpen your memory by matching pairs of natural elements in this colorful challenge.</p>
+                        </div>
+                        
+                        <div class="benefit-tag">
+                            <span><i class="fas fa-memory"></i> Memory</span> 
+                            <span><i class="fas fa-shapes"></i> Pattern Recognition</span>
+                        </div>
+                        
+                        <a href="{{ url_for('matching_exercise') }}" class="btn btn-blue w-100">
+                            <i class="fas fa-play"></i> Play Matching Game
+                        </a>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Snake Game Card -->
+            <div class="col-lg-6">
+                <div class="glass-card snake-card">
+                    <div class="card-glow"></div>
+                    <div class="section-heading">
+                        <div class="heading-icon">
+                            <i class="fas fa-leaf"></i>
+                        </div>
+                        <div class="heading-text">
+                            <h3>Forest Snake</h3>
+                            <p>Navigate through nature</p>
+                        </div>
+                    </div>
+                    
+                    <div class="card-content">
+                        <div class="achievement-badge red-badge">
+                            <i class="fas fa-crown"></i> High Score: <span id="snake-high-score-badge">0</span>
+                        </div>
+                        
+                        <div class="game-stats">
+                            <div class="stat-box">
+                                <div class="stat-icon red-icon"><i class="fas fa-trophy"></i></div>
+                                <div class="stat-value" id="snake-high-score">0</div>
+                                <div class="stat-label">High Score</div>
+                            </div>
+                            <div class="stat-box">
+                                <div class="stat-icon red-icon"><i class="fas fa-gamepad"></i></div>
+                                <div class="stat-value" id="snake-games">0</div>
+                                <div class="stat-label">Games Played</div>
+                            </div>
+                        </div>
+                        
+                        <div class="challenge-level">
+                            <div class="challenge-label">Difficulty Level</div>
+                            <div class="challenge-dots">
+                                <span class="dot active"></span>
+                                <span class="dot active"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                                <span class="dot"></span>
+                            </div>
+                        </div>
+                        
+                        <div class="game-description">
+                            <p>Guide your forest snake through a mindful journey as you collect leaves and grow longer.</p>
+                        </div>
+                        
+                        <div class="benefit-tag">
+                            <span><i class="fas fa-hand-paper"></i> Hand-Eye Coordination</span> 
+                            <span><i class="fas fa-bullseye"></i> Focus</span>
+                        </div>
+                        
+                        <a href="{{ url_for('snake_exercise') }}" class="btn btn-red w-100">
+                            <i class="fas fa-play"></i> Play Snake Game
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+        
+        <!-- Recent Activity Section -->
+        <div class="glass-card mt-4">
+            <div class="section-heading">
+                <div class="heading-icon">
+                    <i class="fas fa-history"></i>
+                </div>
+                <div class="heading-text">
+                    <h3>Recent Activities</h3>
+                    <p>Your latest games and exercises</p>
+                </div>
+            </div>
+            <div class="table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr>
+                            <th>Activity</th>
+                            <th>Type</th>
+                            <th>Duration</th>
+                            <th>Date</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for activity in stats.recent_activities %}
+                        <tr>
+                            <td>{{ activity.description }}</td>
+                            <td><span class="badge bg-{{ activity.type_class }}">{{ activity.type }}</span></td>
+                            <td>{{ activity.duration }}</td>
+                            <td>{{ activity.date }}</td>
+                        </tr>
+                        {% endfor %}
+                        {% if not stats.recent_activities %}
+                        <tr>
+                            <td colspan="4" class="text-center">No recent activities. Start playing to track your progress!</td>
+                        </tr>
+                        {% endif %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+        
+        <!-- Weekly Activity Chart -->
+        <div class="glass-card mt-4">
+            <div class="section-heading">
+                <div class="heading-icon">
+                    <i class="fas fa-chart-bar"></i>
+                </div>
+                <div class="heading-text">
+                    <h3>Weekly Activity</h3>
+                    <p>Track your games and activities over time</p>
+                </div>
+            </div>
+            <div class="activity-chart-container" style="height: 300px;">
+                <canvas id="weeklyActivityChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Load game stats
+    initGameStats();
+    
+    // Initialize weekly activity chart
+    initializeWeeklyChart();
+    
+    // Add animation to cards
+    animateCards();
+});
+
+function initGameStats() {
+    // Load stats from localStorage as fallback
+    try {
+        // Get snake stats from localStorage
+        const snakeStats = JSON.parse(localStorage.getItem('snakeStats') || '{}');
+        if (snakeStats.highScore) {
+            document.getElementById('snake-high-score').textContent = snakeStats.highScore;
+            document.getElementById('snake-high-score-badge').textContent = snakeStats.highScore;
+        }
+        if (snakeStats.games) {
+            document.getElementById('snake-games').textContent = snakeStats.games;
+        }
+    } catch (e) {
+        console.error('Error loading snake stats:', e);
+    }
+}
+
+function initializeWeeklyChart() {
+    const ctx = document.getElementById('weeklyActivityChart').getContext('2d');
+    
+    // Get the current date and calculate the past 7 days
+    const today = new Date();
+    const days = [];
+    const dates = [];
+    
+    for (let i = 6; i >= 0; i--) {
+        const date = new Date(today);
+        date.setDate(today.getDate() - i);
+        const dayName = date.toLocaleDateString('en-US', { weekday: 'short' });
+        days.push(dayName);
+        dates.push(date.toISOString().split('T')[0]);
+    }
+    
+    // Create sample data (replace with real data from backend if available)
+    const breathingData = [
+        Math.floor(Math.random() * 3) + 1,
+        Math.floor(Math.random() * 4) + 1,
+        Math.floor(Math.random() * 5) + 2,
+        Math.floor(Math.random() * 3) + 1,
+        Math.floor(Math.random() * 4) + 2,
+        Math.floor(Math.random() * 3) + 1,
+        Math.floor(Math.random() * 5) + 1
+    ];
+    
+    const gamesData = [
+        Math.floor(Math.random() * 2) + 1,
+        Math.floor(Math.random() * 3) + 0,
+        Math.floor(Math.random() * 2) + 1,
+        Math.floor(Math.random() * 3) + 1,
+        Math.floor(Math.random() * 4) + 0,
+        Math.floor(Math.random() * 3) + 1,
+        Math.floor(Math.random() * 2) + 1
+    ];
+    
+    // Create chart
+    new Chart(ctx, {
+        type: 'bar',
+        data: {
+            labels: days,
+            datasets: [
+                {
+                    label: 'Breathing',
+                    data: breathingData,
+                    backgroundColor: '#22c55e',
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7,
+                    borderRadius: 6
+                },
+                {
+                    label: 'Games',
+                    data: gamesData,
+                    backgroundColor: '#8b5cf6',
+                    barPercentage: 0.6,
+                    categoryPercentage: 0.7,
+                    borderRadius: 6
+                }
+            ]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    grid: {
+                        color: 'rgba(255, 255, 255, 0.1)'
+                    },
+                    ticks: {
+                        color: '#a8d5b5',
+                        font: {
+                            family: "'Poppins', sans-serif",
+                            size: 11
+                        }
+                    }
+                },
+                x: {
+                    grid: {
+                        display: false
+                    },
+                    ticks: {
+                        color: '#a8d5b5',
+                        font: {
+                            family: "'Poppins', sans-serif",
+                            size: 11
+                        }
+                    }
+                }
+            },
+            plugins: {
+                legend: {
+                    labels: {
+                        color: '#a8d5b5',
+                        font: {
+                            family: "'Poppins', sans-serif",
+                            size: 12
+                        },
+                        boxWidth: 15,
+                        padding: 15
+                    }
+                },
+                tooltip: {
+                    backgroundColor: 'rgba(15, 23, 42, 0.9)',
+                    titleFont: {
+                        family: "'Poppins', sans-serif",
+                        size: 13
+                    },
+                    bodyFont: {
+                        family: "'Poppins', sans-serif",
+                        size: 12
+                    },
+                    padding: 12,
+                    cornerRadius: 8,
+                    caretSize: 6,
+                    boxWidth: 10,
+                    boxHeight: 10
+                }
+            }
+        }
+    });
+}
+
+function animateCards() {
+    const cards = document.querySelectorAll('.glass-card');
+    cards.forEach((card, index) => {
+        setTimeout(() => {
+            card.style.opacity = '1';
+            card.style.transform = 'translateY(0)';
+        }, 100 * index);
+    });
+}
+</script>
+{% endblock %}

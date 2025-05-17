@@ -1,0 +1,1242 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Forest Serpent - Mindful Movement</title>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+    <style>
+        :root {
+            --forest-green: #2d5a27;
+            --leaf-green: #4a7d55;
+            --light-green: #a8d5b5;
+            --bark-brown: #8b5a2b;
+            --soil-brown: #5d4037;
+            --sky-blue: #87ceeb;
+            --sunlight: #ffd700;
+        }
+        
+        body {
+            font-family: 'Inter', 'Segoe UI', system-ui, sans-serif;
+            background-color: #e8f4ea;
+            margin: 0;
+            padding: 0;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), 
+                            url('https://images.unsplash.com/photo-1441974231531-c6227db76b6e?ixlib=rb-1.2.1&auto=format&fit=crop&w=1350&q=80');
+            background-size: cover;
+            background-position: center;
+            background-attachment: fixed;
+            color: #333;
+            overflow-x: hidden;
+        }
+        
+        .back-button {
+            position: absolute;
+            top: 20px;
+            left: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            color: var(--forest-green);
+            border: none;
+            border-radius: 50%;
+            width: 50px;
+            height: 50px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
+            transition: all 0.3s ease;
+            z-index: 100;
+        }
+        
+        .back-button:hover {
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.3);
+            background-color: white;
+        }
+        
+        .container {
+            text-align: center;
+            background-color: rgba(255, 255, 255, 0.85);
+            padding: 30px;
+            border-radius: 20px;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.2);
+            margin: 40px auto;
+            max-width: 800px;
+            width: 90%;
+            position: relative;
+            backdrop-filter: blur(10px);
+            -webkit-backdrop-filter: blur(10px);
+            border: 1px solid rgba(255, 255, 255, 0.3);
+            transition: transform 0.3s ease;
+        }
+        
+        h1 {
+            color: var(--forest-green);
+            margin-bottom: 10px;
+            font-size: 2.5rem;
+            font-weight: 700;
+            text-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+        }
+        
+        .subtitle {
+            color: var(--leaf-green);
+            margin-bottom: 20px;
+            font-style: italic;
+            font-size: 1.2rem;
+        }
+        
+        #game-area {
+            background-color: #d0e8d4;
+            border-radius: 15px;
+            margin: 0 auto;
+            position: relative;
+            box-shadow: inset 0 0 20px rgba(0, 0, 0, 0.1);
+            border: 8px solid var(--bark-brown);
+            background-image: url('https://images.unsplash.com/photo-1500382017468-9049fed747ef?ixlib=rb-1.2.1&auto=format&fit=crop&w=500&q=60');
+            background-size: cover;
+            background-position: center;
+        }
+        
+        .controls {
+            margin: 20px 0;
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            flex-wrap: wrap;
+        }
+        
+        .control-btn {
+            background-color: var(--leaf-green);
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            font-size: 16px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .control-btn:hover {
+            background-color: var(--forest-green);
+            transform: translateY(-3px);
+            box-shadow: 0 6px 12px rgba(0, 0, 0, 0.2);
+        }
+        
+        .control-btn i {
+            font-size: 18px;
+        }
+        
+        .game-stats {
+            display: flex;
+            justify-content: space-around;
+            margin: 15px 0;
+            color: var(--forest-green);
+            flex-wrap: wrap;
+            gap: 10px;
+        }
+        
+        .stat {
+            font-size: 18px;
+            padding: 8px 16px;
+            border-radius: 50px;
+            background-color: rgba(91, 154, 104, 0.2);
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        
+        .stat i {
+            color: var(--leaf-green);
+        }
+        
+        .message-overlay {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(255, 255, 255, 0.8);
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            border-radius: 10px;
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity 0.5s;
+            backdrop-filter: blur(5px);
+            -webkit-backdrop-filter: blur(5px);
+        }
+        
+        .message-overlay.visible {
+            opacity: 1;
+            pointer-events: all;
+        }
+        
+        .message-text {
+            font-size: 28px;
+            color: var(--forest-green);
+            margin-bottom: 20px;
+            font-weight: 700;
+        }
+        
+        .message-subtext {
+            font-size: 18px;
+            color: var(--leaf-green);
+            margin-bottom: 30px;
+            max-width: 80%;
+            text-align: center;
+            line-height: 1.5;
+        }
+        
+        .mobile-controls {
+            display: grid;
+            grid-template-columns: repeat(3, 60px);
+            grid-template-rows: repeat(3, 60px);
+            gap: 8px;
+            margin: 20px auto;
+        }
+        
+        .direction-btn {
+            background-color: var(--leaf-green);
+            color: white;
+            border: none;
+            border-radius: 50%;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            cursor: pointer;
+            font-size: 24px;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+        }
+        
+        .direction-btn:hover {
+            background-color: var(--forest-green);
+            transform: scale(1.1);
+        }
+        
+        .affirmation {
+            color: var(--forest-green);
+            font-style: italic;
+            margin: 15px 0;
+            min-height: 24px;
+            font-size: 1.1rem;
+            padding: 10px 20px;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50px;
+            box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+        }
+        
+        .affirmation:hover {
+            background-color: rgba(255, 255, 255, 0.9);
+            transform: translateY(-3px);
+        }
+        
+        .nature-elements {
+            position: absolute;
+            width: 100%;
+            height: 100%;
+            top: 0;
+            left: 0;
+            pointer-events: none;
+            z-index: -1;
+        }
+        
+        .leaf {
+            position: absolute;
+            width: 30px;
+            height: 30px;
+            background-image: url('data:image/svg+xml;utf8,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24" fill="%234a7d55"><path d="M17,8C8,10 5.9,16.17 3.82,21.34L5.71,22L6.66,19.7C7.14,19.87 7.64,20 8,20C19,20 22,3 22,3C21,5 14,5.25 9,6.25C4,7.25 2,11.5 2,13.5C2,15.5 3.75,17.25 3.75,17.25C6,8 17,8 17,8Z" /></svg>');
+            background-size: contain;
+            background-repeat: no-repeat;
+            opacity: 0.6;
+            animation: falling 15s linear infinite;
+        }
+        
+        .leaf-1 {
+            top: 10%;
+            left: 10%;
+            animation-delay: 0s;
+            transform: rotate(45deg);
+        }
+        
+        .leaf-2 {
+            top: 20%;
+            right: 15%;
+            animation-delay: 2s;
+            transform: rotate(-30deg);
+        }
+        
+        .leaf-3 {
+            bottom: 15%;
+            left: 20%;
+            animation-delay: 4s;
+            transform: rotate(60deg);
+        }
+        
+        .leaf-4 {
+            bottom: 25%;
+            right: 10%;
+            animation-delay: 6s;
+            transform: rotate(-45deg);
+        }
+        
+        @keyframes falling {
+            0% {
+                transform: translateY(-100px) rotate(0deg);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(calc(100vh + 100px)) rotate(360deg);
+                opacity: 0;
+            }
+        }
+        
+        .floating-particle {
+            position: absolute;
+            width: 8px;
+            height: 8px;
+            background-color: rgba(255, 255, 255, 0.6);
+            border-radius: 50%;
+            animation: floating 20s linear infinite;
+        }
+        
+        .particle-1 {
+            top: 15%;
+            left: 20%;
+            animation-delay: 0s;
+        }
+        
+        .particle-2 {
+            top: 40%;
+            right: 25%;
+            animation-delay: 5s;
+        }
+        
+        .particle-3 {
+            bottom: 30%;
+            left: 15%;
+            animation-delay: 10s;
+        }
+        
+        @keyframes floating {
+            0% {
+                transform: translateY(0) translateX(0);
+                opacity: 0;
+            }
+            10% {
+                opacity: 0.6;
+            }
+            90% {
+                opacity: 0.6;
+            }
+            100% {
+                transform: translateY(-100vh) translateX(100px);
+                opacity: 0;
+            }
+        }
+        
+        .meditation-timer {
+            position: absolute;
+            top: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            padding: 10px 15px;
+            border-radius: 50px;
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            z-index: 10;
+        }
+        
+        .timer-display {
+            font-size: 18px;
+            color: var(--forest-green);
+            font-weight: 600;
+        }
+        
+        .timer-btn {
+            background: none;
+            border: none;
+            color: var(--leaf-green);
+            cursor: pointer;
+            font-size: 18px;
+            transition: all 0.3s ease;
+        }
+        
+        .timer-btn:hover {
+            color: var(--forest-green);
+            transform: scale(1.1);
+        }
+        
+        .sound-control {
+            position: absolute;
+            bottom: 20px;
+            right: 20px;
+            background-color: rgba(255, 255, 255, 0.8);
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+            transition: all 0.3s ease;
+            z-index: 10;
+        }
+        
+        .sound-control:hover {
+            transform: scale(1.1);
+            background-color: white;
+        }
+        
+        .sound-control i {
+            color: var(--leaf-green);
+            font-size: 20px;
+        }
+        
+        .sound-control.muted i {
+            color: #999;
+        }
+        
+        /* Responsive design */
+        @media (max-width: 768px) {
+            .container {
+                padding: 20px;
+                margin: 20px auto;
+                width: 95%;
+            }
+            
+            h1 {
+                font-size: 2rem;
+            }
+            
+            .subtitle {
+                font-size: 1rem;
+            }
+            
+            #game-area {
+                width: 100%;
+                height: auto;
+            }
+            
+            .mobile-controls {
+                display: grid;
+            }
+            
+            .meditation-timer {
+                top: auto;
+                bottom: 20px;
+                right: 70px;
+            }
+        }
+        
+        @media (min-width: 769px) {
+            .mobile-controls {
+                display: none;
+            }
+        }
+    </style>
+</head>
+<body>
+    <button class="back-button" onclick="window.location.href='/games'">
+        <i class="fas fa-arrow-left"></i>
+    </button>
+    
+    <div class="nature-elements">
+        <div class="leaf leaf-1"></div>
+        <div class="leaf leaf-2"></div>
+        <div class="leaf leaf-3"></div>
+        <div class="leaf leaf-4"></div>
+        <div class="floating-particle particle-1"></div>
+        <div class="floating-particle particle-2"></div>
+        <div class="floating-particle particle-3"></div>
+    </div>
+    
+    <div class="container" id="gameContainer">
+        <h1>Forest Serpent</h1>
+        <p class="subtitle">Mindful movement through nature's embrace</p>
+        
+        <div class="meditation-timer">
+            <i class="fas fa-hourglass-half"></i>
+            <span class="timer-display" id="meditationTimer">00:00</span>
+            <button class="timer-btn" id="startTimerBtn">
+                <i class="fas fa-play"></i>
+            </button>
+            <button class="timer-btn" id="resetTimerBtn">
+                <i class="fas fa-redo"></i>
+            </button>
+        </div>
+        
+        <div class="game-stats">
+            <div class="stat">
+                <i class="fas fa-leaf"></i>
+                <span>Score: <span id="score">0</span></span>
+            </div>
+            <div class="stat">
+                <i class="fas fa-trophy"></i>
+                <span>Highest: <span id="highScore">0</span></span>
+            </div>
+            <div class="stat">
+                <i class="fas fa-clock"></i>
+                <span>Time: <span id="gameTime">00:00</span></span>
+            </div>
+        </div>
+        
+        <div style="position: relative;">
+            <canvas id="game-area" width="400" height="400"></canvas>
+            <div class="message-overlay" id="messageOverlay">
+                <div class="message-text" id="messageText">Welcome to Forest Serpent</div>
+                <div class="message-subtext" id="messageSubtext">Navigate through the forest, collecting leaves to grow. Use arrow keys or swipe to control your serpent. Take your time and enjoy the journey.</div>
+                <button class="control-btn" id="overlayButton">
+                    <i class="fas fa-play"></i> Start Journey
+                </button>
+            </div>
+        </div>
+        
+        <div class="controls">
+            <button class="control-btn" id="startBtn">
+                <i class="fas fa-play"></i> Start
+            </button>
+            <button class="control-btn" id="pauseBtn">
+                <i class="fas fa-pause"></i> Pause
+            </button>
+            <button class="control-btn" id="resetBtn">
+                <i class="fas fa-redo"></i> Reset
+            </button>
+        </div>
+        
+        <div class="mobile-controls">
+            <div></div>
+            <button class="direction-btn" id="upBtn">↑</button>
+            <div></div>
+            <button class="direction-btn" id="leftBtn">←</button>
+            <div></div>
+            <button class="direction-btn" id="rightBtn">→</button>
+            <div></div>
+            <button class="direction-btn" id="downBtn">↓</button>
+            <div></div>
+        </div>
+        
+        <p class="affirmation" id="affirmation"></p>
+    </div>
+    
+    <div class="sound-control" id="soundControl">
+        <i class="fas fa-volume-up"></i>
+    </div>
+    
+    <audio id="ambientSound" loop>
+        <source src="https://assets.mixkit.co/music/preview/mixkit-forest-stream-1186.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="eatSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-forest-bird-chirping-1210.mp3" type="audio/mpeg">
+    </audio>
+    
+    <audio id="gameOverSound">
+        <source src="https://assets.mixkit.co/sfx/preview/mixkit-forest-ambience-loop-1185.mp3" type="audio/mpeg">
+    </audio>
+    
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            // Get all game elements
+            const canvas = document.getElementById('game-area');
+            const ctx = canvas.getContext('2d');
+            const startBtn = document.getElementById('startBtn');
+            const pauseBtn = document.getElementById('pauseBtn');
+            const resetBtn = document.getElementById('resetBtn');
+            const scoreDisplay = document.getElementById('score');
+            const highScoreDisplay = document.getElementById('highScore');
+            const gameTimeDisplay = document.getElementById('gameTime');
+            const messageOverlay = document.getElementById('messageOverlay');
+            const messageText = document.getElementById('messageText');
+            const messageSubtext = document.getElementById('messageSubtext');
+            const overlayButton = document.getElementById('overlayButton');
+            const affirmationText = document.getElementById('affirmation');
+            const gameContainer = document.getElementById('gameContainer');
+            const soundControl = document.getElementById('soundControl');
+            const ambientSound = document.getElementById('ambientSound');
+            const eatSound = document.getElementById('eatSound');
+            const gameOverSound = document.getElementById('gameOverSound');
+            const startTimerBtn = document.getElementById('startTimerBtn');
+            const resetTimerBtn = document.getElementById('resetTimerBtn');
+            const meditationTimer = document.getElementById('meditationTimer');
+            
+            // Mobile control buttons
+            const upBtn = document.getElementById('upBtn');
+            const downBtn = document.getElementById('downBtn');
+            const leftBtn = document.getElementById('leftBtn');
+            const rightBtn = document.getElementById('rightBtn');
+            
+            // Game constants
+            const gridSize = 20;
+            const tileCount = canvas.width / gridSize;
+            
+            // List of positive affirmations
+            const affirmations = [
+                "Take a deep breath with each move",
+                "You're doing great, keep going",
+                "Each moment is a new beginning",
+                "Observe your thoughts as you play",
+                "Stay present with each movement",
+                "Be gentle with yourself",
+                "Growth happens one step at a time",
+                "Your journey is unique and valuable",
+                "Embrace this moment of calm",
+                "Notice how your mind responds to challenges",
+                "Patience grows with practice",
+                "You're exactly where you need to be",
+                "The forest welcomes your presence",
+                "Nature has its own rhythm, find yours",
+                "Every leaf collected is a moment of mindfulness",
+                "The serpent's path is like the river's flow",
+                "In stillness, find movement; in movement, find peace"
+            ];
+            
+            // Game variables
+            let snake = [];
+            let food = {};
+            let dx = 0;
+            let dy = 0;
+            let nextDx = 0;
+            let nextDy = 0;
+            let score = 0;
+            let highScore = 0;
+            let gameTime = 0;
+            let gameTimeInterval;
+            let soundEnabled = true;
+            let meditationTime = 0;
+            let meditationInterval;
+            let meditationActive = false;
+            
+            // Safe localStorage wrapper with fallback
+            const storage = {
+                getItem: function(key) {
+                    try {
+                        return localStorage.getItem(key) || 0;
+                    } catch (e) {
+                        console.log('localStorage not available, using session memory');
+                        return this.memoryStorage[key] || 0;
+                    }
+                },
+                setItem: function(key, value) {
+                    try {
+                        localStorage.setItem(key, value);
+                    } catch (e) {
+                        console.log('localStorage not available, using session memory');
+                        this.memoryStorage[key] = value;
+                    }
+                },
+                memoryStorage: {}
+            };
+            
+            // Get high score safely
+            highScore = storage.getItem('natureSnakeHighScore') || 0;
+            
+            let gameSpeed = 100; // Increased initial speed
+            let gameInterval;
+            let gameActive = false;
+            let gamePaused = false;
+            let touchStartX = 0;
+            let touchStartY = 0;
+            let lastKeyPress = 0; // Track last key press time
+            
+            // Initialize the game
+            function initGame() {
+                // Initialize snake
+                snake = [
+                    {x: 10, y: 10},
+                    {x: 9, y: 10},
+                    {x: 8, y: 10}
+                ];
+                
+                // Create initial food
+                createFood();
+                
+                // Reset direction and score
+                dx = 1;
+                dy = 0;
+                nextDx = dx;
+                nextDy = dy;
+                score = 0;
+                gameTime = 0;
+                updateGameTime();
+                
+                // Update displays
+                scoreDisplay.textContent = score;
+                highScoreDisplay.textContent = highScore;
+                
+                // Show random affirmation
+                showRandomAffirmation();
+            }
+            
+            // Create food at random position
+            function createFood() {
+                food = {
+                    x: Math.floor(Math.random() * tileCount),
+                    y: Math.floor(Math.random() * tileCount),
+                    type: Math.random() > 0.8 ? 'special' : 'normal' // 20% chance of special food
+                };
+                
+                // Make sure food doesn't appear on snake
+                for (let i = 0; i < snake.length; i++) {
+                    if (food.x === snake[i].x && food.y === snake[i].y) {
+                        createFood();
+                        break;
+                    }
+                }
+            }
+            
+            // Draw everything on canvas
+            function draw() {
+                // Clear canvas
+                ctx.fillStyle = '#d0e8d4';
+                ctx.fillRect(0, 0, canvas.width, canvas.height);
+                
+                // Draw subtle grid for zen garden effect
+                ctx.strokeStyle = 'rgba(91, 154, 104, 0.2)';
+                ctx.lineWidth = 0.5;
+                
+                for (let i = 0; i <= tileCount; i++) {
+                    // Vertical lines
+                    ctx.beginPath();
+                    ctx.moveTo(i * gridSize, 0);
+                    ctx.lineTo(i * gridSize, canvas.height);
+                    ctx.stroke();
+                    
+                    // Horizontal lines
+                    ctx.beginPath();
+                    ctx.moveTo(0, i * gridSize);
+                    ctx.lineTo(canvas.width, i * gridSize);
+                    ctx.stroke();
+                }
+                
+                // Draw food (leaf or flower)
+                if (food.type === 'special') {
+                    // Draw flower
+                    ctx.fillStyle = '#ff9e80';
+                    ctx.beginPath();
+                    const flowerSize = gridSize * 0.8;
+                    
+                    // Draw flower petals
+                    ctx.save();
+                    ctx.translate(food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2);
+                    
+                    for (let i = 0; i < 5; i++) {
+                        ctx.rotate(Math.PI * 2 / 5);
+                        ctx.beginPath();
+                        ctx.ellipse(0, -flowerSize/2, flowerSize/4, flowerSize/2, 0, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                    
+                    // Draw flower center
+                    ctx.fillStyle = '#ffd700';
+                    ctx.beginPath();
+                    ctx.arc(0, 0, flowerSize/4, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    ctx.restore();
+                } else {
+                    // Draw leaf
+                    ctx.fillStyle = '#5b9a68';
+                    ctx.beginPath();
+                    const leafSize = gridSize * 0.8;
+                    
+                    // Draw leaf as oval with stem
+                    ctx.save();
+                    ctx.translate(food.x * gridSize + gridSize/2, food.y * gridSize + gridSize/2);
+                    ctx.rotate(Math.PI / 4);
+                    ctx.ellipse(0, 0, leafSize/2, leafSize/1.2, 0, 0, Math.PI * 2);
+                    ctx.fill();
+                    
+                    // Draw leaf vein
+                    ctx.strokeStyle = '#d0e8d4';
+                    ctx.lineWidth = 1;
+                    ctx.beginPath();
+                    ctx.moveTo(0, -leafSize/1.5);
+                    ctx.lineTo(0, leafSize/1.5);
+                    ctx.stroke();
+                    ctx.restore();
+                }
+                
+                // Draw snake
+                for (let i = 0; i < snake.length; i++) {
+                    if (i === 0) {
+                        // Snake head (slightly darker)
+                        ctx.fillStyle = '#3a7d44';
+                    } else {
+                        // Snake body with gradient effect
+                        const colorValue = 58 + Math.floor((i / snake.length) * 50);
+                        ctx.fillStyle = `rgb(${colorValue}, ${colorValue + 67}, ${colorValue + 22})`;
+                    }
+                    
+                    // Draw rounded rectangle for each snake part
+                    roundRect(
+                        snake[i].x * gridSize + 1,
+                        snake[i].y * gridSize + 1,
+                        gridSize - 2,
+                        gridSize - 2,
+                        5
+                    );
+                    
+                    // Draw eyes on head
+                    if (i === 0) {
+                        ctx.fillStyle = 'white';
+                        
+                        // Position eyes based on direction
+                        let eyeX1, eyeY1, eyeX2, eyeY2;
+                        
+                        if (dx === 1) { // Right
+                            eyeX1 = snake[i].x * gridSize + gridSize - 5;
+                            eyeY1 = snake[i].y * gridSize + 5;
+                            eyeX2 = snake[i].x * gridSize + gridSize - 5;
+                            eyeY2 = snake[i].y * gridSize + gridSize - 5;
+                        } else if (dx === -1) { // Left
+                            eyeX1 = snake[i].x * gridSize + 5;
+                            eyeY1 = snake[i].y * gridSize + 5;
+                            eyeX2 = snake[i].x * gridSize + 5;
+                            eyeY2 = snake[i].y * gridSize + gridSize - 5;
+                        } else if (dy === -1) { // Up
+                            eyeX1 = snake[i].x * gridSize + 5;
+                            eyeY1 = snake[i].y * gridSize + 5;
+                            eyeX2 = snake[i].x * gridSize + gridSize - 5;
+                            eyeY2 = snake[i].y * gridSize + 5;
+                        } else { // Down
+                            eyeX1 = snake[i].x * gridSize + 5;
+                            eyeY1 = snake[i].y * gridSize + gridSize - 5;
+                            eyeX2 = snake[i].x * gridSize + gridSize - 5;
+                            eyeY2 = snake[i].y * gridSize + gridSize - 5;
+                        }
+                        
+                        // Draw eyes
+                        ctx.beginPath();
+                        ctx.arc(eyeX1, eyeY1, 2, 0, Math.PI * 2);
+                        ctx.arc(eyeX2, eyeY2, 2, 0, Math.PI * 2);
+                        ctx.fill();
+                        
+                        // Draw pupils
+                        ctx.fillStyle = 'black';
+                        ctx.beginPath();
+                        ctx.arc(eyeX1, eyeY1, 1, 0, Math.PI * 2);
+                        ctx.arc(eyeX2, eyeY2, 1, 0, Math.PI * 2);
+                        ctx.fill();
+                    }
+                }
+            }
+            
+            // Helper function to draw rounded rectangles
+            function roundRect(x, y, width, height, radius) {
+                ctx.beginPath();
+                ctx.moveTo(x + radius, y);
+                ctx.arcTo(x + width, y, x + width, y + height, radius);
+                ctx.arcTo(x + width, y + height, x, y + height, radius);
+                ctx.arcTo(x, y + height, x, y, radius);
+                ctx.arcTo(x, y, x + width, y, radius);
+                ctx.closePath();
+                ctx.fill();
+            }
+            
+            // Update game state
+            function update() {
+                // Update direction based on next direction
+                dx = nextDx;
+                dy = nextDy;
+                
+                // Move snake body
+                for (let i = snake.length - 1; i > 0; i--) {
+                    snake[i] = { ...snake[i-1] };
+                }
+                
+                // Move snake head
+                snake[0].x += dx;
+                snake[0].y += dy;
+                
+                // Handle wall collisions (wrap around)
+                if (snake[0].x < 0) snake[0].x = tileCount - 1;
+                if (snake[0].x >= tileCount) snake[0].x = 0;
+                if (snake[0].y < 0) snake[0].y = tileCount - 1;
+                if (snake[0].y >= tileCount) snake[0].y = 0;
+                
+                // Check for food collision
+                if (snake[0].x === food.x && snake[0].y === food.y) {
+                    // Play eat sound
+                    if (soundEnabled) {
+                        eatSound.currentTime = 0;
+                        eatSound.play();
+                    }
+                    
+                    // Grow snake
+                    const tail = { ...snake[snake.length - 1] };
+                    snake.push(tail);
+                    
+                    // Create new food
+                    createFood();
+                    
+                    // Update score (more points for special food)
+                    score += food.type === 'special' ? 25 : 10;
+                    scoreDisplay.textContent = score;
+                    
+                    // Update high score if needed
+                    if (score > highScore) {
+                        highScore = score;
+                        highScoreDisplay.textContent = highScore;
+                        storage.setItem('natureSnakeHighScore', highScore);
+                    }
+                    
+                    // Show new affirmation
+                    showRandomAffirmation();
+                    
+                    // Speed up very slightly (but keep it relaxing)
+                    if (gameSpeed > 80) {
+                        gameSpeed -= 2;
+                        clearInterval(gameInterval);
+                        gameInterval = setInterval(gameLoop, gameSpeed);
+                    }
+                }
+                
+                // Check for self collision
+                for (let i = 1; i < snake.length; i++) {
+                    if (snake[0].x === snake[i].x && snake[0].y === snake[i].y) {
+                        gameOver();
+                        return;
+                    }
+                }
+            }
+            
+            // Game loop
+            function gameLoop() {
+                if (!gamePaused && gameActive) {
+                    update();
+                    draw();
+                }
+            }
+            
+            // Start game
+            function startGame() {
+                if (!gameActive) {
+                    gameActive = true;
+                    gamePaused = false;
+                    messageOverlay.classList.remove('visible');
+                    gameInterval = setInterval(gameLoop, gameSpeed);
+                    
+                    // Start game timer
+                    gameTimeInterval = setInterval(updateGameTime, 1000);
+                    
+                    // Play ambient sound
+                    if (soundEnabled) {
+                        ambientSound.volume = 0.3;
+                        ambientSound.play();
+                    }
+                } else if (gamePaused) {
+                    gamePaused = false;
+                    gameContainer.classList.remove('breathing-animation');
+                    
+                    // Resume ambient sound
+                    if (soundEnabled) {
+                        ambientSound.play();
+                    }
+                }
+            }
+            
+            // Pause game
+            function pauseGame() {
+                if (gameActive && !gamePaused) {
+                    gamePaused = true;
+                    gameContainer.classList.remove('breathing-animation');
+                    showMessage('Paused', 'Take a moment to breathe. Press Start to continue your journey.', 'Resume');
+                    
+                    // Pause ambient sound
+                    if (soundEnabled) {
+                        ambientSound.pause();
+                    }
+                }
+            }
+            
+            // Reset game
+            function resetGame() {
+                clearInterval(gameInterval);
+                clearInterval(gameTimeInterval);
+                gameActive = false;
+                gamePaused = false;
+                initGame();
+                draw();
+                showMessage('Forest Serpent', 'Find peace in the rhythm of movement. Arrow keys to move.', 'Start Journey');
+                gameContainer.classList.remove('breathing-animation');
+                
+                // Stop ambient sound
+                if (soundEnabled) {
+                    ambientSound.pause();
+                    ambientSound.currentTime = 0;
+                }
+            }
+            
+            // Game over
+            function gameOver() {
+                clearInterval(gameInterval);
+                clearInterval(gameTimeInterval);
+                gameActive = false;
+                gameContainer.classList.remove('breathing-animation');
+                showMessage('Journey Complete', `You collected ${score/10} leaves. Every ending is a new beginning.`, 'Try Again');
+                
+                // Play game over sound
+                if (soundEnabled) {
+                    ambientSound.pause();
+                    gameOverSound.currentTime = 0;
+                    gameOverSound.play();
+                }
+                
+                // Update snake stats in localStorage
+                try {
+                    // Get current stats or initialize if not exists
+                    const snakeStats = JSON.parse(localStorage.getItem('snakeStats') || '{"highScore":0,"games":0,"recentScores":[]}');
+                    
+                    // Update stats
+                    snakeStats.games += 1;
+                    if (score > snakeStats.highScore) {
+                        snakeStats.highScore = score;
+                    }
+                    
+                    // Add to recent scores (keep last 5)
+                    snakeStats.recentScores.unshift(score);
+                    if (snakeStats.recentScores.length > 5) {
+                        snakeStats.recentScores.pop();
+                    }
+                    
+                    // Save back to localStorage
+                    localStorage.setItem('snakeStats', JSON.stringify(snakeStats));
+                } catch (e) {
+                    console.error('Error updating snake stats:', e);
+                }
+            }
+            
+            // Show message overlay
+            function showMessage(title, subtitle, buttonText) {
+                messageText.textContent = title;
+                messageSubtext.textContent = subtitle;
+                overlayButton.innerHTML = `<i class="fas fa-play"></i> ${buttonText}`;
+                messageOverlay.classList.add('visible');
+            }
+            
+            // Change direction
+            function changeDirection(keyCode) {
+                const now = Date.now();
+                if (now - lastKeyPress < 50) return; // Prevent too rapid key presses
+                lastKeyPress = now;
+
+                // Prevent 180-degree turns
+                switch(keyCode) {
+                    case 'ArrowUp':
+                    case 'w':
+                    case 'W':
+                        if (dy !== 1) {
+                            nextDx = 0;
+                            nextDy = -1;
+                        }
+                        break;
+                    case 'ArrowDown':
+                    case 's':
+                    case 'S':
+                        if (dy !== -1) {
+                            nextDx = 0;
+                            nextDy = 1;
+                        }
+                        break;
+                    case 'ArrowLeft':
+                    case 'a':
+                    case 'A':
+                        if (dx !== 1) {
+                            nextDx = -1;
+                            nextDy = 0;
+                        }
+                        break;
+                    case 'ArrowRight':
+                    case 'd':
+                    case 'D':
+                        if (dx !== -1) {
+                            nextDx = 1;
+                            nextDy = 0;
+                        }
+                        break;
+                }
+            }
+            
+            // Show random affirmation
+            function showRandomAffirmation() {
+                const randomIndex = Math.floor(Math.random() * affirmations.length);
+                affirmationText.textContent = affirmations[randomIndex];
+                
+                // Fade in effect
+                affirmationText.style.opacity = 0;
+                setTimeout(() => {
+                    affirmationText.style.opacity = 1;
+                }, 100);
+            }
+            
+            // Update game time
+            function updateGameTime() {
+                gameTime++;
+                const minutes = Math.floor(gameTime / 60);
+                const seconds = gameTime % 60;
+                gameTimeDisplay.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+            }
+            
+            // Toggle sound
+            function toggleSound() {
+                soundEnabled = !soundEnabled;
+                
+                if (soundEnabled) {
+                    soundControl.classList.remove('muted');
+                    soundControl.innerHTML = '<i class="fas fa-volume-up"></i>';
+                    
+                    if (gameActive && !gamePaused) {
+                        ambientSound.play();
+                    }
+                } else {
+                    soundControl.classList.add('muted');
+                    soundControl.innerHTML = '<i class="fas fa-volume-mute"></i>';
+                    
+                    ambientSound.pause();
+                    eatSound.pause();
+                    gameOverSound.pause();
+                }
+            }
+            
+            // Start meditation timer
+            function startMeditationTimer() {
+                if (!meditationActive) {
+                    meditationActive = true;
+                    startTimerBtn.innerHTML = '<i class="fas fa-pause"></i>';
+                    
+                    meditationInterval = setInterval(() => {
+                        meditationTime++;
+                        const minutes = Math.floor(meditationTime / 60);
+                        const seconds = meditationTime % 60;
+                        meditationTimer.textContent = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+                    }, 1000);
+                } else {
+                    meditationActive = false;
+                    startTimerBtn.innerHTML = '<i class="fas fa-play"></i>';
+                    clearInterval(meditationInterval);
+                }
+            }
+            
+            // Reset meditation timer
+            function resetMeditationTimer() {
+                meditationActive = false;
+                meditationTime = 0;
+                meditationTimer.textContent = '00:00';
+                startTimerBtn.innerHTML = '<i class="fas fa-play"></i>';
+                clearInterval(meditationInterval);
+            }
+            
+            // Event listeners
+            window.addEventListener('keydown', (e) => {
+                // Prevent default behavior for arrow keys and space
+                if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight', ' '].includes(e.key)) {
+                    e.preventDefault();
+                }
+                
+                if (!gamePaused && gameActive) {
+                    changeDirection(e.key);
+                }
+                
+                // Space to pause/resume
+                if (e.key === ' ' || e.code === 'Space') {
+                    if (gamePaused) {
+                        startGame();
+                    } else {
+                        pauseGame();
+                    }
+                }
+            }, { passive: false }); // Add passive: false for better key response
+            
+            // Touch controls for swipe
+            canvas.addEventListener('touchstart', (e) => {
+                touchStartX = e.touches[0].clientX;
+                touchStartY = e.touches[0].clientY;
+                e.preventDefault();
+            });
+            
+            canvas.addEventListener('touchmove', (e) => {
+                if (!touchStartX || !touchStartY) return;
+                
+                const touchEndX = e.touches[0].clientX;
+                const touchEndY = e.touches[0].clientY;
+                
+                const diffX = touchStartX - touchEndX;
+                const diffY = touchStartY - touchEndY;
+                
+                // Determine swipe direction based on which difference is greater
+                if (Math.abs(diffX) > Math.abs(diffY)) {
+                    // Horizontal swipe
+                    if (diffX > 0) {
+                        changeDirection('ArrowLeft');
+                    } else {
+                        changeDirection('ArrowRight');
+                    }
+                } else {
+                    // Vertical swipe
+                    if (diffY > 0) {
+                        changeDirection('ArrowUp');
+                    } else {
+                        changeDirection('ArrowDown');
+                    }
+                }
+                
+                touchStartX = null;
+                touchStartY = null;
+                e.preventDefault();
+            });
+            
+            // Button controls
+            startBtn.addEventListener('click', startGame);
+            pauseBtn.addEventListener('click', pauseGame);
+            resetBtn.addEventListener('click', resetGame);
+            overlayButton.addEventListener('click', () => {
+                if (gameActive && gamePaused) {
+                    startGame();
+                } else {
+                    resetGame();
+                    startGame();
+                }
+            });
+            
+            // Mobile direction buttons
+            upBtn.addEventListener('click', () => changeDirection('ArrowUp'));
+            downBtn.addEventListener('click', () => changeDirection('ArrowDown'));
+            leftBtn.addEventListener('click', () => changeDirection('ArrowLeft'));
+            rightBtn.addEventListener('click', () => changeDirection('ArrowRight'));
+            
+            // Sound control
+            soundControl.addEventListener('click', toggleSound);
+            
+            // Meditation timer controls
+            startTimerBtn.addEventListener('click', startMeditationTimer);
+            resetTimerBtn.addEventListener('click', resetMeditationTimer);
+            
+            // Initialize and start
+            resetGame();
+        });
+    </script>
+</body>
+</html>

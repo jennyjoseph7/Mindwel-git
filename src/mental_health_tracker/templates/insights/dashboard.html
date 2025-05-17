@@ -1,0 +1,125 @@
+{% extends "base.html" %}
+
+{% block title %}AI Insights{% endblock %}
+
+{% block content %}
+<div class="container py-4">
+    <h1 class="h3 mb-4">AI-Powered Insights</h1>
+
+    <div class="row g-4">
+        <!-- Sentiment Analysis Card -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Sentiment Analysis</h5>
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="sentimentChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Common Themes Card -->
+        <div class="col-md-6">
+            <div class="card border-0 shadow-sm h-100">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Common Themes</h5>
+                    <div class="chart-container" style="position: relative; height:300px;">
+                        <canvas id="themesChart"></canvas>
+                    </div>
+                </div>
+            </div>
+        </div>
+
+        <!-- Personalized Insights -->
+        <div class="col-12">
+            <div class="card border-0 shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Personalized Insights</h5>
+                    {% if entries %}
+                    <div class="insights-container">
+                        <div class="alert alert-info">
+                            <h6 class="alert-heading">Mood Patterns</h6>
+                            <p class="mb-0">Based on your recent entries, we've noticed your mood tends to be more positive in the mornings.</p>
+                        </div>
+                        
+                        <div class="alert alert-success">
+                            <h6 class="alert-heading">Growth Areas</h6>
+                            <p class="mb-0">You've shown consistent progress in managing stress through journaling.</p>
+                        </div>
+                        
+                        <div class="alert alert-warning">
+                            <h6 class="alert-heading">Recommendations</h6>
+                            <p class="mb-0">Consider incorporating more outdoor activities, as your entries show improved mood on days with nature exposure.</p>
+                        </div>
+                    </div>
+                    {% else %}
+                    <p class="text-muted">Start journaling to receive personalized AI insights.</p>
+                    <a href="{{ url_for('journal_new') }}" class="btn btn-primary">
+                        <i class="bi bi-plus-lg"></i> Create Your First Entry
+                    </a>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    // Sentiment Analysis Chart
+    const sentimentCtx = document.getElementById('sentimentChart').getContext('2d');
+    new Chart(sentimentCtx, {
+        type: 'line',
+        data: {
+            labels: JSON.parse('{{ dates|tojson|safe }}'),
+            datasets: [{
+                label: 'Sentiment Score',
+                data: JSON.parse('{{ sentiment_scores|tojson|safe }}'),
+                borderColor: '#0D6EFD',
+                tension: 0.4
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                y: {
+                    beginAtZero: true,
+                    max: 1
+                }
+            }
+        }
+    });
+
+    // Themes Chart
+    const themesCtx = document.getElementById('themesChart').getContext('2d');
+    new Chart(themesCtx, {
+        type: 'radar',
+        data: {
+            labels: JSON.parse('{{ themes|tojson|safe }}'),
+            datasets: [{
+                label: 'Theme Frequency',
+                data: JSON.parse('{{ theme_scores|tojson|safe }}'),
+                backgroundColor: 'rgba(13, 110, 253, 0.2)',
+                borderColor: '#0D6EFD',
+                pointBackgroundColor: '#0D6EFD'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            scales: {
+                r: {
+                    beginAtZero: true,
+                    max: 1
+                }
+            }
+        }
+    });
+});
+</script>
+{% endblock %} 

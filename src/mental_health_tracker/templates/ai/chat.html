@@ -1,0 +1,519 @@
+{% extends "base.html" %}
+
+{% block title %}AI Chat | Mental Health Tracker{% endblock %}
+
+{# Define template macros #}
+{% macro get_sentiment_icon(sentiment) -%}
+    {%- if sentiment == 'POSITIVE' -%}
+        fa-smile
+    {%- elif sentiment == 'NEGATIVE' -%}
+        fa-frown
+    {%- elif sentiment == 'NEUTRAL' -%}
+        fa-meh
+    {%- else -%}
+        fa-comment
+    {%- endif -%}
+{%- endmacro %}
+
+{% macro get_emotion_icon(emotion) -%}
+    {%- if emotion == 'joy' -%}
+        fa-laugh
+    {%- elif emotion == 'sadness' -%}
+        fa-sad-tear
+    {%- elif emotion == 'anger' -%}
+        fa-angry
+    {%- elif emotion == 'fear' -%}
+        fa-scared
+    {%- elif emotion == 'surprise' -%}
+        fa-surprise
+    {%- elif emotion == 'love' -%}
+        fa-heart
+    {%- else -%}
+        fa-circle
+    {%- endif -%}
+{%- endmacro %}
+
+{% block content %}
+<div class="chat-container">
+    <!-- Chat Header -->
+    <div class="chat-header text-center">
+        <div class="container">
+            <h1 class="chat-title">AI Mental Health Companion</h1>
+            <p class="chat-subtitle">Discuss your thoughts, feelings, and experiences in a safe space</p>
+        </div>
+    </div>
+    
+    <div class="container">
+        <div class="row justify-content-center">
+            <div class="col-lg-8">
+                <div class="card shadow-lg">
+                    <div class="card-header bg-light">
+                        <h2 class="h5 mb-0 text-center">Your Conversation</h2>
+                </div>
+                    <div class="chat-messages" id="chat-messages">
+                        {% if messages %}
+                            {% for message in messages %}
+                                <div class="message {% if message.is_user %}user-message{% else %}assistant-message{% endif %} mb-3">
+                                    <div class="message-content p-3 rounded">
+                                        <strong>{% if message.is_user %}User{% else %}Assistant{% endif %}: </strong>
+                                        {{ message.content | nl2br | safe }}
+                                    </div>
+                                </div>
+                            {% endfor %}
+                        {% else %}
+                            <div class="message assistant-message mb-3">
+                                <div class="message-content p-3 rounded">
+                                    <strong>Assistant: </strong>
+                                    Hello! I'm your mental health companion. How are you feeling today?
+                                </div>
+                            </div>
+                        {% endif %}
+                    </div>
+                    <div class="card-body border-top">
+                    <form id="chat-form" action="/api/chat" method="post">
+                            <input type="hidden" id="session-id" name="session_id" value="">
+                        <div class="input-group">
+                            <input type="text" id="user-message" name="message" class="form-control" placeholder="Type your message here..." required>
+                            <div class="input-group-append">
+                                <button type="submit" class="btn btn-primary">Send</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="card-footer">
+                    <button id="new-chat" class="btn btn-outline-secondary btn-sm">Start New Chat</button>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Emotions Panel -->
+            <div class="col-lg-4 mt-4 mt-lg-0">
+                <div class="card shadow emotions-panel" id="emotions-panel" style="display: none;">
+                    <div class="card-header bg-light">
+                        <h3 class="h5 mb-0">Emotions Analysis</h3>
+                    </div>
+                    <div class="card-body">
+                        <div id="emotions-content"></div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+/* Import Google Fonts */
+@import url('https://fonts.googleapis.com/css2?family=Quicksand:wght@400;500;600;700&display=swap');
+
+/* Base Styles */
+.chat-container {
+    min-height: calc(100vh - 56px);
+    background: linear-gradient(135deg, #E8F5E9 0%, #F3E5F5 100%);
+    padding-bottom: 2rem;
+    font-family: 'Quicksand', sans-serif;
+}
+
+.chat-header {
+    padding: 2rem 0;
+    background: linear-gradient(135deg, rgba(76, 175, 80, 0.1) 0%, rgba(156, 39, 176, 0.05) 100%);
+    margin-bottom: 2rem;
+    border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+    position: relative;
+    overflow: hidden;
+}
+
+.chat-header::before {
+    content: '';
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><path fill="%234CAF50" fill-opacity="0.03" d="M95,50A45,45,0,1,1,50,5,45,45,0,0,1,95,50Zm-5,0A40,40,0,1,0,50,90,40,40,0,0,0,90,50Z"/></svg>') repeat;
+    z-index: 0;
+}
+
+.chat-title {
+    color: #2E7D32;
+    margin-bottom: 0.5rem;
+    font-size: 2.5rem;
+    font-weight: 700;
+    position: relative;
+    text-shadow: 1px 1px 0 rgba(255, 255, 255, 0.5);
+}
+
+.chat-subtitle {
+    color: #558B2F;
+    margin-bottom: 1.5rem;
+    font-size: 1.1rem;
+    font-weight: 500;
+    position: relative;
+}
+
+/* Messages Container */
+.chat-messages {
+    min-height: 400px;
+    max-height: 600px;
+    overflow-y: auto;
+    padding: 1.5rem;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    box-shadow: 0 4px 15px rgba(76, 175, 80, 0.1);
+    border-radius: 16px;
+    backdrop-filter: blur(10px);
+}
+
+/* Message Styles */
+.message {
+    margin-bottom: 1.5rem;
+    max-width: 80%;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.message-content {
+    padding: 1rem;
+    border-radius: 15px;
+    background: #FFFFFF;
+    box-shadow: 0 2px 8px rgba(76, 175, 80, 0.1);
+    border: 1px solid rgba(76, 175, 80, 0.15);
+}
+
+.user-message .message-content {
+    background-color: #e3f2fd;
+    margin-left: 20%;
+}
+
+.assistant-message .message-content {
+    background-color: #f5f5f5;
+    margin-right: 20%;
+}
+
+.message-header {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 0.5rem;
+    font-size: 0.875rem;
+    padding-bottom: 0.5rem;
+    border-bottom: 1px solid rgba(76, 175, 80, 0.1);
+}
+
+.message-role {
+    color: #2E7D32;
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    font-weight: 600;
+}
+
+.message-time {
+    color: #689F38;
+    font-size: 0.8rem;
+    font-weight: 500;
+}
+
+.message-text {
+    color: #1B5E20;
+    line-height: 1.6;
+    white-space: pre-wrap;
+    font-size: 1rem;
+    font-weight: 500;
+}
+
+/* Input Container Styles */
+.chat-input-container {
+    padding: 1rem;
+    background: rgba(255, 255, 255, 0.95);
+    border: 1px solid rgba(76, 175, 80, 0.2);
+    box-shadow: 0 -2px 15px rgba(76, 175, 80, 0.1);
+    border-radius: 15px;
+    backdrop-filter: blur(10px);
+    margin-bottom: 2rem;
+    position: relative;
+}
+
+.chat-form {
+    width: 100%;
+}
+
+.message-input-wrapper {
+    display: flex;
+    gap: 1rem;
+    align-items: flex-start;
+    width: 100%;
+}
+
+/* Emotion Analysis Styles */
+.emotions-panel {
+    height: 100%;
+}
+
+.emotion-item {
+    margin-bottom: 1rem;
+}
+
+.emotion-label {
+    display: flex;
+    justify-content: space-between;
+    font-weight: 500;
+    margin-bottom: 0.25rem;
+}
+
+.emotion-progress {
+    height: 10px;
+    border-radius: 5px;
+}
+
+/* Animation */
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes pulse {
+    0% {
+        opacity: 0.6;
+    }
+    50% {
+        opacity: 1;
+    }
+    100% {
+        opacity: 0.6;
+    }
+}
+
+.typing-indicator {
+    display: flex;
+    align-items: center;
+    margin-bottom: 1rem;
+    animation: fadeIn 0.3s ease-in-out;
+}
+
+.typing-indicator-bubbles {
+    display: flex;
+    gap: 4px;
+    margin-left: 0.5rem;
+}
+
+.typing-indicator-bubble {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background-color: #4CAF50;
+    animation: pulse 1s infinite;
+}
+
+.typing-indicator-bubble:nth-child(2) {
+    animation-delay: 0.2s;
+}
+
+.typing-indicator-bubble:nth-child(3) {
+    animation-delay: 0.4s;
+}
+</style>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const chatForm = document.getElementById('chat-form');
+    const newChatBtn = document.getElementById('new-chat');
+    const chatContainer = document.querySelector('.chat-container');
+    const sessionInput = document.getElementById('session-id');
+    const emotionsPanel = document.getElementById('emotions-panel');
+    const emotionsContent = document.getElementById('emotions-content');
+    
+    // Generate a session ID if not already present
+    if (!sessionInput.value) {
+        sessionInput.value = Date.now().toString() + Math.random().toString(36).substring(2, 9);
+    }
+    
+    // Function to add a message to the chat
+    function addMessage(content, isUser, sentiment = null, emotions = null) {
+        const messageDiv = document.createElement('div');
+        messageDiv.className = `message ${isUser ? 'user-message' : 'assistant-message'} mb-3`;
+        
+        const messageContent = document.createElement('div');
+        messageContent.className = 'message-content p-3 rounded';
+        
+        const role = document.createElement('strong');
+        role.textContent = isUser ? 'User: ' : 'Assistant: ';
+        messageContent.appendChild(role);
+        
+        const text = document.createTextNode(content);
+        messageContent.appendChild(text);
+        
+        messageDiv.appendChild(messageContent);
+        document.getElementById('chat-messages').appendChild(messageDiv);
+        
+        // Update emotions display if available
+        if (!isUser && emotions) {
+            updateEmotionsDisplay(emotions);
+        }
+        
+        // Scroll to new message
+        const chatMessages = document.getElementById('chat-messages');
+        chatMessages.scrollTop = chatMessages.scrollHeight;
+    }
+    
+    // Function to update emotions display
+    function updateEmotionsDisplay(emotions) {
+        if (!emotions || Object.keys(emotions).length === 0) {
+            emotionsPanel.style.display = 'none';
+            return;
+        }
+        
+        emotionsPanel.style.display = 'block';
+        emotionsContent.innerHTML = '';
+        
+        // Emotion colors
+        const emotionColors = {
+            'joy': '#FFC107',
+            'sadness': '#2196F3',
+            'anger': '#F44336',
+            'fear': '#9C27B0',
+            'surprise': '#00BCD4',
+            'disgust': '#795548',
+            'neutral': '#9E9E9E',
+            'love': '#E91E63'
+        };
+        
+        // Sort emotions by strength
+        const sortedEmotions = Object.entries(emotions)
+            .filter(([_, value]) => value > 0.05) // Only show significant emotions
+            .sort((a, b) => b[1] - a[1]);
+            
+        sortedEmotions.forEach(([emotion, score]) => {
+            const emotionItem = document.createElement('div');
+            emotionItem.className = 'emotion-item';
+                    
+            const emotionLabel = document.createElement('div');
+            emotionLabel.className = 'emotion-label';
+            
+            const emotionName = document.createElement('span');
+            emotionName.textContent = emotion.charAt(0).toUpperCase() + emotion.slice(1);
+                    
+            const emotionScore = document.createElement('span');
+            emotionScore.textContent = `${Math.round(score * 100)}%`;
+            
+            emotionLabel.appendChild(emotionName);
+            emotionLabel.appendChild(emotionScore);
+            
+            const progressContainer = document.createElement('div');
+            progressContainer.className = 'progress';
+            
+            const progressBar = document.createElement('div');
+            progressBar.className = 'progress-bar emotion-progress';
+            progressBar.style.width = `${score * 100}%`;
+            progressBar.style.backgroundColor = emotionColors[emotion] || '#9E9E9E';
+            
+            progressContainer.appendChild(progressBar);
+            
+            emotionItem.appendChild(emotionLabel);
+            emotionItem.appendChild(progressContainer);
+            
+            emotionsContent.appendChild(emotionItem);
+        });
+    }
+    
+    // Helper functions for icons
+    function getSentimentIcon(sentiment) {
+        switch(sentiment) {
+            case 'POSITIVE': return 'fa-smile';
+            case 'NEGATIVE': return 'fa-frown';
+            case 'NEUTRAL': return 'fa-meh';
+            default: return 'fa-comment';
+        }
+    }
+    
+    function getEmotionIcon(emotion) {
+        switch(emotion) {
+            case 'joy': return 'fa-laugh';
+            case 'sadness': return 'fa-sad-tear';
+            case 'anger': return 'fa-angry';
+            case 'fear': return 'fa-scared';
+            case 'surprise': return 'fa-surprise';
+            case 'love': return 'fa-heart';
+            default: return 'fa-circle';
+        }
+    }
+    
+    // Handle form submission
+    chatForm.addEventListener('submit', async function(e) {
+        e.preventDefault();
+        
+        const messageInput = document.getElementById('user-message');
+        const message = messageInput.value.trim();
+        
+        if (message) {
+            // Disable form during submission
+            const submitBtn = chatForm.querySelector('button[type="submit"]');
+            submitBtn.disabled = true;
+            
+            // Add user message immediately
+            addMessage(message, true);
+            messageInput.value = '';
+            
+            try {
+                // Send message to server
+                const response = await fetch('/ai-chat/send', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                    },
+                    body: JSON.stringify({ 
+                        message: message,
+                        session_id: sessionInput.value
+                    })
+                });
+                
+                const data = await response.json();
+                
+                if (response.ok && data.response) {
+                    // Add AI response with sentiment and emotions
+                    addMessage(data.response, false, data.sentiment_label, data.emotions);
+                    
+                    // Update session ID if returned
+                    if (data.session_id) {
+                        sessionInput.value = data.session_id;
+                    }
+                } else {
+                    throw new Error(data.error || 'Failed to get response');
+                }
+            } catch (error) {
+                console.error('Error:', error);
+                addMessage('I apologize, but I encountered an error. Please try again.', false, 'neutral');
+            } finally {
+                submitBtn.disabled = false;
+            }
+        }
+    });
+    
+    // Handle new chat button
+    newChatBtn.addEventListener('click', function() {
+        if (confirm('Are you sure you want to start a new chat? This will clear your current conversation.')) {
+            // Clear messages
+            const chatMessages = document.getElementById('chat-messages');
+            chatMessages.innerHTML = '';
+            
+            // Add welcome message
+            addMessage('Hello! I\'m your mental health companion. How are you feeling today?', false);
+            
+            // Reset session ID
+            sessionInput.value = Date.now().toString() + Math.random().toString(36).substring(2, 9);
+            
+            // Hide emotions panel
+            emotionsPanel.style.display = 'none';
+        }
+    });
+    
+    // Scroll to bottom on load
+    const chatMessages = document.getElementById('chat-messages');
+    chatMessages.scrollTop = chatMessages.scrollHeight;
+});
+</script>
+{% endblock %} 

@@ -1,0 +1,44 @@
+{% extends 'base.html' %}
+
+{% block title %}AI Chat Unavailable | MindWell{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row">
+        <div class="col-lg-8 mx-auto">
+            <div class="card shadow">
+                <div class="card-header bg-warning text-white">
+                    <h2 class="mb-0">AI Chat Assistant Unavailable</h2>
+                </div>
+                <div class="card-body">
+                    <div class="alert alert-warning">
+                        <h4 class="alert-heading">Service Temporarily Unavailable</h4>
+                        <p>We're sorry, but the AI chat feature is currently unavailable.</p>
+                        <p><strong>Reason:</strong> {{ reason }}</p>
+                    </div>
+                    
+                    <h5 class="mt-4">Available Options:</h5>
+                    <ul class="list-group mt-3 mb-4">
+                        <li class="list-group-item">
+                            <i class="fas fa-music me-2"></i>
+                            <a href="/music/calm">Listen to calming music</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-book me-2"></i>
+                            <a href="/journal">Write in your journal</a>
+                        </li>
+                        <li class="list-group-item">
+                            <i class="fas fa-home me-2"></i>
+                            <a href="/">Return to home page</a>
+                        </li>
+                    </ul>
+                    
+                    <div class="card-text">
+                        <p>Want to try again later? The AI chat functionality requires API configuration to be working properly.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

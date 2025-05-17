@@ -1,0 +1,42 @@
+{% extends "base.html" %}
+
+{% block title %}Page Not Found - MindWell{% endblock %}
+
+{% block content %}
+<div class="container mt-5">
+    <div class="row justify-content-center">
+        <div class="col-md-8">
+            <div class="card shadow">
+                <div class="card-header bg-primary">
+                    <h5 class="mb-0 text-white">Page Not Found</h5>
+                </div>
+                <div class="card-body">
+                    <div class="text-center mb-4">
+                        <i class="fas fa-map-signs text-primary" style="font-size: 4rem;"></i>
+                    </div>
+                    <h2 class="text-center mb-4">Oops! We can't find that page</h2>
+                    
+                    <p class="text-center">
+                        The page you're looking for doesn't exist or has been moved.
+                    </p>
+                    
+                    {% if requested_url %}
+                    <div class="alert alert-secondary text-center">
+                        <code>{{ requested_url }}</code>
+                    </div>
+                    {% endif %}
+                    
+                    <div class="text-center mt-4">
+                        <a href="javascript:history.back()" class="btn btn-secondary me-2">
+                            <i class="fas fa-arrow-left me-2"></i> Go Back
+                        </a>
+                        <a href="{{ url_for('index') }}" class="btn btn-primary">
+                            <i class="fas fa-home me-2"></i> Go Home
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %} 

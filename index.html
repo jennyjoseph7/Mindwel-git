@@ -1,0 +1,97 @@
+<!DOCTYPE html>
+<html lang="en" data-bs-theme="dark">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Mental Health Tracker</title>
+    <link rel="stylesheet" href="https://cdn.replit.com/agent/bootstrap-agent-dark-theme.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.7.2/font/bootstrap-icons.css">
+    <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+    <nav class="navbar navbar-expand-lg navbar-dark bg-dark">
+        <div class="container">
+            <a class="navbar-brand" href="index.html">Mental Health Tracker</a>
+            <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbarNav">
+                <span class="navbar-toggler-icon"></span>
+            </button>
+            <div class="collapse navbar-collapse" id="navbarNav">
+                <ul class="navbar-nav ms-auto">
+                    <li class="nav-item">
+                        <a class="nav-link" href="{{ url_for('music_dashboard') }}">Music</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="auth/login.html">Login</a>
+                    </li>
+                    <li class="nav-item">
+                        <a class="nav-link" href="auth/register.html">Register</a>
+                    </li>
+                </ul>
+            </div>
+        </div>
+    </nav>
+
+    <div class="container mt-5">
+        <!-- Hero Section -->
+        <div class="row align-items-center py-5">
+            <div class="col-lg-6">
+                <h1 class="display-4 fw-bold">Track Your Mental Well-being</h1>
+                <p class="lead">An AI-powered platform to help you monitor, understand, and improve your mental health journey.</p>
+                <div class="d-grid gap-2 d-md-flex justify-content-md-start">
+                    <a href="auth/register.html" class="btn btn-primary btn-lg px-4 me-md-2">Get Started</a>
+                    <a href="auth/login.html" class="btn btn-outline-secondary btn-lg px-4">Login</a>
+                </div>
+            </div>
+            <div class="col-lg-6">
+                <div class="text-center">
+                    <i class="bi bi-brain display-1 text-primary"></i>
+                </div>
+            </div>
+        </div>
+
+        <!-- Features Section -->
+        <div class="row g-4 py-5">
+            <h2 class="text-center mb-4">Key Features</h2>
+            
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-graph-up text-primary display-4"></i>
+                        <h3 class="card-title h5 mt-3">Mood Tracking</h3>
+                        <p class="card-text">Track your daily mood patterns and emotional well-being with our intuitive tools.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-robot text-primary display-4"></i>
+                        <h3 class="card-title h5 mt-3">AI Analysis</h3>
+                        <p class="card-text">Get personalized insights and recommendations powered by advanced AI algorithms.</p>
+                    </div>
+                </div>
+            </div>
+
+            <div class="col-md-4">
+                <div class="card h-100">
+                    <div class="card-body text-center">
+                        <i class="bi bi-journal-text text-primary display-4"></i>
+                        <h3 class="card-title h5 mt-3">Journal</h3>
+                        <p class="card-text">Document your thoughts and feelings in a secure, private digital journal.</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer mt-auto py-3 bg-dark">
+        <div class="container text-center">
+            <span class="text-muted">© 2024 Mental Health Tracker. All rights reserved.</span>
+        </div>
+    </footer>
+
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    <script src="js/auth.js"></script>
+</body>
+</html>
